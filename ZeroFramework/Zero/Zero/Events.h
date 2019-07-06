@@ -1,0 +1,16 @@
+#pragma once
+
+#include "Events/Event.h"
+#include "Events/KeyEvent.h"
+#include "Events/KeyPressedEvent.h"
+#include "Events/KeyReleasedEvent.h"
+#include "Events/KeyTypedEvent.h"
+#include "Events/MouseButtonEvent.h"
+#include "Events/MouseButtonPressedEvent.h"
+#include "Events/MouseButtonReleasedEvent.h"
+#include "Events/MouseMoveEvent.h"
+#include "Events/MouseScrollEvent.h"
+#include "Events/WindowCloseEvent.h"
+#include "Events/WindowResizeEvent.h"
+#include "Events/WindowGainedFocusEvent.h"
+#include "Events/WindowLostFocusEvent.h"
