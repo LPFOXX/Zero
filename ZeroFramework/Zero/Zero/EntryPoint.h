@@ -4,9 +4,8 @@ extern zr::Application* zr::createApplication();
 
 int main(int argc, char** argv)
 {
-	zr::Application* app = zr::createApplication();
+	std::unique_ptr<zr::Application> app = std::unique_ptr<zr::Application>(zr::createApplication());
 	app->run();
-	delete app;
 	return 0;
 }
 

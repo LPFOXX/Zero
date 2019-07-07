@@ -1,7 +1,10 @@
 #include <zr_pch.h>
 
+#include <GLFW/glfw3.h>
+
 #include "WindowsWindow.h"
-#include "../../Events.h"
+#include "Zero/Events.h"
+#include "Zero/Platform/OpenGL/OpenGLContext.h"
 
 namespace zr
 {
@@ -34,14 +37,11 @@ namespace zr
 			throw std::runtime_error("Window can't be initialized.");
 		}
 
-		glfwMakeContextCurrent(mWindowHandle);
-		glfwSetWindowUserPointer(mWindowHandle, &mData);
+		mContext = new OpenGLContext(mWindowHandle);
+		mContext->init();
+
 		setVSync(true);
-
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			throw std::runtime_error("Failed to initialize the loader. (GLAD)");
-		}
-
+		glfwSetWindowUserPointer(mWindowHandle, &mData);
 		glfwSetInputMode(mWindowHandle, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 		glfwSetKeyCallback(mWindowHandle, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -66,6 +66,8 @@ namespace zr
 					data.callback(event);
 					break;
 				}
+				default:
+				break;
 			}
 		});
 
@@ -94,6 +96,8 @@ namespace zr
 					data.callback(event);
 					break;
 				}
+				default:
+				break;
 			}
 		});
 
@@ -164,7 +168,7 @@ namespace zr
 	void WindowsWindow::onUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(mWindowHandle);
+		mContext->swapBuffers();
 	}
 
 	unsigned WindowsWindow::getWidth() const

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Zero/Window.h> 
+#include <Zero/Window.h>
+#include <Zero/Renderer/GraphicsContext.h>
 
 namespace zr
 {
@@ -26,6 +27,15 @@ namespace zr
 	private:
 		struct WindowData
 		{
+			WindowData() :
+				Width(0),
+				Height(0),
+				VSync(true),
+				callback()
+			{
+
+			}
+
 			unsigned Width;
 			unsigned Height;
 			bool VSync;
@@ -35,5 +45,6 @@ namespace zr
 		std::string mTitle;
 
 		GLFWwindow* mWindowHandle;
+		GraphicsContext* mContext;
 	};
 }

@@ -1,7 +1,9 @@
 #include <zr_pch.h>
 
-#include "../EventDispatcher.h"
-#include "../Application.h"
+#include <GLFW/glfw3.h>
+
+#include "Zero/EventDispatcher.h"
+#include "Zero/Application.h"
 #include "ImGuiLayer.h"
 
 namespace zr

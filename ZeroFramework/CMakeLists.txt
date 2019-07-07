@@ -22,6 +22,7 @@ file(GLOB ZR_SRC_FILES
 	${PROJECT_SOURCE_DIR}/Zero/Zero/ImGui/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/Zero/Platform/OpenGL/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/Zero/Platform/Windows/*.cpp
+	${PROJECT_SOURCE_DIR}/Zero/Zero/Renderer/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/vendor/glad/src/*.c
 	${PROJECT_SOURCE_DIR}/Zero/vendor/imgui/*.cpp
 )

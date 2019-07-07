@@ -4,6 +4,8 @@
 #include "ImGui/ImGuiLayer.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "Renderer/Buffer.h"
+#include "Renderer/Shader.h"
 
 namespace zr
 {
@@ -39,6 +41,13 @@ namespace zr
 		std::unique_ptr<Window> mWindow;
 		LayerStack mLayerStack;
 		ImGuiLayer* mImGuiLayer;
+
+		std::shared_ptr<VertexArray> mVertexArray;
+		std::shared_ptr<Shader> mShader;
+
+		std::shared_ptr<Shader> mBlueShader;
+		std::shared_ptr<VertexArray> mSquareVA;
+
 		bool mRunning = true;
 	};
 
