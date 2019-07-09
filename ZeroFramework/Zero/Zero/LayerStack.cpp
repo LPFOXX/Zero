@@ -14,6 +14,7 @@ namespace zr
 	LayerStack::~LayerStack()
 	{
 		for (Layer* layer : mLayers) {
+			layer->onDetach();
 			delete layer;
 		}
 	}

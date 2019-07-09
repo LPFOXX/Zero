@@ -28,16 +28,30 @@ namespace zr
 				throw std::runtime_error("Can't initialize an OpenGL context.");
 			}
 
-			glfwSetErrorCallback(errorCallback);
 			WindowsWindow::sGLFWInitialized = true;
 		}
+
+		glfwSetErrorCallback(errorCallback);
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_SAMPLES, 2);
+		glfwWindowHint(GLFW_STENCIL_BITS, 24);
+		glfwWindowHint(GLFW_RED_BITS, 8);
+		glfwWindowHint(GLFW_GREEN_BITS, 8);
+		glfwWindowHint(GLFW_BLUE_BITS, 8);
 
 		mWindowHandle = glfwCreateWindow((int)wc.Width, (int)wc.Height, mTitle.c_str(), nullptr, nullptr);
 		if (!mWindowHandle) {
 			throw std::runtime_error("Window can't be initialized.");
 		}
 
-		mContext = new OpenGLContext(mWindowHandle);
+		mContext.reset(new OpenGLContext(mWindowHandle));
 		mContext->init();
 
 		setVSync(true);

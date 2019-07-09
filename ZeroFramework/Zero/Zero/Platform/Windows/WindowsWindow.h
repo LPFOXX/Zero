@@ -45,6 +45,6 @@ namespace zr
 		std::string mTitle;
 
 		GLFWwindow* mWindowHandle;
-		GraphicsContext* mContext;
+		std::unique_ptr<GraphicsContext> mContext;
 	};
 }
