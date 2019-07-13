@@ -80,7 +80,7 @@ namespace zr
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::onUpdate()
+	void ImGuiLayer::onUpdate(const Time& elapsedTime)
 	{
 	}
 

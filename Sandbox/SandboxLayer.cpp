@@ -9,8 +9,12 @@
 namespace lp
 {
 	SandboxLayer::SandboxLayer() :
-		zr::Layer("SandboxLayer")
+		zr::Layer("SandboxLayer"),
+		mCamera(nullptr)
 	{
+		mCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(-3.2f, 3.2f, -1.5f, 1.5f));
+
+
 		float vertices[3 * 7]{
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
 			 0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
@@ -67,6 +71,9 @@ namespace lp
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
+			uniform mat4 u_ViewProjection;
+
+
 			out vec3 v_Position;
 			out vec4 v_Color;
 
@@ -74,7 +81,7 @@ namespace lp
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0);	
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);	
 			}
 		)";
 
@@ -96,12 +103,14 @@ namespace lp
 			
 			layout(location = 0) in vec3 a_Position;
 
+			uniform mat4 u_ViewProjection;
+
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = vec4(a_Position, 1.0);	
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);	
 			}
 		)";
 
@@ -131,6 +140,7 @@ namespace lp
 
 	SandboxLayer::~SandboxLayer()
 	{
+
 	}
 
 	void SandboxLayer::onAttach()
@@ -141,18 +151,39 @@ namespace lp
 	{
 	}
 
-	void SandboxLayer::onUpdate()
+	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
 		zr::RenderCommand::SetClearColor(1, 0, 1, 1);
 		zr::RenderCommand::Clear();
 
-		zr::Renderer::BeginScene();
-		{
-			mBlueShader->bind();
-			zr::Renderer::Submit(mSquareVA);
+		if (zr::Input::isKeyPressed(zr::Keyboard::Up) || zr::Input::isKeyPressed(zr::Keyboard::W)) {
+			mCamera->move({ 0.f, 1.f * elapsedTime.asSeconds(), 0.f });
+		}
 
-			mShader->bind();
-			zr::Renderer::Submit(mVertexArray);
+		if (zr::Input::isKeyPressed(zr::Keyboard::Down) || zr::Input::isKeyPressed(zr::Keyboard::S)) {
+			mCamera->move({ 0.f, -1.f * elapsedTime.asSeconds(), 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::Left) || zr::Input::isKeyPressed(zr::Keyboard::A)) {
+			mCamera->move({ -1.f * elapsedTime.asSeconds(), 0.f, 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::Right) || zr::Input::isKeyPressed(zr::Keyboard::D)) {
+			mCamera->move({ 1.f * elapsedTime.asSeconds(), 0.f, 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
+			mCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::E)) {
+			mCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
+		}
+
+		zr::Renderer::BeginScene(mCamera);
+		{
+			zr::Renderer::Submit(mBlueShader, mSquareVA);
+			zr::Renderer::Submit(mShader, mVertexArray);
 			zr::Renderer::EndScene();
 		}
 	}

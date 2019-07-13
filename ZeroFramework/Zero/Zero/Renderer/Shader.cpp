@@ -20,7 +20,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLShader();
+				return new OpenGLShader;
 			}
 			case RendererAPI::API::Direct3D:
 			{

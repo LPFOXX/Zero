@@ -13,7 +13,7 @@ namespace lp
 		// Inherited via Layer
 		virtual void onAttach() override;
 		virtual void onDetach() override;
-		virtual void onUpdate() override;
+		virtual void onUpdate(const zr::Time& elapsedTime) override;
 		virtual void OnImGuiRender() override;
 		virtual void onEvent(zr::Event& e) override;
 
@@ -23,5 +23,9 @@ namespace lp
 
 		std::shared_ptr<zr::Shader> mBlueShader;
 		std::shared_ptr<zr::VertexArray> mSquareVA;
+
+		std::shared_ptr<zr::Camera> mCamera;
+
+		float mCameraRotationSpeed = 45.f;	// 45 degrees per second
 	};
 }

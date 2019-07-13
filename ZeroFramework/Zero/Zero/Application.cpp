@@ -4,6 +4,8 @@
 #include "Application.h"
 #include "EventDispatcher.h"
 #include "Zero/Renderer/RenderCommand.h"
+#include "Clock.h"
+#include "Timer.h"
 
 namespace zr
 {
@@ -55,17 +57,39 @@ namespace zr
 
 	void Application::run()
 	{
+		using namespace std::chrono_literals;
+
+		Clock clock(Time::minutes(20.f));
+		clock.getTime().asHours();
+		clock.getTime().asMicroseconds();
+		clock.getTime().asMilliseconds();
+		clock.getTime().asMinutes();
+		clock.getTime().asNanoseconds();
+		clock.getTime().asSeconds();
+
+		Timer timer;
+
+		Time accumulatedTime = Time::Zero();
+		Time frameTime(Time::seconds(1.f / 60.f));
+
 		while (mRunning) {
-			for (Layer* l : mLayerStack) {
-				l->onUpdate();
+			Time elapsedTime = timer.restart();
+			accumulatedTime += elapsedTime;
+
+			while (accumulatedTime >= frameTime) {
+				accumulatedTime -= frameTime;
+
+				for (Layer* l : mLayerStack) {
+					l->onUpdate(frameTime);
+				}
+
+				mImGuiLayer->begin();
+				for (Layer* layer : mLayerStack)
+					layer->OnImGuiRender();
+				mImGuiLayer->end();
+
+				mWindow->onUpdate();
 			}
-
-			mImGuiLayer->begin();
-			for (Layer* layer : mLayerStack)
-				layer->OnImGuiRender();
-			mImGuiLayer->end();
-
-			mWindow->onUpdate();
 		}
 	}
 

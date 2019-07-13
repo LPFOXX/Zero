@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../vendor/glm/include/glm/glm.hpp"
+
 namespace zr
 {
 	/**
@@ -263,7 +265,7 @@ namespace zr
 		 * @param uniformName	The name of the uniform which data will be changed.
 		 * @param value		 	The vector to pass to the shader.
 		 */
-		//void setUniform(const char* uniformName, const glm::vec3& value) const;
+		virtual void setUniform(const char* uniformName, const glm::vec3& value) const = 0;
 
 		/**
 		 * @brief Sets a uniform in the shader program.
@@ -274,7 +276,7 @@ namespace zr
 		 * @param uniformName	The name of the uniform which data will be changed.
 		 * @param value		 	The vector to pass to the shader.
 		 */
-		//void setUniform(const char* uniformName, const glm::vec4& value) const;
+		virtual void setUniform(const char* uniformName, const glm::vec4& value) const = 0;
 
 		/**
 		 * @brief Sets a uniform in the shader program.
@@ -285,7 +287,7 @@ namespace zr
 		 * @param uniformName	The name of the uniform which data will be changed.
 		 * @param value		 	The matrix to pass to the shader.
 		 */
-		//void setUniform(const char* uniformName, const glm::mat3& value) const;
+		virtual void setUniform(const char* uniformName, const glm::mat3& value) const = 0;
 
 		/**
 		 * @brief Sets a uniform in the shader program.
@@ -296,7 +298,7 @@ namespace zr
 		 * @param uniformName	The name of the uniform which data will be changed.
 		 * @param value		 	The matrix to pass to the shader.
 		 */
-		//void setUniform(const char* uniformName, const glm::mat4& value) const;
+		virtual void setUniform(const char* uniformName, const glm::mat4& value) const = 0;
 	};
 }
 

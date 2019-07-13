@@ -13,3 +13,7 @@
 #include "Zero/Renderer/RenderCommand.h"
 #include "Zero/Renderer/Buffer.h"
 #include "Zero/Renderer/Shader.h"
+
+#include "Zero/Renderer/Camera.h"
+
+#include "Zero/Clock.h"

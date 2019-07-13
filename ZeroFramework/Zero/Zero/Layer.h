@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Events/Event.h"
+#include "Clock.h"
 
 namespace zr
 {
@@ -12,7 +13,7 @@ namespace zr
 
 		virtual void onAttach() = 0;
 		virtual void onDetach() = 0;
-		virtual void onUpdate() = 0;
+		virtual void onUpdate(const Time& elapsedTime) = 0;
 		virtual void OnImGuiRender() = 0;
 		virtual void onEvent(Event& e) = 0;
 

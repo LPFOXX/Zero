@@ -117,7 +117,7 @@ namespace zr
 		}
 		return true;
 	}
-	
+
 	bool OpenGLShader::loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader)
 	{
 		if (vertexShader.size() != 0 && fragmentShader.size() != 0 && geometryShader.size() != 0) {
@@ -269,6 +269,34 @@ namespace zr
 		GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
 	}
 
+	void OpenGLShader::setUniform(const char* uniformName, const glm::vec3& value) const
+	{
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		GL_ERR_CHECK(glUniform3f(uniformLocation, value.x, value.y, value.z));
+	}
+
+	void OpenGLShader::setUniform(const char* uniformName, const glm::vec4& value) const
+	{
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		GL_ERR_CHECK(glUniform4f(uniformLocation, value.x, value.y, value.z, value.w));
+	}
+
+	void OpenGLShader::setUniform(const char* uniformName, const glm::mat3& value) const
+	{
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		GL_ERR_CHECK(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+	}
+
+	void OpenGLShader::setUniform(const char* uniformName, const glm::mat4& value) const
+	{
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+	}
+
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const
 	{
 		int success;
@@ -353,12 +381,7 @@ namespace zr
 				return false;
 			}
 		}
-		catch (const std::exception& e) {
-			#ifdef DEBUG_TO_STDOUT
-			std::cout << "Error reading the files: " << e.what() << std::endl;
-			std::cout << "File names: " << vertexShaderPath << ", " << fragmentShaderPath << std::endl;
-			#endif
-
+		catch (...) {
 			return false;
 		}
 		return true;
@@ -399,11 +422,7 @@ namespace zr
 				return false;
 			}
 		}
-		catch (const std::exception& e) {
-			#ifdef DEBUG_TO_STDOUT
-			std::cout << "Error reading the file: " << e.what() << "\n";
-			std::cout << "File names: " << geometryShaderPath << std::endl;
-			#endif
+		catch (...) {
 			return false;
 		}
 
@@ -467,32 +486,3 @@ namespace zr
 		return true;
 	}
 }
-
-
-/*void Shader::setUniform(const char* uniformName, const glm::vec3 & value) const
-{
-	int uniformLocation;
-	GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-	GL_ERR_CHECK(glUniform3f(uniformLocation, value.x, value.y, value.z));
-}
-
-void Shader::setUniform(const char* uniformName, const glm::vec4 & value) const
-{
-	int uniformLocation;
-	GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-	GL_ERR_CHECK(glUniform4f(uniformLocation, value.x, value.y, value.z, value.w));
-}
-
-void Shader::setUniform(const char* uniformName, const glm::mat3 & value) const
-{
-	int uniformLocation;
-	GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-	GL_ERR_CHECK(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
-}
-
-void Shader::setUniform(const char* uniformName, const glm::mat4 & value) const
-{
-	int uniformLocation;
-	GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-	GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
-}*/
