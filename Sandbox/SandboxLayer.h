@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Zero/Zero/Layer.h>
+#include <Zero/Zero.h>
 
 namespace lp
 {
@@ -16,5 +16,12 @@ namespace lp
 		virtual void onUpdate() override;
 		virtual void OnImGuiRender() override;
 		virtual void onEvent(zr::Event& e) override;
+
+	private:
+		std::shared_ptr<zr::VertexArray> mVertexArray;
+		std::shared_ptr<zr::Shader> mShader;
+
+		std::shared_ptr<zr::Shader> mBlueShader;
+		std::shared_ptr<zr::VertexArray> mSquareVA;
 	};
 }

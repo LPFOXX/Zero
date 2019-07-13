@@ -3,6 +3,8 @@
 #include "SandboxLayer.h"
 #include "SandboxApplication.h"
 
+#include "Zero/Zero/EntryPoint.h"
+
 namespace lp
 {
 	SandboxApplication::SandboxApplication() :
