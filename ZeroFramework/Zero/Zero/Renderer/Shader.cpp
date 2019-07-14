@@ -11,9 +11,9 @@ namespace zr
 
 	}
 
-	Shader* Shader::create()
+	Shader* Shader::Create()
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;
@@ -36,9 +36,9 @@ namespace zr
 		return nullptr;
 	}
 
-	Shader* Shader::create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	Shader* Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;
@@ -61,9 +61,9 @@ namespace zr
 		return nullptr;
 	}
 
-	Shader* Shader::create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
+	Shader* Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;

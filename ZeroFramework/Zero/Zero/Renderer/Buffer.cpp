@@ -18,7 +18,7 @@ namespace zr
 
 	VertexBuffer* VertexBuffer::Create(float* vertices, unsigned size, DrawMode drawMode)
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;
@@ -51,7 +51,7 @@ namespace zr
 
 	IndexBuffer* IndexBuffer::Create(unsigned* data, unsigned count, DrawMode drawMode)
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;
@@ -84,7 +84,7 @@ namespace zr
 
 	VertexArray* VertexArray::Create()
 	{
-		switch (Renderer::getAPI()) {
+		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
 			{
 				return nullptr;

@@ -2,18 +2,21 @@
 
 #include "SandboxLayer.h"
 
-#include "Zero/Zero/Input.h"
-#include "Zero/Zero/Events.h"
-#include "Zero/Zero/InputCodes.h"
-
 namespace lp
 {
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
-		mCamera(nullptr)
+		mCamera(nullptr),
+		mFramebuffer(nullptr)
 	{
 		mCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(-3.2f, 3.2f, -1.5f, 1.5f));
 
+		zr::Framebuffer::FramebufferProperties fbp;
+		fbp.Width = 1280;
+		fbp.Height = 600;
+		fbp.MSSALevel = 8;
+
+		mFramebuffer.reset(zr::Framebuffer::Create(fbp));
 
 		float vertices[3 * 7]{
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -39,7 +42,6 @@ namespace lp
 		std::shared_ptr<zr::IndexBuffer> indexBuffer;
 		indexBuffer.reset(zr::IndexBuffer::Create(indices, 3U, zr::DrawMode::Static));
 		mVertexArray->setIndexBuffer(indexBuffer);
-
 
 		float squareVertices[3 * 4] = {
 			-0.75f, -0.75f, 0.0f,
@@ -72,7 +74,6 @@ namespace lp
 			layout(location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
-
 
 			out vec3 v_Position;
 			out vec4 v_Color;
@@ -127,12 +128,12 @@ namespace lp
 			}
 		)";
 
-		mShader.reset(zr::Shader::create());
+		mShader.reset(zr::Shader::Create());
 		if (!mShader->loadFromStrings(vertexSrc, fragmentSrc)) {
 			std::cout << "Error creating Shader object!\n";
 		}
 
-		mBlueShader.reset(zr::Shader::create());
+		mBlueShader.reset(zr::Shader::Create());
 		if (!mBlueShader->loadFromStrings(blueShaderVertexSrc, blueShaderFragmentSrc)) {
 			std::cout << "Error creating blue Shader object!\n";
 		}
@@ -153,23 +154,24 @@ namespace lp
 
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
+		mFramebuffer->bind();
 		zr::RenderCommand::SetClearColor(1, 0, 1, 1);
 		zr::RenderCommand::Clear();
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Up) || zr::Input::isKeyPressed(zr::Keyboard::W)) {
-			mCamera->move({ 0.f, 1.f * elapsedTime.asSeconds(), 0.f });
+			mCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Down) || zr::Input::isKeyPressed(zr::Keyboard::S)) {
-			mCamera->move({ 0.f, -1.f * elapsedTime.asSeconds(), 0.f });
+			mCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Left) || zr::Input::isKeyPressed(zr::Keyboard::A)) {
-			mCamera->move({ -1.f * elapsedTime.asSeconds(), 0.f, 0.f });
+			mCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Right) || zr::Input::isKeyPressed(zr::Keyboard::D)) {
-			mCamera->move({ 1.f * elapsedTime.asSeconds(), 0.f, 0.f });
+			mCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
@@ -186,6 +188,19 @@ namespace lp
 			zr::Renderer::Submit(mShader, mVertexArray);
 			zr::Renderer::EndScene();
 		}
+
+		mFramebuffer->unbind();
+		zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
+		zr::RenderCommand::Clear();
+
+		zr::Renderer::BeginScene(mCamera);
+		{
+			zr::Renderer::Submit(mBlueShader, mSquareVA);
+			zr::Renderer::Submit(mShader, mVertexArray);
+			zr::Renderer::EndScene();
+		}
+
+		mFramebuffer->draw();
 	}
 
 	void SandboxLayer::OnImGuiRender()

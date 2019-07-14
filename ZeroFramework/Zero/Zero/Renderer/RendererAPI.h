@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Zero/Renderer/Buffer.h"
+#include "Buffer.h"
 
 namespace zr
 {

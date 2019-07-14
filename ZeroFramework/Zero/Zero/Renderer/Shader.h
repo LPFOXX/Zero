@@ -25,7 +25,7 @@ namespace zr
 		 */
 		Shader();
 
-		static Shader* create();
+		static Shader* Create();
 
 		/**
 		 * @brief Constructor from file (vertex and fragment shaders).
@@ -37,7 +37,7 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Shader* create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		static Shader* Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 
 		/**
 		 * @brief Constructor from files (vertex, fragment and geometry shaders).
@@ -50,7 +50,7 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Shader* create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
+		static Shader* Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
 
 		/**
 		 * @brief Default destructor.

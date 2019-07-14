@@ -11,6 +11,7 @@
 
 #include "Zero/Renderer/Renderer.h"
 #include "Zero/Renderer/RenderCommand.h"
+#include "Zero/Renderer/Framebuffer.h"
 #include "Zero/Renderer/Buffer.h"
 #include "Zero/Renderer/Shader.h"
 
