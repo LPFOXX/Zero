@@ -9,7 +9,7 @@ namespace zr
 		virtual ~KeyTypedEvent();
 
 		// Inherited via Event
-		static EventType getStaticType();
+		static EventType GetStaticType();
 		virtual EventType getType() const override;
 		virtual const char* getName() const override;
 		virtual unsigned getFamilyFlags() const override;

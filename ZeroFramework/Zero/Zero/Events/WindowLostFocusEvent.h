@@ -11,7 +11,7 @@ namespace zr
 		virtual ~WindowLostFocusEvent();
 
 		virtual unsigned getFamilyFlags() const override;
-		static EventType getStaticType();
+		static EventType GetStaticType();
 		virtual EventType getType() const override;
 		virtual const char* getName() const override;
 		virtual std::string toString() const override;

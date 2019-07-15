@@ -17,10 +17,10 @@ namespace zr
 			
 	EventType KeyReleasedEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 	
-	EventType KeyReleasedEvent::getStaticType()
+	EventType KeyReleasedEvent::GetStaticType()
 	{
 		return EventType::KeyReleased;
 	}

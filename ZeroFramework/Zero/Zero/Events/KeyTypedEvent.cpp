@@ -13,14 +13,14 @@ namespace zr
 	{
 	}
 
-	EventType KeyTypedEvent::getStaticType()
+	EventType KeyTypedEvent::GetStaticType()
 	{
 		return EventType::KeyTyped;
 	}
 
 	EventType KeyTypedEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 
 	const char* KeyTypedEvent::getName() const

@@ -17,10 +17,10 @@ namespace zr
 			
 	EventType MouseButtonPressedEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 	
-	EventType MouseButtonPressedEvent::getStaticType()
+	EventType MouseButtonPressedEvent::GetStaticType()
 	{
 		return EventType::MouseButtonPressed;
 	}

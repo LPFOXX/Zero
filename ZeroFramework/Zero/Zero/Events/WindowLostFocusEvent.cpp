@@ -18,14 +18,14 @@ namespace zr
 		return EventFamily::ApplicationEvent;
 	}
 
-	EventType WindowLostFocusEvent::getStaticType()
+	EventType WindowLostFocusEvent::GetStaticType()
 	{
 		return EventType::WindowLostFocus;
 	}
 
 	EventType WindowLostFocusEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 
 	const char* WindowLostFocusEvent::getName() const

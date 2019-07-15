@@ -13,7 +13,7 @@ namespace zr
 		virtual unsigned getFamilyFlags() const override;
 
 		virtual EventType getType() const override;
-		static EventType getStaticType();
+		static EventType GetStaticType();
 		virtual const char* getName() const override;
 	};
 }

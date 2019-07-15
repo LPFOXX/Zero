@@ -8,7 +8,6 @@
 
 namespace zr
 {
-
 	bool WindowsWindow::sGLFWInitialized = false;
 
 	static void errorCallback(int error, const char* description)

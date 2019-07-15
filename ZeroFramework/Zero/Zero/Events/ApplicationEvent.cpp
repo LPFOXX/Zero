@@ -15,14 +15,14 @@ namespace zr
 		
 	}
 	
-	EventType ApplicationEvent::getStaticType()
+	EventType ApplicationEvent::GetStaticType()
 	{
 		return EventType::ApplicationEvent;
 	}
 
 	EventType ApplicationEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 	
 	const char* ApplicationEvent::getName() const

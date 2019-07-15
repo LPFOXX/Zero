@@ -11,7 +11,7 @@ namespace zr
 		virtual ~KeyPressedEvent();
 
 		virtual EventType getType() const override;
-		static EventType getStaticType();
+		static EventType GetStaticType();
 		virtual const char* getName() const override;
 		virtual std::string toString() const override;
 		inline int getRepeatCount() const;

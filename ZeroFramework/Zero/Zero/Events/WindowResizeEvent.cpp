@@ -23,10 +23,10 @@ namespace zr
 	
 	EventType WindowResizeEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 	
-	EventType WindowResizeEvent::getStaticType()
+	EventType WindowResizeEvent::GetStaticType()
 	{
 		return EventType::WindowResize;
 	}

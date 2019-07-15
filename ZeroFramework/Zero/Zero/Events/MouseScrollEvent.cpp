@@ -32,7 +32,7 @@ namespace zr
 		return EventType::MouseScroll;
 	}
 	
-	EventType MouseScrollEvent::getStaticType()
+	EventType MouseScrollEvent::GetStaticType()
 	{
 		return EventType::MouseScroll;
 	}

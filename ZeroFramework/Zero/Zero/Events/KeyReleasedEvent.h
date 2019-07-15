@@ -11,7 +11,7 @@ namespace zr
 		virtual ~KeyReleasedEvent();
 
 		virtual EventType getType() const override;
-		static EventType getStaticType();
+		static EventType GetStaticType();
 		virtual const char* getName() const override;
 
 		virtual std::string toString() const override;

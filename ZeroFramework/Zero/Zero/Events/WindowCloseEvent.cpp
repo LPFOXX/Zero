@@ -22,10 +22,10 @@ namespace zr
 	
 	EventType WindowCloseEvent::getType() const
 	{
-		return getStaticType();
+		return GetStaticType();
 	}
 	
-	EventType WindowCloseEvent::getStaticType()
+	EventType WindowCloseEvent::GetStaticType()
 	{
 		return EventType::WindowClose;
 	}
