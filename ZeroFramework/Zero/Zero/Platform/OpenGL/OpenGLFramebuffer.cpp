@@ -110,6 +110,11 @@ namespace zr
 		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 	}
 
+	void OpenGLFramebuffer::BindDefault()
+	{
+		GL_ERR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+	}
+
 	void OpenGLFramebuffer::bind()
 	{
 		if (mIsMSAAactivated) {

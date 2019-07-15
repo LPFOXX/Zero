@@ -16,6 +16,7 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/Zero/vendor/imgui
 	${PROJECT_SOURCE_DIR}/Zero/vendor/glad/include
 	${PROJECT_SOURCE_DIR}/Zero/vendor/glm/include
+	${PROJECT_SOURCE_DIR}/Zero/vendor/stb_image/include
 )
 
 file(GLOB ZR_SRC_FILES

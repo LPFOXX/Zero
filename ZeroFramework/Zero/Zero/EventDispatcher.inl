@@ -16,7 +16,7 @@ namespace zr
 	template<typename T>
 	inline bool EventDispatcher::dispatch(EventFunction<T> func)
 	{
-		if (mEvent.getType() == T::getStaticType()) {
+		if (mEvent.getType() == T::GetStaticType()) {
 			mEvent.setHandled(func(*(T*)&mEvent));
 			return true;
 		}

@@ -6,10 +6,25 @@ namespace lp
 {
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
-		mCamera(nullptr),
+		mOrthographicCamera(nullptr),
 		mFramebuffer(nullptr)
 	{
-		mCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(-3.2f, 3.2f, -1.5f, 1.5f));
+		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(-3.2f, 3.2f, -1.5f, 1.5f));
+		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
+
+		mCubeMap.reset(zr::CubeMap::Create());
+		bool success = mCubeMap->loadFromFiles({
+			"resources/skybox/right.jpg",
+			"resources/skybox/left.jpg",
+			"resources/skybox/top.jpg",
+			"resources/skybox/bottom.jpg",
+			"resources/skybox/back.jpg",
+			"resources/skybox/front.jpg"
+			});
+
+		if (!success) {
+			std::cout << "CubeMap loading error\n";
+		}
 
 		zr::Framebuffer::FramebufferProperties fbp;
 		fbp.Width = 1280;
@@ -154,53 +169,70 @@ namespace lp
 
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
-		mFramebuffer->bind();
-		zr::RenderCommand::SetClearColor(1, 0, 1, 1);
-		zr::RenderCommand::Clear();
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::Up) || zr::Input::isKeyPressed(zr::Keyboard::W)) {
-			mCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
+			mOrthographicCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Down) || zr::Input::isKeyPressed(zr::Keyboard::S)) {
-			mCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::W)) {
+			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Left) || zr::Input::isKeyPressed(zr::Keyboard::A)) {
-			mCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
+			mOrthographicCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Right) || zr::Input::isKeyPressed(zr::Keyboard::D)) {
-			mCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::S)) {
+			mPerspectiveCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::Left)) {
+			mOrthographicCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::A)) {
+			mPerspectiveCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::Right)) {
+			mOrthographicCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		}
+
+		if (zr::Input::isKeyPressed(zr::Keyboard::D)) {
+			mPerspectiveCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
-			mCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
+			mOrthographicCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::E)) {
-			mCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
+			mOrthographicCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
 		}
 
-		zr::Renderer::BeginScene(mCamera);
+		zr::RenderCommand::EnableDepthTest(true);
+
+		zr::Renderer::BeginScene(mPerspectiveCamera);
 		{
+			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
+			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+
+			//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
+			zr::Renderer::Submit(mCubeMap);
+			//zr::RenderCommand::EnableFaceCulling(false);
+			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
+			zr::Renderer::Submit(mShader, mVertexArray);*/
+			zr::Renderer::EndScene();
+		}
+
+		zr::Renderer::BeginScene(mOrthographicCamera, mFramebuffer);
+		{
+			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
+			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+
 			zr::Renderer::Submit(mBlueShader, mSquareVA);
 			zr::Renderer::Submit(mShader, mVertexArray);
 			zr::Renderer::EndScene();
 		}
-
-		mFramebuffer->unbind();
-		zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
-		zr::RenderCommand::Clear();
-
-		zr::Renderer::BeginScene(mCamera);
-		{
-			zr::Renderer::Submit(mBlueShader, mSquareVA);
-			zr::Renderer::Submit(mShader, mVertexArray);
-			zr::Renderer::EndScene();
-		}
-
-		mFramebuffer->draw();
 	}
 
 	void SandboxLayer::OnImGuiRender()
@@ -209,5 +241,9 @@ namespace lp
 
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
+		if (e.getType() == zr::EventType::MouseMove) {
+			glm::vec2 movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+			//mPerspectiveCamera->move({ movementOffset.x, movementOffset.y, 0.f });
+		}
 	}
 }

@@ -11,7 +11,10 @@ namespace zr
 		// Inherited via RendererAPI
 		virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) override;
 		virtual void setClearColor(float r, float g, float b, float a) override;
-		virtual void clear() override;
+		virtual void clear(unsigned bufferBits) override;
 		virtual void setViewportSize(unsigned width, unsigned height) override;
+		virtual void setCullingFacesState(bool enabled, CullFace facesToCull) override;
+		virtual bool getDepthTestState() override;
+		virtual void setDepthTestState(bool state) override;
 	};
 }

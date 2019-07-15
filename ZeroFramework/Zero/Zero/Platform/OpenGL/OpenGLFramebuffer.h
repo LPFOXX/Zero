@@ -36,6 +36,9 @@ namespace zr
 
 		virtual void draw() const override;
 
+	public:
+		static void BindDefault();
+
 		// Inherited via Framebuffer
 		virtual void bind() override;
 		virtual void unbind() override;

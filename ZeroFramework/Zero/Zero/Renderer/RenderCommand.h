@@ -15,14 +15,24 @@ namespace zr
 			RenderCommand::sRendererAPI->setClearColor(r, g, b, a);
 		}
 
-		inline static void Clear()
+		inline static void Clear(unsigned bufferBits)
 		{
-			RenderCommand::sRendererAPI->clear();
+			RenderCommand::sRendererAPI->clear(bufferBits);
 		}
 
 		inline static void SetViewportSize(unsigned width, unsigned height)
 		{
 			RenderCommand::sRendererAPI->setViewportSize(width, height);
+		}
+
+		inline static void EnableDepthTest(bool depthTestState)
+		{
+			RenderCommand::sRendererAPI->setDepthTestState(depthTestState);
+		}
+
+		inline static void EnableFaceCulling(bool enabled, RendererAPI::CullFace facesToCull = RendererAPI::CullFace::Back)
+		{
+			RenderCommand::sRendererAPI->setCullingFacesState(enabled, facesToCull);
 		}
 
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)

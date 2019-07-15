@@ -14,6 +14,31 @@ namespace zr
 	{
 	}
 
+	void Framebuffer::BindDefault()
+	{
+		switch (Renderer::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				break;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				break;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				OpenGLFramebuffer::BindDefault();
+				break;
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				break;
+			}
+			default:
+			break;
+		}
+	}
+
 	Framebuffer* Framebuffer::Create(const FramebufferProperties& props)
 	{
 		switch (Renderer::GetAPI()) {

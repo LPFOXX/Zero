@@ -44,6 +44,8 @@ namespace zr
 		Framebuffer();
 		virtual ~Framebuffer();
 
+		static void BindDefault();
+
 		virtual void draw() const = 0;
 
 		virtual void bind() = 0;
