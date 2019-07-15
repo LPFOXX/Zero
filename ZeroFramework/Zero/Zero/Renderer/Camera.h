@@ -44,4 +44,15 @@ namespace zr
 		// Inherited via Camera
 		virtual void recomputeMatrices() override;
 	};
+
+	class PerspectiveCamera : public Camera
+	{
+	public:
+		PerspectiveCamera(float fieldOfView, float width, float height);
+		virtual ~PerspectiveCamera();
+
+	private:
+		// Inherited via Camera
+		virtual void recomputeMatrices() override;
+	};
 }

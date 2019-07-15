@@ -1,4 +1,3 @@
-#include "Camera.h"
 #include <zr_pch.h>
 
 #include "Camera.h"
@@ -84,6 +83,33 @@ namespace zr
 			glm::rotate(glm::mat4(1.f), glm::radians(mRotationAngle), glm::vec3(0.f, 0.f, 1.f));
 
 		mViewMatrix = glm::inverse(transform);
+		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
+	}
+
+	PerspectiveCamera::PerspectiveCamera(float fieldOfView, float width, float height) :
+		Camera()
+	{
+		float aspectRatio = 1.f;
+		if (height != 0) {
+			aspectRatio = width / height;
+		}
+
+		mProjectionMatrix = glm::perspective(glm::radians(fieldOfView), aspectRatio, -1.f, 1.f);
+		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
+	}
+
+	PerspectiveCamera::~PerspectiveCamera()
+	{
+	}
+
+	void PerspectiveCamera::recomputeMatrices()
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), mPosition) *
+			glm::rotate(glm::mat4(1.f), glm::radians(mRotationAngle), glm::vec3(0.f, 0.f, 1.f));
+
+		mViewMatrix = glm::lookAt(mPosition, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+
+		//mViewMatrix = glm::inverse(transform);
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 	}
 }
