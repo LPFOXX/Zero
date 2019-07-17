@@ -1,16 +1,20 @@
 #include <pch.h>
 
 #include "SandboxLayer.h"
+#include <Zero/Zero.h>
 
 namespace lp
 {
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
 		mOrthographicCamera(nullptr),
-		mFramebuffer(nullptr)
+		mPerspectiveCamera(nullptr),
+		mFramebuffer(nullptr),
+		mFPSCamera(nullptr)
 	{
-		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(-3.2f, 3.2f, -1.5f, 1.5f));
+		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(0.f, 3.2f, 0.f, 1.5f));
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
+		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, {0.f, 1.f, 0.f}, 1280.f, 600.f));
 
 		mCubeMap.reset(zr::CubeMap::Create());
 		bool success = mCubeMap->loadFromFiles({
@@ -175,6 +179,7 @@ namespace lp
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::W)) {
 			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+			mFPSCamera->move(zr::FPSCamera::MovementDirection::Forward, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
@@ -183,6 +188,7 @@ namespace lp
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::S)) {
 			mPerspectiveCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+			mFPSCamera->move(zr::FPSCamera::MovementDirection::Backward, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Left)) {
@@ -191,6 +197,7 @@ namespace lp
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::A)) {
 			mPerspectiveCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+			mFPSCamera->move(zr::FPSCamera::MovementDirection::Left, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Right)) {
@@ -199,28 +206,34 @@ namespace lp
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::D)) {
 			mPerspectiveCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+			mFPSCamera->move(zr::FPSCamera::MovementDirection::Right, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
 			mOrthographicCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
+			mFPSCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::E)) {
 			mOrthographicCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
+			mFPSCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
 		}
+
+		const zr::Time& time = zr::Application::GetTime();
+		//mPerspectiveCamera->setPosition({ 1.f * cos(time.asSeconds()), .0f, 1.f * sin(time.asSeconds()) });
 
 		zr::RenderCommand::EnableDepthTest(true);
 
-		zr::Renderer::BeginScene(mPerspectiveCamera);
+		zr::Renderer::BeginScene(mFPSCamera);
 		{
 			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
 			//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
-			zr::Renderer::Submit(mCubeMap);
 			//zr::RenderCommand::EnableFaceCulling(false);
 			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
 			zr::Renderer::Submit(mShader, mVertexArray);*/
+			zr::Renderer::Submit(mCubeMap, true);
 			zr::Renderer::EndScene();
 		}
 
@@ -229,10 +242,13 @@ namespace lp
 			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
-			zr::Renderer::Submit(mBlueShader, mSquareVA);
-			zr::Renderer::Submit(mShader, mVertexArray);
+			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
+			zr::Renderer::Submit(mShader, mVertexArray);*/
+			zr::Renderer::Submit(mCubeMap);
 			zr::Renderer::EndScene();
 		}
+
+		mLastDeltaTime = zr::Time::seconds(elapsedTime.asSeconds());
 	}
 
 	void SandboxLayer::OnImGuiRender()
@@ -242,8 +258,23 @@ namespace lp
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
 		if (e.getType() == zr::EventType::MouseMove) {
-			glm::vec2 movementOffset = zr::MouseMoveEvent::GetMovementOffset();
-			//mPerspectiveCamera->move({ movementOffset.x, movementOffset.y, 0.f });
+			if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button0)) {
+				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				e.setHandled();
+				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
+				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
+				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
+			}
+			else if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button1)) {
+				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				e.setHandled();
+			}
+		}
+
+		if (e.getType() == zr::EventType::KeyPressed) {
+			if (dynamic_cast<zr::KeyPressedEvent&>(e).getKeyCode() == static_cast<int>(zr::Keyboard::Escape)) {
+				zr::Application::CloseWindow();
+			}
 		}
 	}
 }

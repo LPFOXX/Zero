@@ -32,38 +32,14 @@ namespace zr
 		return mViewProjectionMatrix;
 	}
 
-	void Camera::setPosition(const glm::vec3& position)
-	{
-		mPosition = position;
-		recomputeMatrices();
-	}
-
 	const glm::vec3& Camera::getPosition() const
 	{
 		return mPosition;
 	}
 
-	void Camera::move(const glm::vec3& offset)
-	{
-		mPosition += offset;
-		recomputeMatrices();
-	}
-
 	float Camera::getRotationAngle() const
 	{
 		return mRotationAngle;
-	}
-
-	void Camera::setRotationAngle(float angle)
-	{
-		mRotationAngle = angle;
-		recomputeMatrices();
-	}
-
-	void Camera::rotate(float angleOffset)
-	{
-		mRotationAngle += angleOffset;
-		recomputeMatrices();
 	}
 
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top) :
@@ -84,6 +60,30 @@ namespace zr
 
 		mViewMatrix = glm::inverse(transform);
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
+	}
+
+	void OrthographicCamera::setPosition(const glm::vec3& position)
+	{
+		mPosition = position;
+		recomputeMatrices();
+	}
+
+	void OrthographicCamera::move(const glm::vec3& offset)
+	{
+		mPosition += offset;
+		recomputeMatrices();
+	}
+
+	void OrthographicCamera::setRotationAngle(float angle)
+	{
+		mRotationAngle = angle;
+		recomputeMatrices();
+	}
+
+	void OrthographicCamera::rotate(float angleOffset)
+	{
+		mRotationAngle += angleOffset;
+		recomputeMatrices();
 	}
 
 	PerspectiveCamera::PerspectiveCamera(float fieldOfView, float width, float height) :
@@ -111,5 +111,29 @@ namespace zr
 
 		//mViewMatrix = glm::inverse(transform);
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
+	}
+
+	void PerspectiveCamera::setPosition(const glm::vec3& position)
+	{
+		mPosition = position;
+		recomputeMatrices();
+	}
+
+	void PerspectiveCamera::move(const glm::vec3& offset)
+	{
+		mPosition += offset;
+		recomputeMatrices();
+	}
+
+	void PerspectiveCamera::setRotationAngle(float angle)
+	{
+		mRotationAngle = angle;
+		recomputeMatrices();
+	}
+
+	void PerspectiveCamera::rotate(float angleOffset)
+	{
+		mRotationAngle += angleOffset;
+		recomputeMatrices();
 	}
 }

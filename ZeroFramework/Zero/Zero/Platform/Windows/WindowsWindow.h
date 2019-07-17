@@ -21,6 +21,8 @@ namespace zr
 		virtual void setVSync(bool enabled) override;
 		virtual bool isVSync() override;
 
+		virtual void captureMouseCursor(bool capture = true) override;
+
 	private:
 		static bool sGLFWInitialized;
 

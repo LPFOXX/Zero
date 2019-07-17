@@ -4,6 +4,7 @@
 #include "ImGui/ImGuiLayer.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "Timer.h"
 
 namespace zr
 {
@@ -29,11 +30,24 @@ namespace zr
 			return *mWindow;
 		}
 
+	public:
+		static void CloseWindow();
+
+	private:
+		void requestWindowClose();
+
+	public:
+		static const Time& GetTime()
+		{
+			return sTimer->getTime();
+		}
+
 	protected:
 		bool onWindowClose(WindowCloseEvent& event);
 
 	private:
 		static Application* sInstance;
+		static std::unique_ptr<Timer> sTimer;
 
 	private:
 		std::unique_ptr<Window> mWindow;

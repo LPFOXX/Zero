@@ -16,7 +16,7 @@ namespace zr
 
 	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera, const std::shared_ptr<zr::Framebuffer>& framebuffer)
 	{
-		Renderer::sSceneData->ViewProjectionMatrix = camera->getViewProjectionMatrix();
+		Renderer::sSceneData->Camera = &(*camera);
 		Renderer::sSceneData->Framebuffer = framebuffer;
 
 		if (Renderer::sSceneData->Framebuffer != nullptr) {
@@ -38,14 +38,21 @@ namespace zr
 	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		shader->bind();
-		shader->setUniform("u_ViewProjection", sSceneData->ViewProjectionMatrix);
+		shader->setUniform("u_ViewProjection", sSceneData->Camera->getViewProjectionMatrix());
 
 		vertexArray->bind();
 		RenderCommand::DrawIndexed(vertexArray);
 	}
-	
-	void Renderer::Submit(const std::shared_ptr<CubeMap>& cubeMap)
+
+	void Renderer::Submit(const std::shared_ptr<CubeMap>& cubeMap, bool ignoreTranslations)
 	{
-		cubeMap->render(Renderer::sSceneData->ViewProjectionMatrix);
+		if (ignoreTranslations) {
+			const glm::mat4& projection = Renderer::sSceneData->Camera->getProjectionMatrix();
+			glm::mat4 view = glm::mat3(Renderer::sSceneData->Camera->getViewMatrix());
+			cubeMap->render(projection * view);
+			return;
+		}
+		
+		cubeMap->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}
 }

@@ -44,7 +44,7 @@ namespace zr
 			virtual const char* getName() const = 0;
 			virtual unsigned getFamilyFlags() const = 0;
 			virtual std::string toString() const;
-			void setHandled(bool handled);
+			void setHandled(bool handled = true);
 			inline bool isInFamily(EventFamily family) const
 			{
 				return (getFamilyFlags() & family);

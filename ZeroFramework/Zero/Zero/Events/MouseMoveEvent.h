@@ -34,6 +34,8 @@ namespace zr
 		static float sLastY;
 		static float sOffsetX;
 		static float sOffsetY;
+		static bool sIsFirstEvent;
+
 
 	private:
 		float mX;

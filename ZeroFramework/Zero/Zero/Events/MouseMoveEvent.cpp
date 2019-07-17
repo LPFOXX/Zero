@@ -8,14 +8,23 @@ namespace zr
 	float MouseMoveEvent::sLastY = 0.f;
 	float MouseMoveEvent::sOffsetX = 0.f;
 	float MouseMoveEvent::sOffsetY = 0.f;
+	bool MouseMoveEvent::sIsFirstEvent = true;
 
 	MouseMoveEvent::MouseMoveEvent(float x, float y) :
 		Event(),
 		mX(x),
 		mY(y)
 	{
-		MouseMoveEvent::sOffsetX = mX - MouseMoveEvent::sLastX;
-		MouseMoveEvent::sOffsetY = mY - MouseMoveEvent::sLastY;
+		if (MouseMoveEvent::sIsFirstEvent) {
+			MouseMoveEvent::sOffsetX = 0;
+			MouseMoveEvent::sOffsetY = 0;
+			MouseMoveEvent::sIsFirstEvent = false;
+		}
+		else {
+			MouseMoveEvent::sOffsetX = mX - MouseMoveEvent::sLastX;
+			MouseMoveEvent::sOffsetY = mY - MouseMoveEvent::sLastY;
+		}
+
 		MouseMoveEvent::sLastX = mX;
 		MouseMoveEvent::sLastY = mY;
 	}

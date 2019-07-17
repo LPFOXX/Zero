@@ -26,11 +26,14 @@ namespace lp
 
 		std::shared_ptr<zr::Camera> mOrthographicCamera;
 		std::shared_ptr<zr::Camera> mPerspectiveCamera;
+		std::shared_ptr<zr::FPSCamera> mFPSCamera;
 
 		std::shared_ptr<zr::CubeMap> mCubeMap;
 
 		float mCameraRotationSpeed = 45.f;	// 45 degrees per second
 		float mCameraSpeed = 5.f;			// 5 units per second
+
+		zr::Time mLastDeltaTime = zr::Time::seconds::zero();
 
 
 		std::shared_ptr<zr::Framebuffer> mFramebuffer;

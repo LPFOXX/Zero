@@ -16,6 +16,12 @@ namespace zr
 
 	}
 
+	const Time& Timer::getTime() const
+	{
+		mTime = Time(std::chrono::steady_clock::now() - mRestartPoint);
+		return mTime;
+	}
+
 	Time Timer::restart()
 	{
 		Time aux = mTime;

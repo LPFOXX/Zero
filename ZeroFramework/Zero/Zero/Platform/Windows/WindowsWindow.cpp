@@ -219,4 +219,9 @@ namespace zr
 	{
 		return mData.VSync;
 	}
+
+	void WindowsWindow::captureMouseCursor(bool capture)
+	{
+		glfwSetInputMode(mWindowHandle, GLFW_CURSOR, (capture ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL));
+	}
 }

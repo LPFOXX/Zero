@@ -17,7 +17,7 @@ namespace zr
 		static void BeginScene(const std::shared_ptr<Camera>& camera, const std::shared_ptr<Framebuffer>& framebuffer = nullptr);
 		static void EndScene();
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray);
-		static void Submit(const std::shared_ptr<CubeMap>& cubeMap);
+		static void Submit(const std::shared_ptr<CubeMap>& cubeMap, bool ignoreTranslations = false);
 
 		inline static RendererAPI::API GetAPI()
 		{
@@ -26,7 +26,8 @@ namespace zr
 	private:
 		struct SceneData
 		{
-			glm::mat4 ViewProjectionMatrix;
+			Camera* Camera;
+			//glm::mat4 ViewProjectionMatrix;
 			std::shared_ptr<Framebuffer> Framebuffer;
 		};
 

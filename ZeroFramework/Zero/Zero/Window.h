@@ -34,5 +34,7 @@ namespace zr
 			virtual void setEventCallback(const EventCallback& callback) = 0;
 			virtual void setVSync(bool enabled) = 0;
 			virtual bool isVSync() = 0;
+
+			virtual void captureMouseCursor(bool capture = true) = 0;
 	};
 }

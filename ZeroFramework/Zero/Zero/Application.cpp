@@ -10,11 +10,13 @@
 namespace zr
 {
 	Application* Application::sInstance = nullptr;
+	std::unique_ptr<Timer> Application::sTimer = nullptr;
 
 	Application::Application()
 	{
 		mWindow.reset(Window::Create());
 		Application::sInstance = this;
+		Application::sTimer = std::unique_ptr<Timer>(new Timer);
 		mWindow->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
 
 		mImGuiLayer = new ImGuiLayer();
@@ -91,6 +93,18 @@ namespace zr
 				mWindow->onUpdate();
 			}
 		}
+	}
+
+	void Application::CloseWindow()
+	{
+		if (Application::sInstance != nullptr) {
+			Application::sInstance->requestWindowClose();
+		}
+	}
+
+	void Application::requestWindowClose()
+	{
+		mRunning = false;
 	}
 
 	bool Application::onWindowClose(WindowCloseEvent& event)
