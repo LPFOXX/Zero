@@ -3,6 +3,8 @@
 #include "SandboxLayer.h"
 #include <Zero/Zero.h>
 
+#include "Zero/vendor/glm/include/glm/gtc/matrix_transform.hpp"
+
 namespace lp
 {
 	SandboxLayer::SandboxLayer() :
@@ -14,7 +16,9 @@ namespace lp
 	{
 		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(0.f, 3.2f, 0.f, 1.5f));
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
-		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, {0.f, 1.f, 0.f}, 1280.f, 600.f));
+		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
+
+		mModel.reset(new zr::Model("resources/nanosuit/nanosuit.obj"));
 
 		mCubeMap.reset(zr::CubeMap::Create());
 		bool success = mCubeMap->loadFromFiles({
@@ -229,11 +233,16 @@ namespace lp
 			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
+			glm::mat4 model(1.f);
+			model = glm::translate(model, glm::vec3(1.f, 0.f, 0.f));
+			mModel->setTransformationMatrix(model);
+			mModel->render(mFPSCamera->getViewProjectionMatrix());
+
 			//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
 			//zr::RenderCommand::EnableFaceCulling(false);
 			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
 			zr::Renderer::Submit(mShader, mVertexArray);*/
-			zr::Renderer::Submit(mCubeMap, true);
+			//zr::Renderer::Submit(mCubeMap, true);
 			zr::Renderer::EndScene();
 		}
 
@@ -258,14 +267,22 @@ namespace lp
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
 		if (e.getType() == zr::EventType::MouseMove) {
-			if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button0)) {
+			if (mIsMouseCaptured) {
 				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
 				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
 				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
 			}
-			else if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button1)) {
+			else if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button0)) {
+				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				e.setHandled();
+				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
+				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
+				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
+			}
+
+			if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button1)) {
 				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 			}
@@ -273,7 +290,14 @@ namespace lp
 
 		if (e.getType() == zr::EventType::KeyPressed) {
 			if (dynamic_cast<zr::KeyPressedEvent&>(e).getKeyCode() == static_cast<int>(zr::Keyboard::Escape)) {
+				e.setHandled();
 				zr::Application::CloseWindow();
+			}
+
+			if (dynamic_cast<zr::KeyPressedEvent&>(e).getKeyCode() == static_cast<int>(zr::Keyboard::C)) {
+				e.setHandled();
+				mIsMouseCaptured = !mIsMouseCaptured;
+				zr::Application::CaptureMouseCursor(mIsMouseCaptured);
 			}
 		}
 	}

@@ -14,6 +14,17 @@ namespace zr
 
 	}
 
+	OpenGLTexture::OpenGLTexture(const std::string& filePath, TextureType type) :
+		Texture()
+	{
+		mFilePath = filePath;
+		mTextureType = type;
+
+		if (!loadFromFile(filePath, true)) {
+			throw std::runtime_error("Can't load texture: " + mFilePath);
+		}
+	}
+
 	OpenGLTexture::~OpenGLTexture()
 	{
 
@@ -156,7 +167,7 @@ namespace zr
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight));
 
 			if (texWidth != 0 && texHeight != 0) {
-				std::vector<unsigned char> pixels(texWidth * texHeight * 4);
+				std::vector<unsigned char> pixels(static_cast<size_t>(texWidth * texHeight * 4));
 				GL_ERR_CHECK(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
 				return image.create(texWidth, texHeight, pixels);;
 			}

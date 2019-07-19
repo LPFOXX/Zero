@@ -18,5 +18,6 @@
 #include "Zero/Renderer/Camera.h"
 #include "Zero/Renderer/FPSCamera.h"
 #include "Zero/Renderer/CubeMap.h"
+#include "Zero/Model.h"
 
 #include "Zero/Clock.h"

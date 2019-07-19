@@ -9,7 +9,18 @@ set(GLFW_BUILD_EXAMPLES 0)
 set(GLFW_BUILD_TESTS 0)
 set(GLFW_BUILD_DOCS 0)
 
+set(ASSIMP_ANDROID_JNIIOSYSTEM 0)
+set(ASSIMP_ASAN 0)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT 0)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_BUILD_SAMPLES OFF)
+set(ASSIMP_NO_EXPORT 1)
+set(BUILD_DOCS OFF)
+set(BUILD_SHARED_LIBS 0)
+
 add_subdirectory("Zero/vendor/glfw")
+add_subdirectory("Zero/vendor/assimp")
+add_subdirectory("Zero/vendor/spdlog")
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/Zero
@@ -17,6 +28,8 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/Zero/vendor/glad/include
 	${PROJECT_SOURCE_DIR}/Zero/vendor/glm/include
 	${PROJECT_SOURCE_DIR}/Zero/vendor/stb_image/include
+	${PROJECT_SOURCE_DIR}/Zero/vendor/assimp/include
+	${PROJECT_SOURCE_DIR}/Zero/vendor/spdlog/include
 )
 
 file(GLOB ZR_SRC_FILES
@@ -36,4 +49,4 @@ target_compile_definitions(Zero PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_CTOR_INIT)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_INLINE)
 
-target_link_libraries(Zero glfw)
+target_link_libraries(Zero glfw assimp)

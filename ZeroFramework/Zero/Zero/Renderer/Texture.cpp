@@ -53,6 +53,31 @@ namespace zr
 		return nullptr;
 	}
 
+	Texture* Texture::Create(const std::string& filePath, TextureType type)
+	{
+		switch (RendererAPI::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				return nullptr;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				return nullptr;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				return new OpenGLTexture(filePath, type);
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				return nullptr;
+			}
+			default:
+			break;
+		}
+		return nullptr;
+	}
+
 	void Texture::Bind(const Texture& texture)
 	{
 	}

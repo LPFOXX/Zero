@@ -10,7 +10,53 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
-      "variables": []
+      "variables": [
+        {
+          "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_SAMPLES",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_DOCS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_EXAMPLES",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_INSTALL",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_NO_EXPORT",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "x64-Release",
@@ -22,7 +68,63 @@
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_SAMPLES",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_NO_EXPORT",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_DOCS",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_DOCS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_EXAMPLES",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_INSTALL",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
     },
     {
       "name": "Linux-Debug",
@@ -44,7 +146,68 @@
       "remoteCopyBuildOutput": false,
       "remoteCopySourcesMethod": "rsync",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
-      "variables": []
+      "variables": [
+        {
+          "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_SAMPLES",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_NO_EXPORT",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_DOCS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_FRAMEWORK",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_DOCS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_EXAMPLES",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_BUILD_TESTS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLFW_INSTALL",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
     }
   ]
 }

@@ -1,11 +1,12 @@
 #include <zr_pch.h>
 
 #include "Events.h"
-#include "Application.h"
 #include "EventDispatcher.h"
 #include "Zero/Renderer/RenderCommand.h"
 #include "Clock.h"
 #include "Timer.h"
+
+#include "Application.h"
 
 namespace zr
 {
@@ -99,6 +100,13 @@ namespace zr
 	{
 		if (Application::sInstance != nullptr) {
 			Application::sInstance->requestWindowClose();
+		}
+	}
+
+	void Application::CaptureMouseCursor(bool capture)
+	{
+		if (Application::sInstance != nullptr) {
+			Application::sInstance->mWindow->captureMouseCursor(capture);
 		}
 	}
 

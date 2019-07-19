@@ -9,6 +9,7 @@ namespace zr
 	{
 	public:
 		OpenGLTexture();
+		OpenGLTexture(const std::string& filePath, TextureType type);
 		virtual ~OpenGLTexture();
 
 		// Inherited via Texture

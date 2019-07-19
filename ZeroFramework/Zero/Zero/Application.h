@@ -32,6 +32,7 @@ namespace zr
 
 	public:
 		static void CloseWindow();
+		static void CaptureMouseCursor(bool capture = true);
 
 	private:
 		void requestWindowClose();

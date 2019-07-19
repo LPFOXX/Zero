@@ -15,7 +15,7 @@ namespace zr
 		 */
 		enum TextureType
 		{
-			None = 1, /**< An enum constant representing the no type option */
+			None = 1,	/**< An enum constant representing the no type option */
 			Diffuse,	/**< An enum constant representing the diffuse option */
 			Specular,   /**< An enum constant representing the specular option */
 			Normal,		/**< An enum constant representing the normal option */
@@ -221,6 +221,8 @@ namespace zr
 		static int GetMaximumSize();
 
 		static Texture* Create();
+
+		static Texture* Create(const std::string& filePath, TextureType type);
 
 	protected:
 		glm::uvec2 mSize;			/**< The texture size. */

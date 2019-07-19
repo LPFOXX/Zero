@@ -317,10 +317,7 @@ namespace zr
 		if (!success) {
 			GL_ERR_CHECK(glGetShaderInfoLog(shaderId, 1024, NULL, info));
 			errorStream << "compilation failed:\n" << info;
-			#ifdef DEBUG_TO_STDOUT
 			std::cout << errorStream.str() << std::endl;
-			#endif
-
 			return false;
 		}
 

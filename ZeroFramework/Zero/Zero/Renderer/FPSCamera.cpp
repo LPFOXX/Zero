@@ -22,7 +22,7 @@ namespace zr
 		if (height != 0) {
 			aspectRatio = width / height;
 		}
-		mProjectionMatrix = glm::perspective(glm::radians(mFieldOfView), aspectRatio, 0.1f, 10.f);
+		mProjectionMatrix = glm::perspective(glm::radians(mFieldOfView), aspectRatio, 0.1f, 100.f);
 		mViewMatrix = glm::lookAt(mPosition, mPosition + mFront, mUp);
 	}
 

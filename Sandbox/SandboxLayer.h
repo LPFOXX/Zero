@@ -30,6 +30,8 @@ namespace lp
 
 		std::shared_ptr<zr::CubeMap> mCubeMap;
 
+		std::shared_ptr<zr::Model> mModel;
+
 		float mCameraRotationSpeed = 45.f;	// 45 degrees per second
 		float mCameraSpeed = 5.f;			// 5 units per second
 
@@ -37,5 +39,7 @@ namespace lp
 
 
 		std::shared_ptr<zr::Framebuffer> mFramebuffer;
+
+		bool mIsMouseCaptured = false;
 	};
 }
