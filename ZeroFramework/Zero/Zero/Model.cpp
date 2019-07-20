@@ -1,8 +1,10 @@
 #include <zr_pch.h>
 
+#include "Log.h"
 #include "Model.h"
 
 #include <assimp/Importer.hpp>
+#include <assimp/DefaultLogger.hpp>
 #include <assimp/postprocess.h>
 
 namespace zr
@@ -10,8 +12,16 @@ namespace zr
 	Model::Model(const std::string& filePath, unsigned componentsToLoad) :
 		mComponents(componentsToLoad)
 	{
+		Assimp::DefaultLogger::set(new ModelLogger(Assimp::Logger::LogSeverity::VERBOSE));
+		Assimp::DefaultLogger::get()->info("Custom Logger Created");
+
 		Assimp::Importer importer;
-		unsigned flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_SortByPType;
+		importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
+		importer.SetProgressHandler(new ModelProgressHandler);
+		importer.SetExtraVerbose(true); // debug feature
+		unsigned flags = aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_RemoveComponent | aiProcess_SplitLargeMeshes | aiProcess_ValidateDataStructure | aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials | aiProcess_SortByPType | aiProcess_FindInvalidData | aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_FlipUVs;
+		//aiProcess_RemoveComponent AI_CONFIG_PP_RVC_FLAGS
+		// aiProcess_SplitLargeMeshes AI_CONFIG_PP_SLM_VERTEX_LIMIT (AI_SLM_DEFAULT_MAX_VERTICES) or AI_CONFIG_PP_SLM_TRIANGLE_LIMIT (AI_SLM_DEFAULT_MAX_TRIANGLES)
 		const aiScene* scene = importer.ReadFile(filePath.c_str(), flags);
 
 		if (!scene) {
@@ -25,6 +35,7 @@ namespace zr
 		walkThroughChildren(scene->mRootNode, scene);
 
 		generateShader();
+		Assimp::DefaultLogger::kill();
 	}
 
 	Model::~Model()
@@ -49,12 +60,19 @@ namespace zr
 
 	void Model::walkThroughChildren(const aiNode* rootNode, const aiScene* scene)
 	{
-		for (unsigned i = 0; i < rootNode->mNumChildren; i++) {
-			for (unsigned j = 0; j < rootNode->mChildren[i]->mNumMeshes; j++) {
-				mMeshes.emplace_back(processMesh(scene->mMeshes[rootNode->mChildren[i]->mMeshes[j]], scene));
-			}
+		if (rootNode->mNumChildren != 0) {
+			for (unsigned i = 0; i < rootNode->mNumChildren; i++) {
+				for (unsigned j = 0; j < rootNode->mChildren[i]->mNumMeshes; j++) {
+					mMeshes.emplace_back(processMesh(scene->mMeshes[rootNode->mChildren[i]->mMeshes[j]], scene));
+				}
 
-			walkThroughChildren(rootNode->mChildren[i], scene);
+				walkThroughChildren(rootNode->mChildren[i], scene);
+			}
+		}
+		else {
+			for (unsigned i = 0; i < rootNode->mNumMeshes; i++) {
+				mMeshes.emplace_back(processMesh(scene->mMeshes[rootNode->mMeshes[i]], scene));
+			}
 		}
 	}
 
@@ -130,7 +148,11 @@ namespace zr
 		// specular: texture_specularN
 		// normal: texture_normalN
 
-		// 1. diffuse maps
+
+		// 1. ambient maps
+		std::vector<std::shared_ptr<Texture>> ambientMaps = processMaterial(material, Texture::TextureType::Ambient);
+		textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
+		// 2. diffuse maps
 		std::vector<std::shared_ptr<Texture>> diffuseMaps = processMaterial(material, Texture::TextureType::Diffuse);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		// 2. specular maps
@@ -143,6 +165,7 @@ namespace zr
 		std::vector<std::shared_ptr<Texture>> heightMaps = processMaterial(material, Texture::TextureType::Height);
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+		mMaxAmbientTextures = std::max(mMaxAmbientTextures, static_cast<unsigned>(ambientMaps.size()));
 		mMaxDiffuseTextures = std::max(mMaxDiffuseTextures, static_cast<unsigned>(diffuseMaps.size()));
 		mMaxSpecularTextures = std::max(mMaxSpecularTextures, static_cast<unsigned>(specularMaps.size()));
 		mMaxNormalTextures = std::max(mMaxNormalTextures, static_cast<unsigned>(normalMaps.size()));
@@ -164,27 +187,32 @@ namespace zr
 
 		aiTextureType type;
 		switch (textureType) {
-			case zr::Texture::None:
+			case zr::Texture::TextureType::Ambient:
+			{
+				type = aiTextureType_AMBIENT;
+				break;
+			}
+			case zr::Texture::TextureType::None:
 			{
 				type = aiTextureType_NONE;
 				break;
 			}
-			case zr::Texture::Diffuse:
+			case zr::Texture::TextureType::Diffuse:
 			{
 				type = aiTextureType_DIFFUSE;
 				break;
 			}
-			case zr::Texture::Specular:
+			case zr::Texture::TextureType::Specular:
 			{
 				type = aiTextureType_SPECULAR;
 				break;
 			}
-			case zr::Texture::Normal:
+			case zr::Texture::TextureType::Normal:
 			{
 				type = aiTextureType_NORMALS;
 				break;
 			}
-			case zr::Texture::Height:
+			case zr::Texture::TextureType::Height:
 			{
 				type = aiTextureType_HEIGHT;
 				break;
@@ -255,6 +283,9 @@ namespace zr
 			"in vec2 TexCoords;\n"
 			"\n";
 
+		for (unsigned i = 0; i < mMaxAmbientTextures; i++) {
+			fragmentShader << "uniform sampler2D texture_ambient" << i + 1 << ";\n";
+		}
 
 		for (unsigned i = 0; i < mMaxDiffuseTextures; i++) {
 			fragmentShader << "uniform sampler2D texture_diffuse" << i + 1 << ";\n";
@@ -276,7 +307,8 @@ namespace zr
 			"\n"
 			"void main()\n"
 			"{\n"
-			"	FragColor = texture(texture_diffuse1, TexCoords) * texture(texture_specular1, TexCoords) * texture(texture_height1, TexCoords); \n"
+			"	//FragColor = texture(texture_ambient1, TexCoords) * texture(texture_diffuse1, TexCoords) * texture(texture_specular1, TexCoords) * texture(texture_height1, TexCoords); \n"
+			"	FragColor = texture(texture_diffuse1, TexCoords); \n"
 			"}\n";
 
 		// "	FragColor = texture(texture_diffuse1, TexCoords);\n"
@@ -285,5 +317,62 @@ namespace zr
 		if (!mShader->loadFromStrings(vertexShader, fragmentShader.str())) {
 			std::cout << "Can't create model shader object.\n";
 		}
+	}
+
+	ModelLogger::ModelLogger(Assimp::Logger::LogSeverity severity) :
+		Assimp::Logger(severity)
+	{
+
+	}
+
+	ModelLogger::~ModelLogger()
+	{
+
+	}
+
+	bool ModelLogger::attachStream(Assimp::LogStream* pStream, unsigned int severity)
+	{
+		return false;
+	}
+
+	bool ModelLogger::detatchStream(Assimp::LogStream* pStream, unsigned int severity)
+	{
+		return false;
+	}
+
+	void ModelLogger::OnDebug(const char* message)
+	{
+		ZR_CORE_TRACE("[ASSIMP] {0}", message);
+	}
+
+	void ModelLogger::OnInfo(const char* message)
+	{
+		ZR_CORE_INFO("[ASSIMP] {0}", message);
+	}
+
+	void ModelLogger::OnWarn(const char* message)
+	{
+		ZR_CORE_WARN("[ASSIMP] {0}", message);
+	}
+
+	void ModelLogger::OnError(const char* message)
+	{
+		ZR_CORE_ERROR("[ASSIMP] {0}", message);
+	}
+
+	ModelProgressHandler::ModelProgressHandler() :
+		Assimp::ProgressHandler()
+	{
+
+	}
+
+	ModelProgressHandler::~ModelProgressHandler()
+	{
+	}
+
+	bool ModelProgressHandler::Update(float percentage)
+	{
+		ZR_CORE_INFO("Model loading progress: {0:.2f}%", percentage * 100.f);
+		return true;
 	}
 }

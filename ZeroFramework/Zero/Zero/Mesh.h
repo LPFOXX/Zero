@@ -48,7 +48,7 @@ namespace zr
 
 
 	public:
-		Mesh(const MeshProperties& meshProps, std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<std::shared_ptr<Texture>>& textures);
+		Mesh(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::vector<std::shared_ptr<Texture>>& textures);
 		~Mesh();
 
 		void render(const std::shared_ptr<Shader>& shader);

@@ -3,6 +3,7 @@
 #include "Events.h"
 #include "EventDispatcher.h"
 #include "Zero/Renderer/RenderCommand.h"
+#include "Zero/Log.h"
 #include "Clock.h"
 #include "Timer.h"
 
@@ -45,7 +46,7 @@ namespace zr
 			}
 		}
 
-		std::cout << e.toString() << '\n';
+		ZR_CORE_TRACE("{0}", e);
 	}
 
 	void Application::pushLayer(Layer* layer)

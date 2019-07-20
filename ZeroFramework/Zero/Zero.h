@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Zero/Application.h"
+#include "Zero/Log.h"
 #include "Zero/Layer.h"
 #include "Zero/Events.h"
 

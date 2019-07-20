@@ -12,6 +12,10 @@ namespace zr
 		OpenGLTexture(const std::string& filePath, TextureType type);
 		virtual ~OpenGLTexture();
 
+	public:
+		static void ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture);
+
+	public:
 		// Inherited via Texture
 		virtual void bind() const override;
 		virtual void bindOnTextureUnit(unsigned textureUnit) override;

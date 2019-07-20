@@ -45,13 +45,26 @@ namespace zr
 			virtual unsigned getFamilyFlags() const = 0;
 			virtual std::string toString() const;
 			void setHandled(bool handled = true);
+			
 			inline bool isInFamily(EventFamily family) const
 			{
 				return (getFamilyFlags() & family);
 			}
+
 			inline bool isHandled() const
 			{
 				return mIsHandled;
+			}
+
+			template <typename OStream>
+			friend OStream& operator<<(OStream& os, const Event& e)
+			{
+				return os << e.toString();
+			}
+
+			inline std::ostream& operator<<(std::ostream& os)
+			{
+				return os << toString();
 			}
 			
 		protected:

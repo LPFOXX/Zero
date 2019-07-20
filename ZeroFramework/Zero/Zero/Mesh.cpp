@@ -6,7 +6,7 @@
 
 namespace zr
 {
-	Mesh::Mesh(const MeshProperties& meshProps, std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<std::shared_ptr<Texture>>& textures) :
+	Mesh::Mesh(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::vector<std::shared_ptr<Texture>>& textures) :
 		mVAO(nullptr),
 		mTextures(textures),
 		mProperties(meshProps)

@@ -45,8 +45,9 @@ file(GLOB ZR_SRC_FILES
 
 add_library (Zero ${ZR_SRC_FILES})
 target_compile_definitions(Zero PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+#target_compile_definitions(Zero PUBLIC SPDLOG_COMPILED_LIB)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_CXX11)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_CTOR_INIT)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_INLINE)
 
-target_link_libraries(Zero glfw assimp)
+target_link_libraries(Zero glfw assimp spdlog)

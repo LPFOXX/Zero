@@ -1,6 +1,8 @@
 #pragma once
 
 #include <assimp/scene.h>
+#include <assimp/Logger.hpp>
+#include <assimp/ProgressHandler.hpp>
 #include "Renderer/Texture.h"
 #include "Renderer/Shader.h"
 
@@ -40,11 +42,38 @@ namespace zr
 
 		glm::mat4 mTransformationMatrix;
 
+		unsigned mMaxAmbientTextures = 0;
 		unsigned mMaxDiffuseTextures = 0;
 		unsigned mMaxSpecularTextures = 0;
 		unsigned mMaxNormalTextures = 0;
 		unsigned mMaxHeightTextures = 0;
 
 		unsigned mComponents = 0;
+	};
+
+	class ModelLogger : public Assimp::Logger
+	{
+	public:
+		ModelLogger(Assimp::Logger::LogSeverity severity);
+		virtual ~ModelLogger();
+
+		virtual bool attachStream(Assimp::LogStream* pStream, unsigned int severity = Debugging | Err | Warn | Info) override;
+		virtual bool detatchStream(Assimp::LogStream* pStream, unsigned int severity = Debugging | Err | Warn | Info) override;
+
+	protected:
+		virtual void OnDebug(const char* message) override;
+		virtual void OnInfo(const char* message) override;
+		virtual void OnWarn(const char* message) override;
+		virtual void OnError(const char* message) override;
+	};
+
+	class ModelProgressHandler : public Assimp::ProgressHandler
+	{
+	public:
+		ModelProgressHandler();
+		virtual ~ModelProgressHandler();
+
+		// Inherited via ProgressHandler
+		virtual bool Update(float percentage = (-1.0F));
 	};
 }

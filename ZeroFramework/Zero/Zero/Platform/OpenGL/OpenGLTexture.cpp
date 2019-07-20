@@ -30,6 +30,12 @@ namespace zr
 
 	}
 
+	void OpenGLTexture::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
+	{
+		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureUnit));
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, bindTexture));
+	}
+
 	void OpenGLTexture::bind() const
 	{
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
@@ -167,7 +173,7 @@ namespace zr
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight));
 
 			if (texWidth != 0 && texHeight != 0) {
-				std::vector<unsigned char> pixels(static_cast<size_t>(texWidth * texHeight * 4));
+				std::vector<unsigned char> pixels(static_cast<size_t>(texWidth) * texHeight * 4);
 				GL_ERR_CHECK(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
 				return image.create(texWidth, texHeight, pixels);;
 			}
@@ -187,29 +193,10 @@ namespace zr
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-			GLenum format;
-			if (channelCount == 4U) {
-				format = GL_RGBA;
-				/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-			}
-			else if (channelCount == 3U) {
-				format = GL_RGB;
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-			}
-			else if (channelCount == 2U) {
-				format = GL_RG;
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-			}
-			else if (channelCount == 1U) {
-				format = GL_RED;
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-			}
+			/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);*/
+			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
 			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 			GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));

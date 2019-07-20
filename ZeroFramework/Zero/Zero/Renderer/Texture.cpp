@@ -85,4 +85,29 @@ namespace zr
 	void Texture::ActivateTextureUnit(unsigned textureUnit, const Texture& bindTexture)
 	{
 	}
+
+	void Texture::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
+	{
+		switch (RendererAPI::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				break;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				break;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				OpenGLTexture::ActivateTextureUnit(textureUnit, bindTexture);
+				break;
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				break;
+			}
+			default:
+			break;
+		}
+	}
 }

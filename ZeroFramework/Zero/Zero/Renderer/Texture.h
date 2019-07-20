@@ -16,6 +16,7 @@ namespace zr
 		enum TextureType
 		{
 			None = 1,	/**< An enum constant representing the no type option */
+			Ambient,	/**< An enum constant representing the ambient option */
 			Diffuse,	/**< An enum constant representing the diffuse option */
 			Specular,   /**< An enum constant representing the specular option */
 			Normal,		/**< An enum constant representing the normal option */
@@ -97,6 +98,17 @@ namespace zr
 		 * @param bindTexture	The texture to bind to the texture unit.
 		 */
 		static void ActivateTextureUnit(unsigned textureUnit, const Texture& bindTexture);
+
+		/**
+		 * @brief Activates the texture unit.
+		 *
+		 * textureUnit can be zero. However it must match the value that it is referenced by in the shader
+		 * program.
+		 *
+		 * @param textureUnit	The texture unit.
+		 * @param bindTexture	The texture to bind to the texture unit.
+		 */
+		static void ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture);
 
 		/**
 		 * @brief Bind on texture unit.

@@ -3,6 +3,7 @@
 #include "GL_ERR_CHECK.h"
 #include "OpenGLCubeMap.h"
 #include "OpenGLBuffer.h"
+#include "OpenGLTexture.h"
 
 #include "Zero/Image.h"
 
@@ -76,7 +77,8 @@ namespace zr
 				// The texture coordinates of the images are the vertices of
 				// the cube.
 				TexCoords = aPos;
-				gl_Position = uViewProjection * vec4(aPos, 1.0);
+				vec4 pos = uViewProjection * vec4(aPos, 1.0);
+				gl_Position = pos.xyww;
 			}
 		)";
 
@@ -168,6 +170,8 @@ namespace zr
 		mShader->bind();
 		mShader->setUniform("uViewProjection", viewProjectionMatrix);
 		mVertexArray->bind();
+		
+		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0));
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureId));
 		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, mVertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
 	}
@@ -188,7 +192,6 @@ namespace zr
 
 	bool OpenGLCubeMap::loadFace(CubeFace whichFace, const std::string& filePath)
 	{
-		bool returnValue = true;
 		int width, height, nrChannels;
 		unsigned char* data = ImageLoader::loadDataFromFile(filePath, &width, &height, &nrChannels, false);
 
@@ -206,7 +209,7 @@ namespace zr
 			return true;
 		}
 		else {
-			returnValue = false;
+			return false;
 		}
 	}
 

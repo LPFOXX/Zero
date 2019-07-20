@@ -1,5 +1,6 @@
 #include <zr_pch.h>
 
+#include "Zero/Log.h"
 #include "OpenGLShader.h"
 #include "GL_ERR_CHECK.h"
 
@@ -300,7 +301,7 @@ namespace zr
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const
 	{
 		int success;
-		char info[1024];
+		char info[5 * 1024];
 		std::stringstream errorStream;
 		GL_ERR_CHECK(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success));
 
@@ -315,9 +316,9 @@ namespace zr
 		}
 
 		if (!success) {
-			GL_ERR_CHECK(glGetShaderInfoLog(shaderId, 1024, NULL, info));
+			GL_ERR_CHECK(glGetShaderInfoLog(shaderId, 5 * 1024, NULL, info));
 			errorStream << "compilation failed:\n" << info;
-			std::cout << errorStream.str() << std::endl;
+			ZR_CORE_ERROR("[SHADER] {0}", errorStream.str());
 			return false;
 		}
 

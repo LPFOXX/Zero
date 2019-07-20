@@ -18,7 +18,8 @@ namespace lp
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
 
-		mModel.reset(new zr::Model("resources/nanosuit/nanosuit.obj"));
+		//mModel.reset(new zr::Model("resources/nanosuit/nanosuit.obj"));
+		mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
 
 		mCubeMap.reset(zr::CubeMap::Create());
 		bool success = mCubeMap->loadFromFiles({
@@ -31,7 +32,7 @@ namespace lp
 			});
 
 		if (!success) {
-			std::cout << "CubeMap loading error\n";
+			ZR_CORE_ERROR("CubeMap loading error.");
 		}
 
 		zr::Framebuffer::FramebufferProperties fbp;
@@ -153,12 +154,12 @@ namespace lp
 
 		mShader.reset(zr::Shader::Create());
 		if (!mShader->loadFromStrings(vertexSrc, fragmentSrc)) {
-			std::cout << "Error creating Shader object!\n";
+			ZR_CORE_ERROR("Error creating Shader object!");
 		}
 
 		mBlueShader.reset(zr::Shader::Create());
 		if (!mBlueShader->loadFromStrings(blueShaderVertexSrc, blueShaderFragmentSrc)) {
-			std::cout << "Error creating blue Shader object!\n";
+			ZR_CORE_ERROR("Error creating blue Shader object!");
 		}
 	}
 
@@ -228,21 +229,23 @@ namespace lp
 
 		zr::RenderCommand::EnableDepthTest(true);
 
+		glm::mat4 model(1.f);
+		model = glm::translate(model, glm::vec3(0.f, 0.f, 0.f));
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		mModel->setTransformationMatrix(model);
+
 		zr::Renderer::BeginScene(mFPSCamera);
 		{
 			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
-			glm::mat4 model(1.f);
-			model = glm::translate(model, glm::vec3(1.f, 0.f, 0.f));
-			mModel->setTransformationMatrix(model);
 			mModel->render(mFPSCamera->getViewProjectionMatrix());
 
 			//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
 			//zr::RenderCommand::EnableFaceCulling(false);
 			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
 			zr::Renderer::Submit(mShader, mVertexArray);*/
-			//zr::Renderer::Submit(mCubeMap, true);
+			zr::Renderer::Submit(mCubeMap, true);
 			zr::Renderer::EndScene();
 		}
 
@@ -250,6 +253,8 @@ namespace lp
 		{
 			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+
+			mModel->render(mOrthographicCamera->getViewProjectionMatrix());
 
 			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
 			zr::Renderer::Submit(mShader, mVertexArray);*/

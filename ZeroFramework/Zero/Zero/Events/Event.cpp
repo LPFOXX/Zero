@@ -24,9 +24,4 @@ namespace zr
 	{
 		mIsHandled = handled;
 	}
-	
-	inline std::ostream& operator<<(std::ostream& os, const Event& e)
-	{
-		return os << e.toString();
-	}
 }
