@@ -123,6 +123,31 @@
           "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "SPDLOG_BUILD_BENCH",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "SPDLOG_BUILD_EXAMPLES",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "SPDLOG_BUILD_TESTS",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "USE_MSVC_RUNTIME_LIBRARY_DLL",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_VERBOSE_MAKEFILE",
+          "value": "True",
+          "type": "BOOL"
         }
       ]
     },

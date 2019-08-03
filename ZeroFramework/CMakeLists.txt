@@ -17,20 +17,25 @@ set(ASSIMP_BUILD_SAMPLES OFF)
 set(ASSIMP_NO_EXPORT 1)
 set(BUILD_DOCS OFF)
 set(BUILD_SHARED_LIBS 0)
-
-add_subdirectory("Zero/vendor/glfw")
-add_subdirectory("Zero/vendor/assimp")
-add_subdirectory("Zero/vendor/spdlog")
+set(FREETYPE_NO_DIST OFF)
+set(SKIP_INSTALL_HEADERS ON)
 
 include_directories(
-	${PROJECT_SOURCE_DIR}/Zero
-	${PROJECT_SOURCE_DIR}/Zero/vendor/imgui
-	${PROJECT_SOURCE_DIR}/Zero/vendor/glad/include
-	${PROJECT_SOURCE_DIR}/Zero/vendor/glm/include
-	${PROJECT_SOURCE_DIR}/Zero/vendor/stb_image/include
-	${PROJECT_SOURCE_DIR}/Zero/vendor/assimp/include
-	${PROJECT_SOURCE_DIR}/Zero/vendor/spdlog/include
+	${PROJECT_SOURCE_DIR}/Zero/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/assimp/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/freetype/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/glad/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/glfw/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/glm/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/imgui/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/spdlog/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/stb_image/include/
 )
+
+add_subdirectory("Zero/vendor/assimp")
+add_subdirectory("Zero/vendor/freetype")
+add_subdirectory("Zero/vendor/glfw")
+add_subdirectory("Zero/vendor/spdlog")
 
 file(GLOB ZR_SRC_FILES
 	${PROJECT_SOURCE_DIR}/Zero/Zero/*.cpp
@@ -45,9 +50,17 @@ file(GLOB ZR_SRC_FILES
 
 add_library (Zero ${ZR_SRC_FILES})
 target_compile_definitions(Zero PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+#target_compile_definitions(Zero PUBLIC FT2_BUILD_LIBRARY)
+#target_compile_definitions(Zero PUBLIC STB_IMAGE_WRITE_IMPLEMENTATION)
+#target_compile_definitions(Zero PUBLIC STB_IMAGE_IMPLEMENTATION)
 #target_compile_definitions(Zero PUBLIC SPDLOG_COMPILED_LIB)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_CXX11)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_CTOR_INIT)
 #target_compile_definitions(Zero PRIVATE GLM_FORCE_INLINE)
 
-target_link_libraries(Zero glfw assimp spdlog)
+target_link_libraries(Zero
+	assimp
+	freetype
+	glfw
+	spdlog
+)
