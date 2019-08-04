@@ -17,9 +17,12 @@ namespace lp
 		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(0.f, 3.2f, 0.f, 1.5f));
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
+		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
 		//mModel.reset(new zr::Model("resources/nanosuit/nanosuit.obj"));
-		mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
+		//mModel.reset(new zr::Model("resources/iron_man/IronMan.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
+		mModel.reset(new zr::Model("resources/iron_man_fixed/iron_man_fixed.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
+		//mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
 
 		mCubeMap.reset(zr::CubeMap::Create());
 		bool success = mCubeMap->loadFromFiles({
@@ -57,8 +60,8 @@ namespace lp
 		std::shared_ptr<zr::VertexBuffer> vertexBuffer;
 		vertexBuffer.reset(zr::VertexBuffer::Create(vertices, sizeof(vertices), zr::DrawMode::Static));
 		zr::BufferLayout layout = {
-			{ zr::ShaderDataType::Float3, "a_Position" },
-			{ zr::ShaderDataType::Float4, "a_Color" }
+			{ zr::ShaderDataType::Float3, "aPosition" },
+			{ zr::ShaderDataType::Float4, "aColor" }
 		};
 		vertexBuffer->setLayout(layout);
 		mVertexArray->addVertexBuffer(vertexBuffer);
@@ -79,7 +82,7 @@ namespace lp
 		std::shared_ptr<zr::VertexBuffer> squareVB;
 		squareVB.reset(zr::VertexBuffer::Create(squareVertices, sizeof(squareVertices), zr::DrawMode::Static));
 		squareVB->setLayout({
-			{ zr::ShaderDataType::Float3, "a_Position" }
+			{ zr::ShaderDataType::Float3, "aPosition" }
 			});
 		mSquareVA->addVertexBuffer(squareVB);
 
@@ -94,19 +97,19 @@ namespace lp
 		std::string vertexSrc = R"(
 			#version 330 core
 			
-			layout(location = 0) in vec3 a_Position;
-			layout(location = 1) in vec4 a_Color;
+			layout(location = 0) in vec3 aPosition;
+			layout(location = 1) in vec4 aColor;
 
-			uniform mat4 u_ViewProjection;
+			uniform mat4 uViewProjection;
 
-			out vec3 v_Position;
-			out vec4 v_Color;
+			out vec3 vPosition;
+			out vec4 vColor;
 
 			void main()
 			{
-				v_Position = a_Position;
-				v_Color = a_Color;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);	
+				vPosition = aPosition;
+				vColor = aColor;
+				gl_Position = uViewProjection * vec4(aPosition, 1.0);	
 			}
 		)";
 
@@ -115,27 +118,28 @@ namespace lp
 			
 			layout(location = 0) out vec4 color;
 
-			in vec3 v_Position;
+			in vec3 vPosition;
 
 			void main()
 			{
-				color = vec4(v_Position * 0.5 + 0.5, 1.0);
+				color = vec4(vPosition * 0.5 + 0.5, 1.0);
 			}
 		)";
 
 		std::string blueShaderVertexSrc = R"(
 			#version 330 core
 			
-			layout(location = 0) in vec3 a_Position;
+			layout(location = 0) in vec3 aPosition;
 
-			uniform mat4 u_ViewProjection;
+			uniform mat4 uViewProjection;
+			uniform mat4 uTransform;
 
-			out vec3 v_Position;
+			out vec3 vPosition;
 
 			void main()
 			{
-				v_Position = a_Position;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);	
+				vPosition = aPosition;
+				gl_Position = uViewProjection * uTransform * vec4(aPosition, 1.0);	
 			}
 		)";
 
@@ -144,7 +148,7 @@ namespace lp
 			
 			layout(location = 0) out vec4 color;
 
-			in vec3 v_Position;
+			in vec3 vPosition;
 
 			void main()
 			{
@@ -225,14 +229,14 @@ namespace lp
 		}
 
 		const zr::Time& time = zr::Application::GetTime();
-		//mPerspectiveCamera->setPosition({ 1.f * cos(time.asSeconds()), .0f, 1.f * sin(time.asSeconds()) });
+		//mFPSCamera->setPosition({ 1.f * cos(time.asSeconds()), .0f, 1.f * sin(time.asSeconds()) });
 
 		zr::RenderCommand::EnableDepthTest(true);
 
 		glm::mat4 model(1.f);
-		model = glm::translate(model, glm::vec3(0.f, 0.f, 0.f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+		model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
 		mModel->setTransformationMatrix(model);
+		mModel->setCameraPosition(mFPSCamera->getPosition());
 
 		zr::Renderer::BeginScene(mFPSCamera);
 		{
@@ -249,18 +253,24 @@ namespace lp
 			zr::Renderer::EndScene();
 		}
 
-		zr::Renderer::BeginScene(mOrthographicCamera, mFramebuffer);
-		{
-			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
-			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+		//zr::Renderer::BeginScene(mOrthographicCamera, mFramebuffer);
+		//{
+		//	zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
+		//	zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
-			mModel->render(mOrthographicCamera->getViewProjectionMatrix());
+		//	mModel->render(mOrthographicCamera->getViewProjectionMatrix());
 
-			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
-			zr::Renderer::Submit(mShader, mVertexArray);*/
-			zr::Renderer::Submit(mCubeMap);
-			zr::Renderer::EndScene();
-		}
+		//	for (int x = 0; x < 10; x++) {
+		//		for (int y = 0; y < 10; y++) {
+		//			glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(.2f * x, .2f * y, 0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(.1f, .1f, .1f));
+		//			zr::Renderer::Submit(mBlueShader, mSquareVA, transform);
+		//		}
+		//	}
+
+		//	zr::Renderer::Submit(mShader, mVertexArray);
+		//	//zr::Renderer::Submit(mCubeMap);
+		//	zr::Renderer::EndScene();
+		//}
 
 		mLastDeltaTime = zr::Time::seconds(elapsedTime.asSeconds());
 	}
@@ -272,7 +282,13 @@ namespace lp
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
 		if (e.getType() == zr::EventType::MouseMove) {
-			if (mIsMouseCaptured) {
+			if (zr::Input::isKeyPressed(zr::Keyboard::X)) {
+				mModelScaleFactor -= zr::MouseMoveEvent::GetMovementOffset().y * .001f * mLastDeltaTime.asSeconds();
+				if (mModelScaleFactor <= .001f) {
+					mModelScaleFactor = .001f;
+				}
+			}
+			else if (mIsMouseCaptured) {
 				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
@@ -303,6 +319,7 @@ namespace lp
 				e.setHandled();
 				mIsMouseCaptured = !mIsMouseCaptured;
 				zr::Application::CaptureMouseCursor(mIsMouseCaptured);
+				mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 			}
 		}
 	}
