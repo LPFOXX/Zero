@@ -20,7 +20,7 @@ namespace zr
 
 		void run();
 
-		inline static Application& getInstance()
+		inline static Application& GetInstance()
 		{
 			return *sInstance;
 		}

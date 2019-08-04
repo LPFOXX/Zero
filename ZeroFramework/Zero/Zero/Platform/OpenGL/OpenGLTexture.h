@@ -14,6 +14,7 @@ namespace zr
 
 	public:
 		static void ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture);
+		static int GetMaximumSize();
 
 	public:
 		// Inherited via Texture
@@ -25,24 +26,22 @@ namespace zr
 		virtual bool update(const unsigned char* data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) override;
 		virtual bool update(const Image& data, unsigned xPos = 0, unsigned yPos = 0) override;
 		virtual bool update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) override;
+		virtual void setSmoothFilter(bool smoothFilterEnabled) override;
+		virtual bool getSmoothFilter() const override;
+		virtual void setRepeat(bool repeatEnabled) override;
+		virtual bool isRepetead() const override;
 		virtual bool loadToImage(Image& image) const override;
+		virtual bool generateMipMaps() override;
 		virtual unsigned getHandle() const override;
 
 	private:
-	/**
-	 * @brief Sets texture data
-	 *
-	 * @param width		  	The width.
-	 * @param height	  	The height.
-	 * @param channelCount	Number of channels.
-	 * @param data		  	The data.
-	 *
-	 * @returns True if it succeeds, false if it fails.
-	 */
-	bool setTextureData(unsigned width, unsigned height, unsigned channelCount, const unsigned char* data);
+		static unsigned sCurrentlyBoundTexture;
 
 	private:
-		unsigned mTextureId;		/**< The OpenGL texture handler. */
+		unsigned mTextureId;	/**< The OpenGL texture handler. */
+		bool mIsSmooth;
+		bool mIsRepeated;
+		bool mHasMipmaps;		/**< Wheather the texture has mipmaps generated or not. */
 	};
 }
 

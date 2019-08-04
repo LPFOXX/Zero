@@ -16,5 +16,7 @@ namespace zr
 		virtual void setCullingFacesState(bool enabled, CullFace facesToCull) override;
 		virtual bool getDepthTestState() override;
 		virtual void setDepthTestState(bool state) override;
+		virtual void enableBlend(bool blendEnabled) override;
+		virtual bool isBlendEnabled() override;
 	};
 }

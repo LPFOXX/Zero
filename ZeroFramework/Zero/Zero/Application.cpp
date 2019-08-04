@@ -63,21 +63,13 @@ namespace zr
 	{
 		using namespace std::chrono_literals;
 
-		Clock clock(Time::minutes(20.f));
-		clock.getTime().asHours();
-		clock.getTime().asMicroseconds();
-		clock.getTime().asMilliseconds();
-		clock.getTime().asMinutes();
-		clock.getTime().asNanoseconds();
-		clock.getTime().asSeconds();
-
 		Timer timer;
 
 		Time accumulatedTime = Time::Zero();
 		Time frameTime(Time::seconds(1.f / 60.f));
 
 		while (mRunning) {
-			Time elapsedTime = timer.restart();
+			/*Time elapsedTime = timer.restart();
 			accumulatedTime += elapsedTime;
 
 			while (accumulatedTime >= frameTime) {
@@ -93,7 +85,21 @@ namespace zr
 				mImGuiLayer->end();
 
 				mWindow->onUpdate();
+			}*/
+
+			Time& elapsedTime = timer.restart();
+			//accumulatedTime += elapsedTime;
+
+			for (Layer* l : mLayerStack) {
+				l->onUpdate(elapsedTime);
 			}
+
+			mImGuiLayer->begin();
+			for (Layer* layer : mLayerStack)
+				layer->OnImGuiRender();
+			mImGuiLayer->end();
+
+			mWindow->onUpdate();
 		}
 	}
 

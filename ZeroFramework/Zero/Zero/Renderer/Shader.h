@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../vendor/glm/include/glm/glm.hpp"
+#include "Material.h"
 
 namespace zr
 {
@@ -259,6 +260,17 @@ namespace zr
 		/**
 		 * @brief Sets a uniform in the shader program.
 		 *
+		 * This is a way of passing data to it. It passes a 2D <code>float</code> vector to the shader
+		 * program.
+		 *
+		 * @param uniformName	The name of the uniform which data will be changed.
+		 * @param value		 	The vector to pass to the shader.
+		 */
+		virtual void setUniform(const char* uniformName, const glm::vec2& value) const = 0;
+
+		/**
+		 * @brief Sets a uniform in the shader program.
+		 *
 		 * This is a way of passing data to it. It passes a 3D <code>float</code> vector to the shader
 		 * program.
 		 *
@@ -299,6 +311,10 @@ namespace zr
 		 * @param value		 	The matrix to pass to the shader.
 		 */
 		virtual void setUniform(const char* uniformName, const glm::mat4& value) const = 0;
+
+		virtual void setUniform(const char* uniformName, const Material& value) const = 0;
+
+		virtual void setUniform(const char* uniformName, const Light& value) const = 0;
 	};
 }
 

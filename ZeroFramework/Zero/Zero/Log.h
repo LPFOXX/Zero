@@ -33,8 +33,8 @@ namespace zr
 #define ZR_CORE_FATAL(...)	zr::Log::GetCoreLogger()->fatal(__VA_ARGS__)
 
 
-#define ZR_TRACE(...)	zr::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define ZR_INFO(...)	zr::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define ZR_WARN(...)	zr::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define ZR_ERROR(...)	zr::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define ZR_FATAL(...)	zr::Log::GetCoreLogger()->fatal(__VA_ARGS__)
+#define ZR_TRACE(...)	zr::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define ZR_INFO(...)	zr::Log::GetClientLogger()->info(__VA_ARGS__)
+#define ZR_WARN(...)	zr::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define ZR_ERROR(...)	zr::Log::GetClientLogger()->error(__VA_ARGS__)
+#define ZR_FATAL(...)	zr::Log::GetClientLogger()->fatal(__VA_ARGS__)

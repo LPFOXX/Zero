@@ -1,12 +1,11 @@
 #include <zr_pch.h>
 
-#include "Core.h"
+#include "../Core.h"
 #include "Image.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image_write.h>
-#include <stb_image.h>
+#include "ImageReader.h"
+
+#include "../Log.h"
 
 namespace zr
 {
@@ -90,7 +89,7 @@ namespace zr
 	bool Image::loadFromFile(const std::string& imageFilePath, bool flipImage)
 	{
 		int width, height, nrChannel;
-		unsigned char* data = ImageLoader::loadDataFromFile(imageFilePath, &width, &height, &nrChannel, flipImage);
+		unsigned char* data = ImageReader::loadDataFromFile(imageFilePath, width, height, nrChannel, flipImage);
 
 		if (data) {
 			mWidth = width;
@@ -101,7 +100,7 @@ namespace zr
 			mBuffer.resize(static_cast<size_t>(mWidth) * mHeight * 4U);
 			std::memcpy(&mBuffer[0], data, static_cast<size_t>(mWidth) * mHeight * 4U);
 
-			ImageLoader::cleanData(data);
+			ImageReader::cleanData(data);
 			return true;
 		}
 		return false;
@@ -184,44 +183,5 @@ namespace zr
 			return true;
 		}
 		return false;
-	}
-
-	ImageLoader::~ImageLoader()
-	{
-
-	}
-
-	unsigned char* ImageLoader::loadDataFromFile(const std::string& imagePath, int* width, int* height, int* channelCount, bool flipImage)
-	{
-		stbi_set_flip_vertically_on_load(flipImage);
-		// Force 4 channels output by specifying 4 as the last parameter
-		return stbi_load(imagePath.c_str(), width, height, channelCount, 4);
-	}
-
-	void ImageLoader::cleanData(unsigned char* data)
-	{
-		stbi_image_free(data);
-	}
-
-	ImageWriter::~ImageWriter()
-	{
-	}
-
-	bool ImageWriter::loadDataIntoFile(const std::string& fileName, unsigned width, unsigned height, const unsigned char* data)
-	{
-		if (data) {
-			return stbi_write_png(fileName.c_str(), width, height, 4, data, 0);;
-		}
-		return false;
-	}
-
-	bool ImageWriter::loadDataIntoFile(const std::string& fileName, unsigned width, unsigned height, const std::vector<unsigned char>& data)
-	{
-		return ImageWriter::loadDataIntoFile(fileName, width, height, &data[0]);
-	}
-
-	bool ImageWriter::loadDataIntoFile(const std::string& fileName, const Image& image)
-	{
-		return ImageWriter::loadDataIntoFile(fileName, image.getWidth(), image.getHeight(), image.getData());
 	}
 };

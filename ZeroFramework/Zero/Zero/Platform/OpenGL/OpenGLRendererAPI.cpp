@@ -74,4 +74,16 @@ namespace zr
 			GL_ERR_CHECK(glDisable(GL_DEPTH_TEST));
 		}
 	}
+
+	void OpenGLRendererAPI::enableBlend(bool blendEnabled)
+	{
+		GL_ERR_CHECK(glEnable(GL_BLEND));
+		GL_ERR_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	}
+
+	bool OpenGLRendererAPI::isBlendEnabled()
+	{
+		// TODO:
+		return false;
+	}
 }

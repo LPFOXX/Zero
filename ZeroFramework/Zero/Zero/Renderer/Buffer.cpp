@@ -82,7 +82,7 @@ namespace zr
 	{
 	}
 
-	VertexArray* VertexArray::Create()
+	VertexArray* VertexArray::Create(bool createAndBind)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -91,7 +91,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLVertexArray;
+				return new OpenGLVertexArray(createAndBind);
 			}
 			case RendererAPI::API::Direct3D:
 			{

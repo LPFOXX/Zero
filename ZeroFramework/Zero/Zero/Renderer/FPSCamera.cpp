@@ -8,7 +8,6 @@ namespace zr
 {
 	FPSCamera::FPSCamera(const glm::vec3& initialPosition, const glm::vec3& front, const glm::vec3& up, float width, float height, float fieldOfView) :
 		Camera(),
-		mPosition(initialPosition),
 		mFront(front),
 		mUp(up),
 		mWorldUp(up),
@@ -16,12 +15,14 @@ namespace zr
 		mYawAngle(0U),
 		mPitchAngle(0U),
 		mRollAngle(0U),
-		mFieldOfView(fieldOfView)
+		mFieldOfView(fieldOfView),
+		mIsMouseInverted(false)
 	{
 		float aspectRatio = 1.f;
 		if (height != 0) {
 			aspectRatio = width / height;
 		}
+		mPosition = initialPosition;
 		mProjectionMatrix = glm::perspective(glm::radians(mFieldOfView), aspectRatio, 0.1f, 100.f);
 		mViewMatrix = glm::lookAt(mPosition, mPosition + mFront, mUp);
 	}
@@ -36,8 +37,8 @@ namespace zr
 
 	void FPSCamera::processMouseMovement(const glm::vec2& mouseOffset)
 	{
-		mYawAngle += -mouseOffset.x;
-		mPitchAngle += mouseOffset.y;
+		mYawAngle += (mIsMouseInverted ? -1 : 1) * mouseOffset.x;
+		mPitchAngle += (mIsMouseInverted ? 1 : -1) * mouseOffset.y;
 
 		// Make sure that when pitch is out of bounds, screen doesn't get flipped
 		if (mPitchAngle > 89.0f)
@@ -47,6 +48,11 @@ namespace zr
 
 		// Update Front, Right and Up Vectors using the updated Eular angles
 		recomputeMatrices();
+	}
+
+	void FPSCamera::invertMouseMovement(bool invert)
+	{
+		mIsMouseInverted = invert;
 	}
 
 	void FPSCamera::move(MovementDirection direction, const Time& deltaTime)
@@ -94,14 +100,9 @@ namespace zr
 
 	void FPSCamera::move(const glm::vec3& offset)
 	{
-		if (offset.x != 0.f) {
-			mPosition += offset.x * mRight;
-		}
+		mPosition += offset.x * mRight;
+		mPosition += offset.y * mFront;
 
-		if (offset.y != 0.f) {
-			mPosition += offset.y * mFront;
-		}
-		
 		recomputeMatrices();
 	}
 

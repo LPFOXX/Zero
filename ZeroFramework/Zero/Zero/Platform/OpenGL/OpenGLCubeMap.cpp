@@ -5,7 +5,8 @@
 #include "OpenGLBuffer.h"
 #include "OpenGLTexture.h"
 
-#include "Zero/Image.h"
+#include "../../Renderer/Image.h" 
+#include "../../Renderer/ImageReader.h" 
 
 namespace zr
 {
@@ -55,7 +56,7 @@ namespace zr
 		std::shared_ptr<OpenGLVertexBuffer> vertexBuffer;
 		vertexBuffer.reset(new OpenGLVertexBuffer(skyboxVertices, sizeof(skyboxVertices), DrawMode::Static));
 		vertexBuffer->setLayout({
-			{ShaderDataType::Float3, "aPos"}
+			{ShaderDataType::Float3, "aPosition"}
 			});
 		mVertexArray->addVertexBuffer(vertexBuffer);
 
@@ -66,7 +67,7 @@ namespace zr
 		std::string vertexShader = R"(
 			#version 330 core
 
-			layout (location = 0) in vec3 aPos;
+			layout (location = 0) in vec3 aPosition;
 
 			uniform mat4 uViewProjection;
 
@@ -76,8 +77,8 @@ namespace zr
 			{
 				// The texture coordinates of the images are the vertices of
 				// the cube.
-				TexCoords = aPos;
-				vec4 pos = uViewProjection * vec4(aPos, 1.0);
+				TexCoords = aPosition;
+				vec4 pos = uViewProjection * vec4(aPosition, 1.0);
 				gl_Position = pos.xyww;
 			}
 		)";
@@ -86,20 +87,20 @@ namespace zr
 			#version 330 core
 			
 			// Instead of a sampler2D a samplerCube is used
-			uniform samplerCube skybox;
+			uniform samplerCube uSkybox;
 
 			out vec4 FragColor;
 			in vec3 TexCoords;
 
 			void main()
 			{
-				FragColor = texture(skybox, TexCoords);
+				FragColor = texture(uSkybox, TexCoords);
 			}
 		)";
 
 		mShader.reset(new OpenGLShader());
 		if (!mShader->loadFromStrings(vertexShader, fragmentShader)) {
-			std::cout << "Failed to load cubemap shader.\n";
+			ZR_CORE_ERROR("Failed to load cubemap shader.");
 		}
 	}
 
@@ -126,30 +127,31 @@ namespace zr
 
 	bool OpenGLCubeMap::loadFromFiles(const std::vector<std::string>& faces)
 	{
-		genTexture();
+		// Generate and bind the cubemap texture
+		GL_ERR_CHECK(glGenTextures(1, &mTextureId));
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureId));
 
+		std::unique_ptr<unsigned char> data;
 		for (unsigned i = 0; i < faces.size(); i++) {
 			int width, height, nrChannels;
-			unsigned char* data = ImageLoader::loadDataFromFile(faces[i], &width, &height, &nrChannels, false);
-
+			data.reset(ImageReader::loadDataFromFile(faces[i], width, height, nrChannels, false));
 			if (data) {
-				GLenum format;
-				if (nrChannels == 4) {
-					format = GL_RGBA;
-				}
-				else {
-					format = GL_RGB;
-				}
-
-				GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
-				ImageLoader::cleanData(data);
+				GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.get()));
+				//ImageReader::cleanData(data.get());
 			}
 			else {
-				std::cout << "Failed to load texture: " << faces[i] << "\n";
+				ZR_CORE_ERROR("Failed to load texture: {0}", faces[i]);
 				return false;
 			}
 		}
+
 		GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_CUBE_MAP));
+		// Set minifying and magnifying filters as linear 
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 		return true;
 	}
 
@@ -166,9 +168,9 @@ namespace zr
 
 	void OpenGLCubeMap::render(const glm::mat4& viewProjectionMatrix)
 	{
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureId));
 		mShader->bind();
 		mShader->setUniform("uViewProjection", viewProjectionMatrix);
+		mShader->setUniform("uSkybox", 0);
 		mVertexArray->bind();
 		
 		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0));
@@ -178,34 +180,18 @@ namespace zr
 
 	void OpenGLCubeMap::genTexture()
 	{
-		// Generate and bind the cubemap texture
-		GL_ERR_CHECK(glGenTextures(1, &mTextureId));
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureId));
-
-		// Set minifying and magnifying filters as linear 
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+		
 	}
 
 	bool OpenGLCubeMap::loadFace(CubeFace whichFace, const std::string& filePath)
 	{
 		int width, height, nrChannels;
-		unsigned char* data = ImageLoader::loadDataFromFile(filePath, &width, &height, &nrChannels, false);
+		unsigned char* data = ImageReader::loadDataFromFile(filePath, width, height, nrChannels, false);
 
 		if (data) {
-			GLenum format;
-			if (nrChannels == 4) {
-				format = GL_RGBA;
-			}
-			else {
-				format = GL_RGB;
-			}
-			GL_ERR_CHECK(glTexImage2D(whichFace, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data));
+			GL_ERR_CHECK(glTexImage2D(whichFace, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 			GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_CUBE_MAP));
-			ImageLoader::cleanData(data);
+			ImageReader::cleanData(data);
 			return true;
 		}
 		else {

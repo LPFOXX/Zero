@@ -26,15 +26,14 @@ namespace zr
 		return 0;
 	}
 
-	OpenGLVertexArray::OpenGLVertexArray() :
+	OpenGLVertexArray::OpenGLVertexArray(bool createAndBind) :
 		VertexArray(),
-		mId(0),
-		mAttributesBound(0U)
+		mId(0)
 	{
 		GL_ERR_CHECK(glGenVertexArrays(1, &mId));
-		/*if (createAndBind) {
+		if (createAndBind) {
 			GL_ERR_CHECK(glBindVertexArray(mId));
-		}*/
+		}
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
@@ -43,7 +42,6 @@ namespace zr
 			GL_ERR_CHECK(glDeleteVertexArrays(1, &mId));
 			mId = 0U;
 		}
-		mAttributesBound = 0U;
 	}
 
 	void OpenGLVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)

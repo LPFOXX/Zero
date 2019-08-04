@@ -4,6 +4,7 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/Texture.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Material.h"
 
 namespace zr
 {
@@ -31,19 +32,25 @@ namespace zr
 		
 		struct MeshProperties
 		{
+			enum BitField : unsigned char
+			{
+				Textures =				1 << 0,
+				Normals =				1 << 1,
+				TangentsAndBitangents = 1 << 2,
+				TextureCoordinates =	1 << 3
+			};
+
 			MeshProperties() :
 				Name(""),
-				HasNormals(false),
-				HasTangentsAndBitangents(false),
-				HasTextureCoordinates(false)
+				mMaterial(),
+				Components(0U)
 			{
 
 			}
 
 			std::string Name;
-			bool HasNormals;
-			bool HasTangentsAndBitangents;
-			bool HasTextureCoordinates;
+			Material mMaterial;
+			unsigned char Components;
 		};	
 
 
@@ -56,6 +63,6 @@ namespace zr
 	private:
 		std::shared_ptr<VertexArray> mVAO;
 		std::vector<std::shared_ptr<Texture>> mTextures;
-		MeshProperties mProperties;
+		std::unique_ptr<MeshProperties> mProperties;
 	};
 }

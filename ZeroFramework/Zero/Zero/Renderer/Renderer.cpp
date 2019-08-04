@@ -1,6 +1,7 @@
 #include <zr_pch.h>
 
 #include "Renderer.h"
+#include "Texture.h"
 
 namespace zr
 {
@@ -31,14 +32,16 @@ namespace zr
 	{
 		if (Renderer::sSceneData->Framebuffer != nullptr) {
 			zr::Framebuffer::BindDefault();
+			zr::Texture::ActivateTextureUnit(0, 0);
 			Renderer::sSceneData->Framebuffer->draw();
 		}
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
+	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
-		shader->setUniform("u_ViewProjection", sSceneData->Camera->getViewProjectionMatrix());
+		shader->setUniform("uViewProjection", sSceneData->Camera->getViewProjectionMatrix());
+		shader->setUniform("uTransform", transform);
 
 		vertexArray->bind();
 		RenderCommand::DrawIndexed(vertexArray);
@@ -54,5 +57,10 @@ namespace zr
 		}
 		
 		cubeMap->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
+	}
+
+	void Renderer::Submit(const std::shared_ptr<Text>& text)
+	{
+		text->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}
 }

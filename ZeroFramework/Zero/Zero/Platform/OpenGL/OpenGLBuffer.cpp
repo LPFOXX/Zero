@@ -13,6 +13,10 @@ namespace zr
 				{
 					return GL_DYNAMIC_DRAW;
 				}
+				case zr::DrawMode::Streamed:
+				{
+					return GL_STREAM_DRAW;
+				}
 				case zr::DrawMode::Static:
 				default:
 				{

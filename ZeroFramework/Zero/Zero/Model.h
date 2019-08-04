@@ -17,7 +17,8 @@ namespace zr
 		{
 			Normals =					1 << 0,
 			TangentsAndBitangents =		1 << 1,
-			TextureCoordinates =		1 << 2
+			TextureCoordinates =		1 << 2,
+			Textures =					1 << 3
 		};
 
 	public:
@@ -25,6 +26,10 @@ namespace zr
 		virtual ~Model();
 
 		void setTransformationMatrix(const glm::mat4& transformations);
+		void setCameraPosition(const glm::vec3& cameraPosition)
+		{
+			mCameraPosition = cameraPosition;
+		}
 
 		void render(const glm::mat4& viewProjectionMatrix);
 
@@ -49,6 +54,9 @@ namespace zr
 		unsigned mMaxHeightTextures = 0;
 
 		unsigned mComponents = 0;
+
+		zr::DirectionalLight mDirectionalLight;
+		glm::vec3 mCameraPosition = glm::vec3(0.f, 0.f, 0.f);
 	};
 
 	class ModelLogger : public Assimp::Logger

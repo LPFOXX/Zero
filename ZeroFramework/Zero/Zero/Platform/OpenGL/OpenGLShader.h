@@ -31,10 +31,13 @@ namespace zr
 		virtual void setUniform(const char* uniformName, bool valueX, bool valueY) const override;
 		virtual void setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ) const override;
 		virtual void setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ, bool valueW) const override;
+		virtual void setUniform(const char* uniformName, const glm::vec2& value) const override;
 		virtual void setUniform(const char* uniformName, const glm::vec3& value) const override;
 		virtual void setUniform(const char* uniformName, const glm::vec4& value) const override;
 		virtual void setUniform(const char* uniformName, const glm::mat3& value) const override;
 		virtual void setUniform(const char* uniformName, const glm::mat4& value) const override;
+		virtual void setUniform(const char* uniformName, const Material& value) const override;
+		virtual void setUniform(const char* uniformName, const Light& value) const override;
 
 	private:
 		/**

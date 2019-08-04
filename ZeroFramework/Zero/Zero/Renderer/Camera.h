@@ -46,6 +46,8 @@ namespace zr
 		virtual void setPosition(const glm::vec3& position) override;
 		virtual void move(const glm::vec3& offset) override;
 
+		void setSize(float width, float height);
+
 	private:
 		// Inherited via Camera
 		virtual void recomputeMatrices() override;

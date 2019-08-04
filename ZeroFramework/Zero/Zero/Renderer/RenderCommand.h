@@ -25,7 +25,7 @@ namespace zr
 			RenderCommand::sRendererAPI->setViewportSize(width, height);
 		}
 
-		inline static void EnableDepthTest(bool depthTestState)
+		inline static void EnableDepthTest(bool depthTestState = true)
 		{
 			RenderCommand::sRendererAPI->setDepthTestState(depthTestState);
 		}
@@ -38,6 +38,16 @@ namespace zr
 		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
 		{
 			RenderCommand::sRendererAPI->drawIndexed(vertexArray);
+		}
+
+		inline static void EnableBlend(bool blendEnabled)
+		{
+			RenderCommand::sRendererAPI->enableBlend(blendEnabled);
+		}
+
+		inline static bool GetDepthTestState()
+		{
+			return RenderCommand::sRendererAPI->getDepthTestState();
 		}
 
 	private:

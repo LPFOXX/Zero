@@ -15,7 +15,8 @@ namespace zr
 	Texture::Texture() :
 		mSize(0U, 0U),
 		mTextureType(TextureType::None),
-		mFilePath("")
+		mFilePath(""),
+		mIsSRGBCapable(false)
 	{
 	}
 
@@ -25,6 +26,26 @@ namespace zr
 
 	int Texture::GetMaximumSize()
 	{
+		switch (RendererAPI::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				return 0;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				return 0;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				return OpenGLTexture::GetMaximumSize();
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				return 0;
+			}
+			default:
+			break;
+		}
 		return 0;
 	}
 

@@ -270,6 +270,13 @@ namespace zr
 		GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
 	}
 
+	void OpenGLShader::setUniform(const char* uniformName, const glm::vec2& value) const
+	{
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		GL_ERR_CHECK(glUniform2f(uniformLocation, value.x, value.y));
+	}
+
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec3& value) const
 	{
 		int uniformLocation;
@@ -296,6 +303,30 @@ namespace zr
 		int uniformLocation;
 		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
 		GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+	}
+
+	void OpenGLShader::setUniform(const char* uniformName, const Material& value) const
+	{
+		std::string name(uniformName);
+		setUniform((name + ".Ambient").c_str(), value.Ambient);
+		setUniform((name + ".Diffuse").c_str(), value.Diffuse);
+		setUniform((name + ".Emissive").c_str(), value.Emissive);
+		setUniform((name + ".Specular").c_str(), value.Specular);
+		setUniform((name + ".Shininess").c_str(), value.Shininess);
+	}
+
+	void OpenGLShader::setUniform(const char* uniformName, const Light& value) const
+	{
+		std::string name(uniformName);
+		setUniform((name + ".Ambient").c_str(), value.Ambient);
+		setUniform((name + ".Diffuse").c_str(), value.Diffuse);
+		setUniform((name + ".Specular").c_str(), value.Specular);
+		
+		if (value.Type == Light::LightType::Directional) {
+			DirectionalLight* light = (DirectionalLight*)&value;
+			setUniform((name + ".Direction").c_str(), light->Direction);
+			setUniform((name + ".Type").c_str(), Light::LightType::Directional);
+		}
 	}
 
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const

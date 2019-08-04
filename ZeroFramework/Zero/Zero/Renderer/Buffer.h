@@ -121,7 +121,8 @@ namespace zr
 	enum class DrawMode
 	{
 		Static,
-		Dynamic
+		Dynamic,
+		Streamed
 	};
 
 	class VertexBuffer
@@ -159,7 +160,7 @@ namespace zr
 		VertexArray();
 		virtual ~VertexArray();
 
-		static VertexArray* Create();
+		static VertexArray* Create(bool createAndBind = false);
 
 		virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) = 0;
 		virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) = 0;

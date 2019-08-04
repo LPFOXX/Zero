@@ -5,7 +5,7 @@ namespace zr
 	class OpenGLVertexArray : public VertexArray
 	{
 	public:
-		OpenGLVertexArray();
+		OpenGLVertexArray(bool createAndBind = false);
 		virtual ~OpenGLVertexArray();
 
 		// Inherited via VertexArray
@@ -20,7 +20,6 @@ namespace zr
 
 	private:
 		unsigned mId;
-		unsigned mAttributesBound;
 		std::vector<std::shared_ptr<VertexBuffer>> mVertexBuffers;
 		std::shared_ptr<IndexBuffer> mIndexBuffer;
 	};

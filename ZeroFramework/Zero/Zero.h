@@ -20,5 +20,9 @@
 #include "Zero/Renderer/FPSCamera.h"
 #include "Zero/Renderer/CubeMap.h"
 #include "Zero/Model.h"
+#include "Zero/Renderer/Font.h"
+#include "Zero/Renderer/Text.h"
+
+#include "Zero/Renderer/ViewportDependable.h"
 
 #include "Zero/Clock.h"

@@ -23,6 +23,7 @@ namespace zr
 
 		void processKeyboard(Keyboard key);
 		void processMouseMovement(const glm::vec2& mouseOffset);
+		void invertMouseMovement(bool invert = true);
 		void move(MovementDirection direction, const Time& deltaTime);
 
 		// Inherited via Camera
@@ -36,7 +37,6 @@ namespace zr
 		virtual void recomputeMatrices() override;
 
 	private:
-		glm::vec3 mPosition;
 		glm::vec3 mFront;
 		glm::vec3 mUp;
 		glm::vec3 mWorldUp;
@@ -47,5 +47,6 @@ namespace zr
 		float mRollAngle;
 
 		float mFieldOfView;
+		bool mIsMouseInverted;
 	};
 }

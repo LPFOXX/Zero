@@ -74,6 +74,12 @@ namespace zr
 		recomputeMatrices();
 	}
 
+	void OrthographicCamera::setSize(float width, float height)
+	{
+		mProjectionMatrix = glm::ortho(0.f, width, 0.f, height, -1.f, 1.f);
+		recomputeMatrices();
+	}
+
 	void OrthographicCamera::setRotationAngle(float angle)
 	{
 		mRotationAngle = angle;

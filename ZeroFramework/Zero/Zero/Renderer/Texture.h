@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Image.h"
+#include "Image.h"
 
 namespace zr
 {
@@ -197,6 +197,16 @@ namespace zr
 		 */
 		virtual bool update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) = 0;
 
+		virtual void setSmoothFilter(bool smoothFilterEnabled) = 0;
+
+		virtual bool getSmoothFilter() const = 0;
+
+		virtual void setRepeat(bool repeatEnabled) = 0;
+
+		virtual bool isRepetead() const = 0;
+
+		virtual bool generateMipMaps() = 0;
+
 		/**
 		 * @brief Loads the data contained in the texture into a lp::Image.
 		 *
@@ -240,5 +250,6 @@ namespace zr
 		glm::uvec2 mSize;			/**< The texture size. */
 		TextureType mTextureType;	/**< The type of the texture. */
 		std::string mFilePath;		/**< The path of the texture file. Used to prevent loading it more than once when it is an ASSIMP material texture. */
+		bool mIsSRGBCapable;		/**< Whether this texture is sRGB capable or not. */
 	};
 }

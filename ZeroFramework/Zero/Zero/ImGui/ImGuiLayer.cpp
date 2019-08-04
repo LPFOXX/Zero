@@ -27,7 +27,7 @@ namespace zr
 	void ImGuiLayer::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		Application& app = Application::getInstance();
+		Application& app = Application::GetInstance();
 		io.DisplaySize = ImVec2((float)app.getWindow().getWidth(), (float)app.getWindow().getHeight());
 
 		// Rendering
@@ -65,7 +65,7 @@ namespace zr
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		Application& app = Application::getInstance();
+		Application& app = Application::GetInstance();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeHandle());
 
 		// Setup Platform/Renderer bindings

@@ -39,6 +39,8 @@ namespace zr
 		virtual void setCullingFacesState(bool enabled, CullFace facesToCull) = 0;
 		virtual bool getDepthTestState() = 0;
 		virtual void setDepthTestState(bool state) = 0;
+		virtual void enableBlend(bool blendEnabled) = 0;
+		virtual bool isBlendEnabled() = 0;
 
 		virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) = 0;
 		
