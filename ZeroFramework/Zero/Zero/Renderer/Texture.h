@@ -1,19 +1,38 @@
 #pragma once
 
+#include "../Core.h"
+
 #include "Image.h"
 
 namespace zr
 {
+	class Texture
+	{
+	public:
+		Texture() = default;
+		virtual ~Texture() = default;
+
+		/**
+		 * @brief Binds this object
+		 */
+		virtual void bind() const = 0;
+
+		/**
+		 * @brief Unbinds this object
+		 */
+		virtual void unbind() const = 0;
+	};
+
 	/**
 	 * @brief lp::Texture is a representation of an image object loaded into graphic memory.
 	 */
-	class Texture
+	class Texture2D : public Texture
 	{
 	public:
 		/**
 		 * @brief Values that represent texture types.
 		 */
-		enum TextureType
+		enum class Type
 		{
 			None = 1,	/**< An enum constant representing the no type option */
 			Ambient,	/**< An enum constant representing the ambient option */
@@ -30,11 +49,11 @@ namespace zr
 		 *
 		 * @returns A const std::string.
 		 */
-		static const std::string typeToString(TextureType textureType);
+		static const std::string typeToString(Type textureType);
 
 	public:
-		Texture();
-		virtual ~Texture();
+		Texture2D();
+		virtual ~Texture2D();
 
 		/**
 	 * @brief Get the width value of the texture.
@@ -71,22 +90,17 @@ namespace zr
 		 *
 		 * @returns The type.
 		 */
-		inline TextureType getType() const
+		inline Type getType() const
 		{
 			return mTextureType;
 		}
-
-		/**
-		 * @brief Binds this object
-		 */
-		virtual void bind() const = 0;
 
 		/**
 		 * @brief Binds the given texture
 		 *
 		 * @param texture	The texture.
 		 */
-		static void Bind(const Texture& texture);
+		static void Bind(const Texture2D& texture);
 
 		/**
 		 * @brief Activates the texture unit.
@@ -97,7 +111,7 @@ namespace zr
 		 * @param textureUnit	The texture unit.
 		 * @param bindTexture	The texture to bind to the texture unit.
 		 */
-		static void ActivateTextureUnit(unsigned textureUnit, const Texture& bindTexture);
+		static void ActivateTextureUnit(unsigned textureUnit, const Texture2D& bindTexture);
 
 		/**
 		 * @brief Activates the texture unit.
@@ -118,25 +132,15 @@ namespace zr
 		virtual void bindOnTextureUnit(unsigned textureUnit) = 0;
 
 		/**
-		 * @brief Loads the texture data from a file.
-		 *
-		 * @param fileName			The path where the file is stored.
-		 * @param flipVertically	(Optional) Whether or not to flip the image on load.
-		 *
-		 * @returns true when loaded successfully, false otherwise.
-		 */
-		virtual bool loadFromFile(const std::string& fileName, bool flipVertically = false) = 0;
-
-		/**
 		 * @brief Loads from file
 		 *
 		 * @param fileName			Filename of the file.
-		 * @param textureType   	Type of the texture.
 		 * @param flipVertically	(Optional) True to flip vertically.
+		 * @param textureType   	Type of the texture.
 		 *
 		 * @returns True if it succeeds, false if it fails.
 		 */
-		virtual bool loadFromFile(const std::string& fileName, TextureType textureType, bool flipVertically = false) = 0;
+		virtual bool loadFromFile(const std::string& filePath, bool flipVertically = false, Type textureType = Type::None) = 0;
 
 		/**
 		 * @brief Loads the texture data from an lp::Image.
@@ -147,7 +151,18 @@ namespace zr
 		 *
 		 * @returns true when loaded successfully, false otherwise.
 		 */
-		virtual bool loadFromImage(const Image& image) = 0;
+		virtual bool loadFromImage(const Image& image, Type textureType = Type::None) = 0;
+
+		/**
+		 * @brief Loads the texture data from a memory address.
+		 *
+		 * @param width	The width of the image in the specified address.
+		 * @param width	The heigth of the image in the specified address.
+		 * @param data	The address where the pixel data is stored.
+		 *
+		 * @returns true when loaded successfully, false otherwise.
+		 */
+		virtual bool loadFromMemory(float width, float height, const unsigned char* data) = 0;
 
 		/**
 		 * @brief Update the texture data.
@@ -197,15 +212,23 @@ namespace zr
 		 */
 		virtual bool update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) = 0;
 
-		virtual void setSmoothFilter(bool smoothFilterEnabled) = 0;
+		virtual void setSmooth(bool smoothFilterEnabled) = 0;
 
-		virtual bool getSmoothFilter() const = 0;
+		virtual inline bool isSmooth() const
+		{
+			return mIsSmooth;
+		}
 
 		virtual void setRepeat(bool repeatEnabled) = 0;
 
-		virtual bool isRepetead() const = 0;
+		virtual inline bool isRepetead() const
+		{
+			return mIsRepeated;
+		}
 
 		virtual bool generateMipMaps() = 0;
+
+		virtual void invalidateMipmaps() = 0;
 
 		/**
 		 * @brief Loads the data contained in the texture into a lp::Image.
@@ -242,14 +265,17 @@ namespace zr
 		 */
 		static int GetMaximumSize();
 
-		static Texture* Create();
+		static Ref<Texture2D> Create();
 
-		static Texture* Create(const std::string& filePath, TextureType type);
+		static Ref<Texture2D> Create(const std::string& filePath, Type type);
 
 	protected:
-		glm::uvec2 mSize;			/**< The texture size. */
-		TextureType mTextureType;	/**< The type of the texture. */
+		glm::vec2 mSize;			/**< The texture size. */
+		Type mTextureType;			/**< The type of the texture. */
 		std::string mFilePath;		/**< The path of the texture file. Used to prevent loading it more than once when it is an ASSIMP material texture. */
 		bool mIsSRGBCapable;		/**< Whether this texture is sRGB capable or not. */
+		bool mIsSmooth;
+		bool mIsRepeated;
+		bool mHasMipmaps;
 	};
 }

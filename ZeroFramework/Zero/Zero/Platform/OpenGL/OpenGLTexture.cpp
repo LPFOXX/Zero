@@ -3,82 +3,83 @@
 #include "GL_ERR_CHECK.h"
 #include <glad/glad.h>
 #include "OpenGLTexture.h"
-#include "../../Renderer/Image.h"
 #include "../../Renderer/ImageReader.h"
 
 namespace zr
 {
-	unsigned OpenGLTexture::sCurrentlyBoundTexture = 0U;
+	unsigned OpenGLTexture2D::sCurrentlyBoundTexture = 0U;
 
-	OpenGLTexture::OpenGLTexture() :
-		Texture(),
-		mTextureId(0U),
-		mIsSmooth(false),
-		mIsRepeated(true),
-		mHasMipmaps(false)
+	OpenGLTexture2D::OpenGLTexture2D() :
+		Texture2D(),
+		mTextureId(0U)
 	{
 
 	}
 
-	OpenGLTexture::OpenGLTexture(const std::string& filePath, TextureType type) :
-		Texture()
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& filePath, Texture2D::Type textureType) :
+		Texture2D(),
+		mTextureId(0U)
 	{
-		mFilePath = filePath;
-		mTextureType = type;
-
-		if (!loadFromFile(filePath, true)) {
-			throw std::runtime_error("Can't load texture: " + mFilePath);
+		if (loadFromFile(filePath, true, textureType)) {
+			ZR_CORE_ERROR("[OpenGLTexture] Can't load texture file: " + filePath);
 		}
 	}
 
-	OpenGLTexture::~OpenGLTexture()
+	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		if (mTextureId != 0U) {
-			GL_ERR_CHECK(glDeleteTextures(1, &mTextureId););
+			GL_ERR_CHECK(glDeleteTextures(1, &mTextureId));
 			mTextureId = 0U;
 		}
 	}
 
-	void OpenGLTexture::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
-	{
-		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureUnit));
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, bindTexture));
-		OpenGLTexture::sCurrentlyBoundTexture = bindTexture;
-	}
-
-	int OpenGLTexture::GetMaximumSize()
+	int OpenGLTexture2D::GetMaximumSize()
 	{
 		int size;
 		GL_ERR_CHECK(glGetIntegerv(GL_MAX_TEXTURE_SIZE, &size));
 		return size;
 	}
 
-	void OpenGLTexture::bind() const
+	void OpenGLTexture2D::bind() const
 	{
-		if (OpenGLTexture::sCurrentlyBoundTexture != mTextureId) {
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
+			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
 		}
 	}
 
-	void OpenGLTexture::bindOnTextureUnit(unsigned textureUnit)
+	void OpenGLTexture2D::unbind() const
 	{
-		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureUnit));
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != 0U) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, 0U));
+			OpenGLTexture2D::sCurrentlyBoundTexture = 0U;
+		}
 	}
 
-	bool OpenGLTexture::loadFromFile(const std::string& fileName, bool flipVertically)
+	bool OpenGLTexture2D::loadFromFile(const std::string& filePath, bool flipVertically, Texture2D::Type textureType)
 	{
-		GL_ERR_CHECK(glGenTextures(1, &mTextureId));
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
-
 		int width, height, nrChannels;
 		// Get image data
-		unsigned char* data = ImageReader::loadDataFromFile(fileName, width, height, nrChannels, flipVertically);
+		unsigned char* data = ImageReader::LoadDataFromFile(filePath, width, height, nrChannels, flipVertically);
 
+		bool returnResult = false;
+		if (data && loadFromMemory(width, height, data)) {
+			mFilePath = filePath;
+			mTextureType = textureType;
+			returnResult = true;
+		}
+
+		ImageReader::CleanData(data);
+		return returnResult;
+	}
+
+	bool OpenGLTexture2D::loadFromMemory(float width, float height, const unsigned char* data)
+	{
 		if (data) {
+			GL_ERR_CHECK(glGenTextures(1, &mTextureId));
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
+
 			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
@@ -92,70 +93,46 @@ namespace zr
 			// Update texture width and height attributes
 			mSize.x = width;
 			mSize.y = height;
-			mFilePath = fileName;
-			ImageReader::cleanData(data);
 
 			return true;
 		}
-		else {
-			ImageReader::cleanData(data);
-			return false;
+
+		return false;
+	}
+
+	bool OpenGLTexture2D::loadFromImage(const Image& image, Texture2D::Type textureType)
+	{
+		if (loadFromMemory((float)image.getWidth(), (float)image.getHeight(), image.getData())) {
+			mTextureType = textureType;
+			return true;
+		}
+		return false;
+	}
+
+	void OpenGLTexture2D::bindOnTextureUnit(unsigned textureUnit)
+	{
+		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureUnit));
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
 		}
 	}
 
-	bool OpenGLTexture::loadFromFile(const std::string& fileName, Texture::TextureType textureType, bool flipVertically)
+	bool OpenGLTexture2D::update(const unsigned char* data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
 	{
-		mTextureType = textureType;
-		return loadFromFile(fileName, flipVertically);
-	}
-
-	bool OpenGLTexture::loadFromImage(const Image& image)
-	{
-		int imageWidth = image.getWidth();
-		int imageHeight = image.getHeight();
-
-		if (imageWidth == 0 || imageHeight == 0) {
+		if (mTextureId == 0U) {
 			return false;
 		}
 
-		GL_ERR_CHECK(glGenTextures(1, &mTextureId));
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
-
-		const unsigned char* imageData = image.getData();
-
-		GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData));
-
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
-
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-
-		GL_ERR_CHECK(glFlush());
-
-		// Update texture width and height attributes
-		mSize.x = image.getWidth();
-		mSize.y = image.getHeight();
-		mFilePath = "Loaded from image"; /** TODO: get image file path from image object. */
-
-		return true;
-	}
-
-	bool OpenGLTexture::update(const unsigned char* data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
-	{
-		if (mTextureId == 0) {
-			return false;
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
 		}
 
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data));
 
-		setSmoothFilter(true);
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 
@@ -163,7 +140,7 @@ namespace zr
 		return true;
 	}
 
-	bool OpenGLTexture::update(const Image& data, unsigned xPos, unsigned yPos)
+	bool OpenGLTexture2D::update(const Image& data, unsigned xPos, unsigned yPos)
 	{
 		if (mTextureId == 0) {
 			return false;
@@ -173,7 +150,6 @@ namespace zr
 		unsigned height = data.getHeight();
 
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data.getData()));
 
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -185,14 +161,13 @@ namespace zr
 		return true;
 	}
 
-	bool OpenGLTexture::update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
+	bool OpenGLTexture2D::update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
 	{
 		if (mTextureId == 0) {
 			return false;
 		}
 
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
 
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -204,20 +179,103 @@ namespace zr
 		return true;
 	}
 
-	bool OpenGLTexture::loadToImage(Image& image) const
+	void OpenGLTexture2D::setSmooth(bool smoothFilterEnabled)
 	{
-		image = Image();
+		if (mIsSmooth != smoothFilterEnabled) {
+			mIsSmooth = smoothFilterEnabled;
 
-		if (mTextureId != 0U) {
+			if (mTextureId != 0U) {
+				unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
+				if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+				}
+				
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+				
+				if (mHasMipmaps) {
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
+				}
+				else {
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
+				}
+
+				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
+			}
+		}
+	}
+
+	void OpenGLTexture2D::setRepeat(bool repeatEnabled)
+	{
+		if (mIsRepeated != repeatEnabled) {
+			mIsRepeated = repeatEnabled;
+
+			if (mTextureId != 0U) {
+				unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
+				if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+				}
+
+				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
+				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
+
+				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
+			}
+		}
+	}
+
+	bool OpenGLTexture2D::generateMipMaps()
+	{
+		if (mTextureId == 0U)
+			return false;
+
+		unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+		}
+
+		GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
+
+		mHasMipmaps = true;
+
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
+		return true;
+	}
+
+	void OpenGLTexture2D::invalidateMipmaps()
+	{
+		if (!mHasMipmaps)
+			return;
+
+		unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+		}
+
+		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
+
+		mHasMipmaps = false;
+
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
+	}
+
+	bool OpenGLTexture2D::loadToImage(Image& image) const
+	{
+		if (mTextureId) {
 			int texWidth = 0, texHeight = 0;
 
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
+			unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
+			if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
+				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
+			}
+
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texWidth));
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight));
 
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
+
 			if (texWidth != 0 && texHeight != 0) {
-				std::vector<unsigned char> pixels(static_cast<size_t>(texWidth) * texHeight * 4);
+				std::vector<unsigned char> pixels(texWidth * texHeight * 4);
 				GL_ERR_CHECK(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, &pixels[0]));
 				return image.create(texWidth, texHeight, pixels);;
 			}
@@ -226,78 +284,8 @@ namespace zr
 		return false;
 	}
 
-	unsigned OpenGLTexture::getHandle() const
+	unsigned OpenGLTexture2D::getHandle() const
 	{
 		return mTextureId;
-	}
-
-	bool OpenGLTexture::generateMipMaps()
-	{
-		if (mTextureId == 0U) {
-			return false;
-		}
-
-		if (OpenGLTexture::sCurrentlyBoundTexture != mTextureId) {
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
-		}
-
-		GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
-		mHasMipmaps = true;
-		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
-
-		return true;
-	}
-
-	void OpenGLTexture::setSmoothFilter(bool smoothFilterEnabled)
-	{
-		if (mIsSmooth != smoothFilterEnabled) {
-			mIsSmooth = smoothFilterEnabled;
-
-			if (mTextureId != 0U) {
-				// Bind this texture object if needed
-				if (OpenGLTexture::sCurrentlyBoundTexture != mTextureId) {
-					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-					OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
-				}
-
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
-				//GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? (mHasMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR) : (mHasMipmaps ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST)));
-				if (mHasMipmaps) {
-					GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
-				}
-				else {
-					GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
-				}
-			}
-		}
-	}
-
-	bool OpenGLTexture::getSmoothFilter() const
-	{
-		return mIsSmooth;
-	}
-
-	void OpenGLTexture::setRepeat(bool repeatEnabled)
-	{
-		if (mIsRepeated != mIsRepeated) {
-			mIsRepeated = repeatEnabled;
-
-			if (mTextureId != 0U) {
-				// Bind this texture object if needed
-				if (OpenGLTexture::sCurrentlyBoundTexture != mTextureId) {
-					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-					OpenGLTexture::sCurrentlyBoundTexture = mTextureId;
-				}
-
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-			}
-		}
-	}
-
-	bool OpenGLTexture::isRepetead() const
-	{
-		return mIsRepeated;
 	}
 }

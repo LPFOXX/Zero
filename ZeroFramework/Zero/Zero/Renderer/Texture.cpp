@@ -7,24 +7,27 @@
 
 namespace zr
 {
-	const std::string Texture::typeToString(TextureType textureType)
+	const std::string Texture2D::typeToString(Type textureType)
 	{
 		return std::string();
 	}
 
-	Texture::Texture() :
-		mSize(0U, 0U),
-		mTextureType(TextureType::None),
+	Texture2D::Texture2D() :
+		mSize(0.f, 0.f),
+		mTextureType(Type::None),
 		mFilePath(""),
-		mIsSRGBCapable(false)
+		mIsSRGBCapable(false),
+		mIsSmooth(false),
+		mIsRepeated(true),
+		mHasMipmaps(false)
 	{
 	}
 
-	Texture::~Texture()
+	Texture2D::~Texture2D()
 	{
 	}
 
-	int Texture::GetMaximumSize()
+	int Texture2D::GetMaximumSize()
 	{
 		switch (RendererAPI::GetAPI()) {
 			case RendererAPI::API::None:
@@ -37,7 +40,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return OpenGLTexture::GetMaximumSize();
+				return OpenGLTexture2D::GetMaximumSize();
 			}
 			case RendererAPI::API::Vulkan:
 			{
@@ -49,7 +52,7 @@ namespace zr
 		return 0;
 	}
 
-	Texture* Texture::Create()
+	Ref<Texture2D> Texture2D::Create()
 	{
 		switch (RendererAPI::GetAPI()) {
 			case RendererAPI::API::None:
@@ -62,7 +65,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLTexture;
+				return std::make_shared<OpenGLTexture2D>();
 			}
 			case RendererAPI::API::Vulkan:
 			{
@@ -74,7 +77,7 @@ namespace zr
 		return nullptr;
 	}
 
-	Texture* Texture::Create(const std::string& filePath, TextureType type)
+	Ref<Texture2D> Texture2D::Create(const std::string& filePath, Type type)
 	{
 		switch (RendererAPI::GetAPI()) {
 			case RendererAPI::API::None:
@@ -87,7 +90,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLTexture(filePath, type);
+				return std::make_shared<OpenGLTexture2D>(filePath, type);
 			}
 			case RendererAPI::API::Vulkan:
 			{
@@ -99,15 +102,15 @@ namespace zr
 		return nullptr;
 	}
 
-	void Texture::Bind(const Texture& texture)
+	void Texture2D::Bind(const Texture2D& texture)
 	{
 	}
 
-	void Texture::ActivateTextureUnit(unsigned textureUnit, const Texture& bindTexture)
+	void Texture2D::ActivateTextureUnit(unsigned textureUnit, const Texture2D& bindTexture)
 	{
 	}
 
-	void Texture::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
+	void Texture2D::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
 	{
 		switch (RendererAPI::GetAPI()) {
 			case RendererAPI::API::None:
@@ -120,7 +123,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				OpenGLTexture::ActivateTextureUnit(textureUnit, bindTexture);
+				OpenGLTexture2D::ActivateTextureUnit(textureUnit, bindTexture);
 				break;
 			}
 			case RendererAPI::API::Vulkan:

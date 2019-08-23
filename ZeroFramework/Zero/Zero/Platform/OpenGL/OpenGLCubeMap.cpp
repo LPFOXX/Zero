@@ -134,7 +134,7 @@ namespace zr
 		std::unique_ptr<unsigned char> data;
 		for (unsigned i = 0; i < faces.size(); i++) {
 			int width, height, nrChannels;
-			data.reset(ImageReader::loadDataFromFile(faces[i], width, height, nrChannels, false));
+			data.reset(ImageReader::LoadDataFromFile(faces[i], width, height, nrChannels, false));
 			if (data) {
 				GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.get()));
 				//ImageReader::cleanData(data.get());
@@ -186,12 +186,12 @@ namespace zr
 	bool OpenGLCubeMap::loadFace(CubeFace whichFace, const std::string& filePath)
 	{
 		int width, height, nrChannels;
-		unsigned char* data = ImageReader::loadDataFromFile(filePath, width, height, nrChannels, false);
+		unsigned char* data = ImageReader::LoadDataFromFile(filePath, width, height, nrChannels, false);
 
 		if (data) {
 			GL_ERR_CHECK(glTexImage2D(whichFace, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 			GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_CUBE_MAP));
-			ImageReader::cleanData(data);
+			ImageReader::CleanData(data);
 			return true;
 		}
 		else {
