@@ -1,3 +1,4 @@
+#include "Camera.h"
 #include <zr_pch.h>
 
 #include "Camera.h"
@@ -45,12 +46,17 @@ namespace zr
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top) :
 		Camera()
 	{
-		mProjectionMatrix = glm::ortho(left, right, bottom, top, -1.f, 1.f);
-		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
+		setProjection(left, right, bottom, top);
 	}
 
 	OrthographicCamera::~OrthographicCamera()
 	{
+	}
+
+	void OrthographicCamera::setProjection(float left, float right, float bottom, float top)
+	{
+		mProjectionMatrix = glm::ortho(left, right, bottom, top, -1.f, 1.f);
+		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 	}
 
 	void OrthographicCamera::recomputeMatrices()

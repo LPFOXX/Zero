@@ -52,13 +52,16 @@ namespace zr
 		unsigned index = 0;
 		const auto& layout = vertexBuffer->getLayout();
 		for (const auto& element : layout) {
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index,
+			GL_ERR_CHECK(glEnableVertexAttribArray(index));
+			GL_ERR_CHECK(glVertexAttribPointer(index,
 				element.getComponentCount(),
 				ShaderDataTypeToOpenGLBaseType(element.Type),
 				element.Normalized ? GL_TRUE : GL_FALSE,
 				layout.getStride(),
-				(const void*)element.Offset);
+				(const void*)element.Offset));
+			if (element.Divisor != 0U) {
+				GL_ERR_CHECK(glVertexAttribDivisor(index, element.Divisor));
+			}
 			index++;
 		}
 

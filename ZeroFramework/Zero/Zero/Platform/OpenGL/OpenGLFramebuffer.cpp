@@ -66,10 +66,9 @@ namespace zr
 			2, 3, 0			// second triangle
 		};
 
-		mQuadVAO.reset(VertexArray::Create());
+		mQuadVAO = VertexArray::Create();
 
-		std::shared_ptr<VertexBuffer> VBO;
-		VBO.reset(new OpenGLVertexBuffer(quadVertices, sizeof(quadVertices), DrawMode::Static));
+		Ref<VertexBuffer> VBO = VertexBuffer::Create(quadVertices, sizeof(quadVertices), DrawMode::Static);
 		VBO->setLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TextCoord" }
@@ -77,11 +76,10 @@ namespace zr
 
 		mQuadVAO->addVertexBuffer(VBO);
 
-		std::shared_ptr<IndexBuffer> EBO;
-		EBO.reset(IndexBuffer::Create(quadIndices, 6U, DrawMode::Static));
+		std::shared_ptr<IndexBuffer> EBO = IndexBuffer::Create(quadIndices, 6U, DrawMode::Static);
 		mQuadVAO->setIndexBuffer(EBO);
 
-		mScreenShader.reset(Shader::Create());
+		mScreenShader = Shader::Create();
 		if (!mScreenShader->loadFromStrings(sVertexShader, sFragmentShader)) {
 			std::cout << "Error creating Shader\n";
 		}

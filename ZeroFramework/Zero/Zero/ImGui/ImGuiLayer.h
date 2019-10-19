@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Layer.h"
-#include "../Clock.h"
+#include "../Core/Layer.h"
+#include "../Core/Clock.h"
 
 namespace zr
 {

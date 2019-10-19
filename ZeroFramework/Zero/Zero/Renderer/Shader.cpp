@@ -11,7 +11,7 @@ namespace zr
 
 	}
 
-	Shader* Shader::Create()
+	Ref<Shader> Shader::Create()
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -20,7 +20,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLShader;
+				return std::make_shared<OpenGLShader>();
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -36,7 +36,7 @@ namespace zr
 		return nullptr;
 	}
 
-	Shader* Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -45,7 +45,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLShader(vertexShaderPath, fragmentShaderPath);
+				return std::make_shared<OpenGLShader>(vertexShaderPath, fragmentShaderPath);
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -61,7 +61,7 @@ namespace zr
 		return nullptr;
 	}
 
-	Shader* Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
+	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -70,7 +70,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLShader(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
+				return std::make_shared<OpenGLShader>(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 			}
 			case RendererAPI::API::Direct3D:
 			{

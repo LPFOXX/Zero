@@ -10,6 +10,11 @@ namespace zr
 		RenderCommand();
 		virtual ~RenderCommand();
 
+		inline static void Init()
+		{
+			RenderCommand::sRendererAPI->init();
+		}
+
 		inline static void SetClearColor(float r, float g, float b, float a)
 		{
 			RenderCommand::sRendererAPI->setClearColor(r, g, b, a);

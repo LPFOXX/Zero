@@ -1,6 +1,6 @@
 #include <zr_pch.h>
 
-#include "Zero/Log.h"
+#include "Zero/Core/Log.h"
 #include "OpenGLShader.h"
 #include "GL_ERR_CHECK.h"
 
@@ -188,121 +188,138 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, float value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform1f(uniformLocation, value));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform1f(uniformLocation, value));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform2f(uniformLocation, valueX, valueY));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform2f(uniformLocation, valueX, valueY));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY, float valueZ) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform3f(uniformLocation, valueX, valueY, valueZ));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform3f(uniformLocation, valueX, valueY, valueZ));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY, float valueZ, float valueW) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform4f(uniformLocation, valueX, valueY, valueZ, valueW));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform4f(uniformLocation, valueX, valueY, valueZ, valueW));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, int value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform1i(uniformLocation, value));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform1i(uniformLocation, value));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY, int valueZ) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY, int valueZ, int valueW) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, bool value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform1i(uniformLocation, value));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform1i(uniformLocation, value));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ, bool valueW) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec2& value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform2f(uniformLocation, value.x, value.y));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform2f(uniformLocation, value.x, value.y));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec3& value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform3f(uniformLocation, value.x, value.y, value.z));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform3f(uniformLocation, value.x, value.y, value.z));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec4& value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniform4f(uniformLocation, value.x, value.y, value.z, value.w));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniform4f(uniformLocation, value.x, value.y, value.z, value.w));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::mat3& value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::mat4& value) const
 	{
-		int uniformLocation;
-		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
-		GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
+		}
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, const Material& value) const
@@ -331,9 +348,9 @@ namespace zr
 
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const
 	{
-		int success;
-		char info[5 * 1024];
 		std::stringstream errorStream;
+
+		int success;
 		GL_ERR_CHECK(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success));
 
 		if (shaderType == VertexShader) {
@@ -347,8 +364,13 @@ namespace zr
 		}
 
 		if (!success) {
-			GL_ERR_CHECK(glGetShaderInfoLog(shaderId, 5 * 1024, NULL, info));
-			errorStream << "compilation failed:\n" << info;
+			int maxLength = 0;
+			GL_ERR_CHECK(glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &maxLength));
+
+			std::vector<char> info(maxLength);
+
+			GL_ERR_CHECK(glGetShaderInfoLog(shaderId, maxLength, &maxLength, &info[0]));
+			errorStream << "compilation failed:\n" << info.data();
 			ZR_CORE_ERROR("[SHADER] {0}", errorStream.str());
 			return false;
 		}
@@ -469,9 +491,6 @@ namespace zr
 			return false;
 		}
 
-		// Attach shaders, link the program and check for errors
-		int success;
-		char info[1024];
 
 		GL_ERR_CHECK(mProgramId = glCreateProgram());
 		GL_ERR_CHECK(glAttachShader(mProgramId, mVertexShaderId));
@@ -480,11 +499,18 @@ namespace zr
 			GL_ERR_CHECK(glAttachShader(mProgramId, mGeometryShaderId));
 		}
 
+		// Attach shaders, link the program and check for errors
+		int success;
 		GL_ERR_CHECK(glLinkProgram(mProgramId));
 		GL_ERR_CHECK(glGetProgramiv(mProgramId, GL_LINK_STATUS, &success));
 
 		if (!success) {
-			GL_ERR_CHECK(glGetProgramInfoLog(mProgramId, 1024, NULL, info));
+			int maxLength;
+			GL_ERR_CHECK(glGetProgramiv(mProgramId, GL_INFO_LOG_LENGTH, &maxLength));
+
+			std::vector<char> info(maxLength);
+
+			GL_ERR_CHECK(glGetProgramInfoLog(mProgramId, 1024, &maxLength, &info[0]));
 			#ifdef DEBUG_TO_STDOUT
 			std::cout << "Program linking failed:\n" << info << std::endl;
 			#endif
@@ -513,5 +539,17 @@ namespace zr
 		}
 
 		return true;
+	}
+	
+	int OpenGLShader::getUniformLocation(const char* uniformName) const
+	{
+		if (mUniformLocationCache.find(uniformName) != mUniformLocationCache.end()) {
+			return mUniformLocationCache[uniformName];
+		}
+
+		int uniformLocation;
+		GL_ERR_CHECK(uniformLocation = glGetUniformLocation(mProgramId, uniformName));
+		mUniformLocationCache[uniformName] = uniformLocation;
+		return uniformLocation;
 	}
 }

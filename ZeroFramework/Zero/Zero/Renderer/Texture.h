@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../Core.h"
-
-#include "Image.h"
+#include "Zero/Core/Core.h"
+#include "Zero/Image.h"
 
 namespace zr
 {
@@ -56,11 +55,11 @@ namespace zr
 		virtual ~Texture2D();
 
 		/**
-	 * @brief Get the width value of the texture.
-	 *
-	 * @returns The texture width value.
-	 */
-		inline unsigned getWidth() const
+		 * @brief Get the width value of the texture.
+		 *
+		 * @returns The texture width value.
+		 */
+		inline virtual float getWidth() const
 		{
 			return mSize.x;
 		}
@@ -70,7 +69,7 @@ namespace zr
 		 *
 		 * @returns The texture height value.
 		 */
-		inline virtual unsigned getHeight() const
+		inline virtual float getHeight() const
 		{
 			return mSize.y;
 		}
@@ -80,7 +79,7 @@ namespace zr
 		 *
 		 * @returns The size.
 		 */
-		inline const glm::uvec2& getSize() const
+		inline const glm::vec2& getSize() const
 		{
 			return mSize;
 		}

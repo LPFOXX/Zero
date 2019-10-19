@@ -7,24 +7,47 @@
 
 namespace lp
 {
+	struct ModelLoader
+	{
+		ModelLoader()
+		{
+		}
+
+		~ModelLoader()
+		{
+		}
+
+		void operator()()
+		{
+			ZR_INFO("Model loading thread execution started.");
+		}
+	};
+
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
-		mOrthographicCamera(nullptr),
+		mOrthographicCameraController(nullptr),
 		mPerspectiveCamera(nullptr),
 		mFramebuffer(nullptr),
-		mFPSCamera(nullptr)
+		mFPSCamera(nullptr),
+		mModelLoadingThread(&SandboxLayer::loadModel, this),
+		mModelLoadingMutex()
 	{
-		mOrthographicCamera = std::shared_ptr<zr::Camera>(new zr::OrthographicCamera(0.f, 3.2f, 0.f, 1.5f));
+		/*zr::ModelLoader::Get()->setProgressHandler(std::make_shared<zr::ModelProgressHandler>());
+		zr::Ref<zr::ModelLogger> modelLogger = std::make_shared<zr::ModelLogger>();
+		modelLogger->setLogSeverity(Assimp::Logger::LogSeverity::VERBOSE);
+		zr::ModelLoader::Get()->setLogger(modelLogger);*/
+
+		//mModelLoadingThread.launch();
+		mOrthographicCameraController = std::shared_ptr<zr::OrthographicCameraController>(new zr::OrthographicCameraController(1280.f / 600.f, true));
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
 		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
-		//mModel.reset(new zr::Model("resources/nanosuit/nanosuit.obj"));
-		//mModel.reset(new zr::Model("resources/iron_man/IronMan.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
-		mModel.reset(new zr::Model("resources/iron_man_fixed/iron_man_fixed.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
-		//mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
+		/*mModel = std::make_shared<zr::Model3D>("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
+			mProgress = progress;
+		});*/
 
-		mCubeMap.reset(zr::CubeMap::Create());
+		mCubeMap = zr::CubeMap::Create();
 		bool success = mCubeMap->loadFromFiles({
 			"resources/skybox/right.jpg",
 			"resources/skybox/left.jpg",
@@ -35,7 +58,7 @@ namespace lp
 			});
 
 		if (!success) {
-			ZR_CORE_ERROR("CubeMap loading error.");
+			ZR_ERROR("CubeMap loading error.");
 		}
 
 		zr::Framebuffer::FramebufferProperties fbp;
@@ -55,10 +78,9 @@ namespace lp
 			0, 1, 2
 		};
 
-		mVertexArray.reset(zr::VertexArray::Create());
+		mVertexArray = zr::VertexArray::Create();
 
-		std::shared_ptr<zr::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(zr::VertexBuffer::Create(vertices, sizeof(vertices), zr::DrawMode::Static));
+		std::shared_ptr<zr::VertexBuffer> vertexBuffer = zr::VertexBuffer::Create(vertices, sizeof(vertices), zr::DrawMode::Static);
 		zr::BufferLayout layout = {
 			{ zr::ShaderDataType::Float3, "aPosition" },
 			{ zr::ShaderDataType::Float4, "aColor" }
@@ -66,8 +88,7 @@ namespace lp
 		vertexBuffer->setLayout(layout);
 		mVertexArray->addVertexBuffer(vertexBuffer);
 
-		std::shared_ptr<zr::IndexBuffer> indexBuffer;
-		indexBuffer.reset(zr::IndexBuffer::Create(indices, 3U, zr::DrawMode::Static));
+		std::shared_ptr<zr::IndexBuffer> indexBuffer = zr::IndexBuffer::Create(indices, 3U, zr::DrawMode::Static);
 		mVertexArray->setIndexBuffer(indexBuffer);
 
 		float squareVertices[3 * 4] = {
@@ -77,10 +98,9 @@ namespace lp
 			-0.75f,  0.75f, 0.0f
 		};
 
-		mSquareVA.reset(zr::VertexArray::Create());
+		mSquareVA = zr::VertexArray::Create();
 
-		std::shared_ptr<zr::VertexBuffer> squareVB;
-		squareVB.reset(zr::VertexBuffer::Create(squareVertices, sizeof(squareVertices), zr::DrawMode::Static));
+		std::shared_ptr<zr::VertexBuffer> squareVB = zr::VertexBuffer::Create(squareVertices, sizeof(squareVertices), zr::DrawMode::Static);
 		squareVB->setLayout({
 			{ zr::ShaderDataType::Float3, "aPosition" }
 			});
@@ -90,8 +110,8 @@ namespace lp
 			0, 1, 2,
 			2, 3, 0
 		};
-		std::shared_ptr<zr::IndexBuffer> squareIB;
-		squareIB.reset(zr::IndexBuffer::Create(squareIndices, 6U, zr::DrawMode::Static));
+
+		std::shared_ptr<zr::IndexBuffer> squareIB = zr::IndexBuffer::Create(squareIndices, 6U, zr::DrawMode::Static);
 		mSquareVA->setIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
@@ -149,19 +169,20 @@ namespace lp
 			layout(location = 0) out vec4 color;
 
 			in vec3 vPosition;
+			uniform vec4 uColor;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = uColor;
 			}
 		)";
 
-		mShader.reset(zr::Shader::Create());
+		mShader = zr::Shader::Create();
 		if (!mShader->loadFromStrings(vertexSrc, fragmentSrc)) {
 			ZR_CORE_ERROR("Error creating Shader object!");
 		}
 
-		mBlueShader.reset(zr::Shader::Create());
+		mBlueShader = zr::Shader::Create();
 		if (!mBlueShader->loadFromStrings(blueShaderVertexSrc, blueShaderFragmentSrc)) {
 			ZR_CORE_ERROR("Error creating blue Shader object!");
 		}
@@ -169,7 +190,7 @@ namespace lp
 
 	SandboxLayer::~SandboxLayer()
 	{
-
+		mModelLoadingThread.wait();
 	}
 
 	void SandboxLayer::onAttach()
@@ -182,50 +203,26 @@ namespace lp
 
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
-		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
-			mOrthographicCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
-		}
+		mOrthographicCameraController->onUpdate(elapsedTime);
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::W)) {
+		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
 			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Forward, elapsedTime);
 		}
-
+		
 		if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
-			mOrthographicCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
-		}
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::S)) {
 			mPerspectiveCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Backward, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Left)) {
-			mOrthographicCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
-		}
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::A)) {
 			mPerspectiveCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Left, elapsedTime);
 		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Right)) {
-			mOrthographicCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
-		}
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::D)) {
 			mPerspectiveCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Right, elapsedTime);
-		}
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
-			mOrthographicCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
-			mFPSCamera->rotate(mCameraRotationSpeed * elapsedTime.asSeconds());
-		}
-
-		if (zr::Input::isKeyPressed(zr::Keyboard::E)) {
-			mOrthographicCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
-			mFPSCamera->rotate(-mCameraRotationSpeed * elapsedTime.asSeconds());
 		}
 
 		const zr::Time& time = zr::Application::GetTime();
@@ -235,52 +232,92 @@ namespace lp
 
 		glm::mat4 model(1.f);
 		model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
-		mModel->setTransformationMatrix(model);
-		mModel->setCameraPosition(mFPSCamera->getPosition());
+		/*mModel->setTransformationMatrix(model);
+		mModel->setCameraPosition(mFPSCamera->getPosition());*/
 
-		zr::Renderer::BeginScene(mFPSCamera);
-		{
-			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
-			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
-
-			mModel->render(mFPSCamera->getViewProjectionMatrix());
-
-			//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
-			//zr::RenderCommand::EnableFaceCulling(false);
-			/*zr::Renderer::Submit(mBlueShader, mSquareVA);
-			zr::Renderer::Submit(mShader, mVertexArray);*/
-			zr::Renderer::Submit(mCubeMap, true);
-			zr::Renderer::EndScene();
-		}
-
-		//zr::Renderer::BeginScene(mOrthographicCamera, mFramebuffer);
+		//zr::Renderer::BeginScene(mFPSCamera);
 		//{
-		//	zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
+		//	zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
 		//	zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
-		//	mModel->render(mOrthographicCamera->getViewProjectionMatrix());
+		//mModel->render(mFPSCamera->getViewProjectionMatrix());
 
-		//	for (int x = 0; x < 10; x++) {
-		//		for (int y = 0; y < 10; y++) {
-		//			glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(.2f * x, .2f * y, 0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(.1f, .1f, .1f));
-		//			zr::Renderer::Submit(mBlueShader, mSquareVA, transform);
-		//		}
-		//	}
-
-		//	zr::Renderer::Submit(mShader, mVertexArray);
-		//	//zr::Renderer::Submit(mCubeMap);
+		//	//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
+		//	//zr::RenderCommand::EnableFaceCulling(false);
+		//	/*zr::Renderer::Submit(mBlueShader, mSquareVA);
+		//	zr::Renderer::Submit(mShader, mVertexArray);*/
+		//	zr::Renderer::Submit(mCubeMap, true);
 		//	zr::Renderer::EndScene();
 		//}
 
-		mLastDeltaTime = zr::Time::seconds(elapsedTime.asSeconds());
+		//zr::Renderer::BeginScene(std::make_shared<zr::OrthographicCamera>(mOrthographicCameraController->getCamera()));
+		zr::Renderer::BeginScene(mOrthographicCameraController->getCamera());
+		{
+			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
+			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+
+			//mModel->render(mOrthographicCameraController->getCamera().getViewProjectionMatrix());
+
+			glm::vec4 blueColor(.2f, .3f, .8f, 1.f);
+			glm::vec4 redColor(.8f, .2f, .3, 1.f);
+
+			mBlueShader->bind();
+
+			for (int x = 0; x < 10; x++) {
+				for (int y = 0; y < 10; y++) {
+					glm::mat4 transform = glm::translate(glm::mat4(1.f), glm::vec3(.2f * x, .2f * y, 0.f)) * glm::scale(glm::mat4(1.f), glm::vec3(.1f, .1f, .1f));
+					mBlueShader->setUniform("uColor", ((x + y) % 2 == 0 ? blueColor : redColor));
+					zr::Renderer::Submit(mBlueShader, mSquareVA, transform);
+				}
+			}
+
+			/*zr::Renderer::Submit(mShader, mVertexArray);
+			zr::Renderer::Submit(mCubeMap);*/
+			zr::Renderer::EndScene();
+		}
+
+		mLastDeltaTime = zr::Time::Seconds(elapsedTime.asSeconds());
 	}
 
 	void SandboxLayer::OnImGuiRender()
 	{
+		ImGui::Begin("Settings");
+		{
+			ImGui::ColorEdit3("Squares' color", &mSquareColor[0]);
+
+			// Animate a simple progress bar
+			//static float progress = 0.0f, progress_dir = 1.0f;
+			/*progress += progress_dir * 0.4f * ImGui::GetIO().DeltaTime;
+			if (progress >= +1.1f) {
+				progress = +1.1f; progress_dir *= -1.0f;
+			}
+			if (progress <= -0.1f) {
+				progress = -0.1f; progress_dir *= -1.0f;
+			}*/
+
+			// Typically we would use ImVec2(-1.0f,0.0f) or ImVec2(-FLT_MIN,0.0f) to use all available width, 
+			// or ImVec2(width,0.0f) for a specified width. ImVec2(0.0f,0.0f) uses ItemWidth.
+			ImGui::ProgressBar(mProgress, ImVec2(0.0f, 0.0f));
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+			ImGui::Text("Progress Bar");
+			ImGui::End();
+		}
+
+		static zr::ImGuiConsole imguiConsole;
+		static bool isOpen = true;
+		imguiConsole.Draw("Example: Console", &isOpen);
 	}
 
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
+		mOrthographicCameraController->onEvent(e);
+		if (e.getType() == zr::EventType::WindowResize) {
+			//auto& resizeEvent = (zr::WindowResizeEvent&) e;
+			//mOrthographicCameraController->setZoomLevel(resizeEvent.fe)
+		}
+
+
+
 		if (e.getType() == zr::EventType::MouseMove) {
 			if (zr::Input::isKeyPressed(zr::Keyboard::X)) {
 				mModelScaleFactor -= zr::MouseMoveEvent::GetMovementOffset().y * .001f * mLastDeltaTime.asSeconds();
@@ -322,5 +359,32 @@ namespace lp
 				mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 			}
 		}
+	}
+
+	void SandboxLayer::loadModel()
+	{
+		ZR_INFO("Model loading started.");
+		/*zr::ModelLoader::Get()->loadFromFile("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
+			mProgress = progress;
+		});*/
+		//zr::Ref<zr::Model> temp = std::make_shared<zr::Model3D>("resources/nanosuit/nanosuit.obj");
+		//temp->loadFromFile("resources/iron_man/IronMan.obj", zr::Model3D::LoadComponents::Normals | zr::Model3D::LoadComponents::TextureCoordinates);
+		//temp->sub
+		//mModel.reset(new zr::Model("resources/iron_man/IronMan.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
+		//mModel.reset(new zr::Model("resources/iron_man_fixed/iron_man_fixed.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
+		//mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
+
+		//progress = temp->getLoadingProgress();
+
+		{
+			sf::Lock lock(mModelLoadingMutex);
+			//mModel = temp;
+		}
+		onLoadModelFinished();
+	}
+
+	void SandboxLayer::onLoadModelFinished()
+	{
+		ZR_INFO("Model loading finished.");
 	}
 }

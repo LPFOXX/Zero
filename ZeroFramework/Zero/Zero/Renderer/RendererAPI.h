@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Core/Core.h"
+
 #include "Buffer.h"
 
 namespace zr
@@ -33,6 +35,7 @@ namespace zr
 		virtual ~RendererAPI();
 
 		static RendererAPI* Create();
+		virtual void init() = 0;
 		virtual void setClearColor(float r, float g, float b, float a) = 0;
 		virtual void clear(unsigned bufferBits) = 0;
 		virtual void setViewportSize(unsigned width, unsigned height) = 0;
@@ -42,7 +45,7 @@ namespace zr
 		virtual void enableBlend(bool blendEnabled) = 0;
 		virtual bool isBlendEnabled() = 0;
 
-		virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) = 0;
+		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) = 0;
 		
 		inline static API GetAPI()
 		{

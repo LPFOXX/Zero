@@ -40,6 +40,8 @@ namespace zr
 		OrthographicCamera(float left, float right, float bottom, float top);
 		virtual ~OrthographicCamera();
 
+		void setProjection(float left, float right, float bottom, float top);
+
 		// Inherited via Camera
 		virtual void setRotationAngle(float angle) override;
 		virtual void rotate(float angleOffset) override;

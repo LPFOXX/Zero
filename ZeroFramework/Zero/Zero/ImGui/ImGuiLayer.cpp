@@ -2,8 +2,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Zero/EventDispatcher.h"
-#include "Zero/Application.h"
+#include "Zero/Core/EventDispatcher.h"
+#include "Zero/Core/Application.h"
 #include "ImGuiLayer.h"
 
 namespace zr
@@ -27,8 +27,7 @@ namespace zr
 	void ImGuiLayer::end()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		Application& app = Application::GetInstance();
-		io.DisplaySize = ImVec2((float)app.getWindow().getWidth(), (float)app.getWindow().getHeight());
+		io.DisplaySize = ImVec2((float)Application::GetWindow().getWidth(), (float)Application::GetWindow().getHeight());
 
 		// Rendering
 		ImGui::Render();
@@ -65,8 +64,7 @@ namespace zr
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		Application& app = Application::GetInstance();
-		GLFWwindow* window = static_cast<GLFWwindow*>(app.getWindow().getNativeHandle());
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::GetWindow().getNativeHandle());
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, false);

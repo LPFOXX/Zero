@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Zero/Log.h"
+#include "Zero/Core/Log.h"
 
 #if defined(_MSC_VER) && !defined(NDEBUG)
 #define GL_ERR_CHECK(func)\

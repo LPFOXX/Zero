@@ -1,8 +1,12 @@
 #pragma once
 
+#include "../Core/Core.h"
+
+#include "Texture.h"
+
 namespace zr
 {
-	class CubeMap
+	class CubeMap : public Texture
 	{
 	public:
 		/**
@@ -12,9 +16,6 @@ namespace zr
 		*/
 		CubeMap();
 		virtual ~CubeMap();
-
-		virtual void bind() const = 0;
-		virtual void unbind() const = 0;
 
 		virtual bool loadFromFiles(const std::string& rightFace, const std::string& leftFace, const std::string& topFace, const std::string& bottomFace, const std::string& backFace, const std::string& frontFace) = 0;
 
@@ -42,6 +43,6 @@ namespace zr
 
 		virtual void render(const glm::mat4& viewProjectionMatrix) = 0;
 
-		static CubeMap* Create();
+		static Ref<CubeMap> Create();
 	};
 }

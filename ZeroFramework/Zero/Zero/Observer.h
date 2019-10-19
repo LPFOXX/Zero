@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Core.h"
+
 namespace zr
 {
 	template <typename EventDataType>
@@ -20,7 +22,7 @@ namespace zr
 		virtual ~Observable();
 
 		void notify(const EventDataType& eventData);
-		void subscribe(std::shared_ptr<Observer<EventDataType>>& observer);
+		void subscribe(Ref<Observer<EventDataType>>& observer);
 		void unsubscribe(std::shared_ptr<Observer<EventDataType>>& observer);
 
 	private:

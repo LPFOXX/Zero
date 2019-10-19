@@ -80,10 +80,14 @@ namespace zr
 		 */
 		bool createAndLinkProgram(unsigned char whichShaders);
 
+		int getUniformLocation(const char* uniformName) const;
+
 	private:
 		GLuint mVertexShaderId;		/**< The handler for the vertex shader of this shader program.*/
 		GLuint mFragmentShaderId;	/**< The handler for the fragment shader of this shader program.*/
 		GLuint mGeometryShaderId;	/**< The handler for the geometry shader of this shader program.*/
 		unsigned mProgramId;		/**< The handler for this shader program.*/
+
+		mutable std::unordered_map<std::string, int> mUniformLocationCache;
 	};
 }

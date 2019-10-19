@@ -2,6 +2,8 @@
 
 #include "../../vendor/glm/include/glm/glm.hpp"
 #include "Material.h"
+#include "../Core/Core.h"
+
 
 namespace zr
 {
@@ -26,7 +28,7 @@ namespace zr
 		 */
 		Shader();
 
-		static Shader* Create();
+		static Ref<Shader> Create();
 
 		/**
 		 * @brief Constructor from file (vertex and fragment shaders).
@@ -38,7 +40,7 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Shader* Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		static Ref<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 
 		/**
 		 * @brief Constructor from files (vertex, fragment and geometry shaders).
@@ -51,14 +53,14 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Shader* Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
+		static Ref<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
 
 		/**
 		 * @brief Default destructor.
 		 *
 		 * Deletes the shader program.
 		 */
-		~Shader();
+		virtual ~Shader();
 
 		/**
 		 * @brief Loads and creates the shader program from files (vertex and fragment shaders).

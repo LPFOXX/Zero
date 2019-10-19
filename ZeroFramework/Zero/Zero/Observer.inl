@@ -32,7 +32,7 @@ namespace zr
 	}
 
 	template<typename T, typename EventDataType>
-	inline void Observable<T, EventDataType>::subscribe(std::shared_ptr<Observer<EventDataType>>& observer)
+	inline void Observable<T, EventDataType>::subscribe(Ref<Observer<EventDataType>>& observer)
 	{
 		auto& found = std::find(mObservers.begin(), mObservers.end(), observer);
 		if (found == mObservers.end()) {

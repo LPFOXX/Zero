@@ -3,7 +3,7 @@
 #include "RenderCommand.h"
 #include "Text.h"
 
-#include "../Log.h"
+#include "../Core/Log.h"
 
 namespace zr
 {
@@ -15,11 +15,10 @@ namespace zr
 
 		out vec2 TexCoords;
 		uniform mat4 uViewProjection;
-		uniform vec2 uTextPosition;
 
 		void main()
 		{
-			gl_Position = uViewProjection * vec4(aVertexPos + uTextPosition, 0.0, 1.0);
+			gl_Position = uViewProjection * vec4(aVertexPos, 0.0, 1.0);
 			TexCoords = aVertexTexCoord;
 		}
 	)";
@@ -151,7 +150,7 @@ namespace zr
 		mOutlineColor = color;
 	}
 
-	const glm::uvec2& Text::getSize() const
+	const glm::vec2& Text::getSize() const
 	{
 		return mQuadSize;
 	}
@@ -159,7 +158,7 @@ namespace zr
 	void Text::render(const glm::mat4& viewProjectionMatrix)
 	{
 		if (!mString.empty()) {
-			const std::shared_ptr<Texture>& fontTexture = mFont->getTexture(mFontSize);
+			const Ref<Texture2D>& fontTexture = mFont->getTexture(mFontSize);
 			// Bind the buffer
 			Text::sVAO->bind();
 
@@ -176,10 +175,10 @@ namespace zr
 
 			unsigned lastChar = 0U;
 			float outlineXPosition = mPosition.x;
-			float outlineYPosition = (mPosition.y - mMaxVerticalBearing);
+			float outlineYPosition = mViewportHeight - (mPosition.y + mMaxVerticalBearing);
 
 			float fillXPosition = outlineXPosition + mOutlineThickness;
-			float fillYPosition = (mPosition.y - mMaxVerticalBearing - mOutlineThickness);
+			float fillYPosition = mViewportHeight - (mPosition.y + mMaxVerticalBearing + mOutlineThickness);
 
 			// Save depth mask state
 			// Disable test mask
@@ -271,7 +270,6 @@ namespace zr
 					mOutlineVertices.insert(mOutlineVertices.end(), vertices, vertices + 16);
 
 					Text::sShader->setUniform("uTextColor", mOutlineColor);
-					Text::sShader->setUniform("uTextPosition", mActualPosition);
 
 					// Update the buffer
 					//Text::sVBOupdateData(vertices, sizeof(vertices));
@@ -311,24 +309,21 @@ namespace zr
 				float bryTexCoord = bottomRightY / textureHeight;	// Top right
 
 				// Bottom and top coordinates are actually flipped
-				// because of the system coordinates of textures.
+					// because of the system coordinates of textures.
 				float vertices[]{
-					xPos + charWidth,	(yPos),					brxTexCoord, bryTexCoord,	// Bottom right
-					xPos,				(yPos),					blxTexCoord, blyTexCoord,	// Bottom left
-					xPos,				(yPos + charHeight),	tlxTexCoord, tlyTexCoord,	// Top left
-					xPos + charWidth,	(yPos + charHeight),	trxTexCoord, tryTexCoord 	// Top right 
+					xPos + charWidth,	yPos,					brxTexCoord, bryTexCoord,	// Bottom right
+					xPos,				yPos,					blxTexCoord, blyTexCoord,	// Bottom left
+					xPos,				yPos + charHeight,		tlxTexCoord, tlyTexCoord,	// Top left
+					xPos + charWidth,	yPos + charHeight,		trxTexCoord, tryTexCoord 	// Top right 
 				};
 
 				mFillVertices.insert(mFillVertices.end(), vertices, vertices + 16);
 
 				Text::sShader->setUniform("uTextColor", mColor);
-				Text::sShader->setUniform("uTextPosition", mActualPosition);
 				// Update the buffer
 				Text::sVAO->getVertexBuffers()[0]->setData(vertices, sizeof(vertices));
 				RenderCommand::DrawIndexed(Text::sVAO);
 			}
-
-
 
 			// Restore depth testing state
 			RenderCommand::EnableDepthTest(isDoingDepthTest);
@@ -342,7 +337,7 @@ namespace zr
 		if (mFont != nullptr) {
 			mQuadSize.x = 0U;
 			mQuadSize.y = 0U;
-			unsigned lineWidth = 0U;
+			float lineWidth = 0.f;
 			unsigned lastChar = 0U;
 			int lastCharAdvance = 0;
 			mMaxVerticalBearing = 0U;
@@ -393,7 +388,7 @@ namespace zr
 	{
 		//updateProjectionMatrix();
 		ZR_CORE_INFO("[TEXT] Viewport updated to: {0}, {1}", viewportSize.x, viewportSize.y);
-		mActualPosition.y = viewportSize.y - 2.f * mPosition.y;
+		mViewportHeight = viewportSize.y;
 		dryRun();
 	}
 
@@ -406,9 +401,8 @@ namespace zr
 				0, 2, 3
 			};
 
-			Text::sVAO.reset(VertexArray::Create());
-			std::shared_ptr<VertexBuffer> vbo;
-			vbo.reset(VertexBuffer::Create(nullptr, 16 * sizeof(float), DrawMode::Dynamic));
+			Text::sVAO = VertexArray::Create();
+			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, 16 * sizeof(float), DrawMode::Dynamic);
 			vbo->setLayout({
 				{ ShaderDataType::Float2, "aVertexPos"},
 				{ ShaderDataType::Float2, "aVertexTexCoord"}
@@ -416,11 +410,10 @@ namespace zr
 
 			Text::sVAO->addVertexBuffer(vbo);
 
-			std::shared_ptr<IndexBuffer> ebo;
-			ebo.reset(IndexBuffer::Create(indices, 6U, DrawMode::Static));
+			std::shared_ptr<IndexBuffer> ebo = IndexBuffer::Create(indices, 6U, DrawMode::Static);
 			Text::sVAO->setIndexBuffer(ebo);
 
-			Text::sShader.reset(Shader::Create());
+			Text::sShader = Shader::Create();
 			if (!Text::sShader->loadFromStrings(Text::sVertexShader, Text::sFragmentShader)) {
 				ZR_CORE_ERROR("Can't create Text shader.");
 			}
@@ -431,7 +424,7 @@ namespace zr
 
 	void Text::onPositionUpdate()
 	{
-		mActualPosition.y = ViewportDependable::GetViewportSize().y - 2.f * mPosition.y;
+		//mViewportHeight = ViewportDependable::GetViewportSize().y - 2.f * mPosition.y;
 	}
 
 	void Text::onSizeUpdate()

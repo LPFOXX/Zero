@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "WindowsWindow.h"
-#include "Zero/Events.h"
+#include "Zero/Core/Events.h"
 #include "Zero/Platform/OpenGL/OpenGLContext.h"
 
 namespace zr

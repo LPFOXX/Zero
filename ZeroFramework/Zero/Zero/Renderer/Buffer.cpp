@@ -16,7 +16,7 @@ namespace zr
 	{
 	}
 
-	VertexBuffer* VertexBuffer::Create(float* vertices, unsigned size, DrawMode drawMode)
+	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, unsigned size, DrawMode drawMode)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -25,7 +25,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLVertexBuffer(vertices, size, drawMode);
+				return std::make_shared<OpenGLVertexBuffer>(vertices, size, drawMode);
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -49,7 +49,7 @@ namespace zr
 	{
 	}
 
-	IndexBuffer* IndexBuffer::Create(unsigned* data, unsigned count, DrawMode drawMode)
+	Ref<IndexBuffer> IndexBuffer::Create(unsigned* data, unsigned count, DrawMode drawMode)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -58,7 +58,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLIndexBuffer(data, count, drawMode);
+				return std::make_shared<OpenGLIndexBuffer>(data, count, drawMode);
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -82,7 +82,7 @@ namespace zr
 	{
 	}
 
-	VertexArray* VertexArray::Create(bool createAndBind)
+	Ref<VertexArray> VertexArray::Create(bool createAndBind)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -91,7 +91,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLVertexArray(createAndBind);
+				return std::make_shared<OpenGLVertexArray>(createAndBind);
 			}
 			case RendererAPI::API::Direct3D:
 			{

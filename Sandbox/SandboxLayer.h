@@ -2,6 +2,8 @@
 
 #include <Zero/Zero.h>
 
+#include <SFML/System.hpp>
+
 namespace lp
 {
 	class SandboxLayer : public zr::Layer
@@ -18,28 +20,37 @@ namespace lp
 		virtual void onEvent(zr::Event& e) override;
 
 	private:
-		std::shared_ptr<zr::VertexArray> mVertexArray;
-		std::shared_ptr<zr::Shader> mShader;
+		void loadModel();
+		void onLoadModelFinished();
 
-		std::shared_ptr<zr::Shader> mBlueShader;
-		std::shared_ptr<zr::VertexArray> mSquareVA;
+	private:
+		zr::Ref<zr::VertexArray> mVertexArray;
+		zr::Ref<zr::Shader> mShader;
 
-		std::shared_ptr<zr::Camera> mOrthographicCamera;
-		std::shared_ptr<zr::Camera> mPerspectiveCamera;
-		std::shared_ptr<zr::FPSCamera> mFPSCamera;
+		zr::Ref<zr::Shader> mBlueShader;
+		zr::Ref<zr::VertexArray> mSquareVA;
 
-		std::shared_ptr<zr::CubeMap> mCubeMap;
+		zr::Ref<zr::OrthographicCameraController> mOrthographicCameraController;
+		zr::Ref<zr::Camera> mPerspectiveCamera;
+		zr::Ref<zr::FPSCamera> mFPSCamera;
 
-		std::shared_ptr<zr::Model> mModel;
+		zr::Ref<zr::CubeMap> mCubeMap;
+
+		//zr::Ref<zr::Model3D> mModel;
+		sf::Thread mModelLoadingThread;
+		sf::Mutex mModelLoadingMutex;
 		float mModelScaleFactor = .01f;
 
-		float mCameraRotationSpeed = 45.f;	// 45 degrees per second
+		//float mCameraRotationSpeed = 45.f;	// 45 degrees per second
 		float mCameraSpeed = 5.f;			// 5 units per second
 
-		zr::Time mLastDeltaTime = zr::Time::seconds::zero();
+		zr::Time mLastDeltaTime;
+		float mProgress = 0.f;
 
 
-		std::shared_ptr<zr::Framebuffer> mFramebuffer;
+		zr::Ref<zr::Framebuffer> mFramebuffer;
+
+		glm::vec3 mSquareColor = {0.f, 0.f, 0.f};
 
 		bool mIsMouseCaptured = false;
 	};

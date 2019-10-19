@@ -2,7 +2,7 @@
 
 #include "Font.h"
 
-#include "../Log.h"
+#include "../Core/Log.h"
 
 namespace zr
 {
@@ -122,7 +122,7 @@ namespace zr
 		return 0;
 	}
 
-	const std::shared_ptr<Texture>& Font::getTexture(unsigned fontSize) const
+	const Ref<Texture2D>& Font::getTexture(unsigned fontSize) const
 	{
 		return mPages[fontSize].Texture;
 	}
@@ -277,7 +277,7 @@ namespace zr
 		unsigned padding = 2U + outlineThickness * 2U; // padding to apply around the character
 
 		Rows& rows = page.Rows;
-		std::shared_ptr<Texture>& texture = page.Texture;
+		Ref<Texture2D>& texture = page.Texture;
 		// Check whether there are any rows in the page texture
 		if (rows.empty()) {
 			// If it is empty, make a new row
@@ -353,7 +353,7 @@ namespace zr
 				if (page.NextRowVerticalOffset + characterHeight + 2 * padding > textureHeight) {
 					// The texture has no more space to the character to be added
 
-					unsigned maxTextureSize = Texture::GetMaximumSize();
+					unsigned maxTextureSize = Texture2D::GetMaximumSize();
 					unsigned textureSize = texture->getHeight();	// Texture is always square
 
 					if (maxTextureSize >= textureSize * 2) {
@@ -364,7 +364,7 @@ namespace zr
 						Image newTextureImage;
 						newTextureImage.create(textureSize * 2, textureSize * 2, glm::uvec4(255, 255, 255, 0));
 
-						texture.reset(Texture::Create());
+						texture = Texture2D::Create();
 						texture->loadFromImage(newTextureImage);
 						texture->update(oldTextureImage);
 

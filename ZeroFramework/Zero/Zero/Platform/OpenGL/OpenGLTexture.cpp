@@ -2,8 +2,9 @@
 
 #include "GL_ERR_CHECK.h"
 #include <glad/glad.h>
+
+#include "../../ImageReader.h"
 #include "OpenGLTexture.h"
-#include "../../Renderer/ImageReader.h"
 
 namespace zr
 {
@@ -20,7 +21,7 @@ namespace zr
 		Texture2D(),
 		mTextureId(0U)
 	{
-		if (loadFromFile(filePath, true, textureType)) {
+		if (!loadFromFile(filePath, true, textureType)) {
 			ZR_CORE_ERROR("[OpenGLTexture] Can't load texture file: " + filePath);
 		}
 	}
@@ -78,9 +79,10 @@ namespace zr
 		if (data) {
 			GL_ERR_CHECK(glGenTextures(1, &mTextureId));
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
+			
+			OpenGLTexture2D::TextureSaver saver;
 
-			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
 
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
@@ -124,11 +126,8 @@ namespace zr
 			return false;
 		}
 
-		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
-		}
-
+		OpenGLTexture2D::TextureSaver saver;
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data));
 
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -149,6 +148,7 @@ namespace zr
 		unsigned width = data.getWidth();
 		unsigned height = data.getHeight();
 
+		OpenGLTexture2D::TextureSaver saver;
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data.getData()));
 
@@ -167,6 +167,7 @@ namespace zr
 			return false;
 		}
 
+		OpenGLTexture2D::TextureSaver saver;
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 		GL_ERR_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, xPos, yPos, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]));
 
@@ -185,21 +186,17 @@ namespace zr
 			mIsSmooth = smoothFilterEnabled;
 
 			if (mTextureId != 0U) {
-				unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
-				if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-				}
-				
+				OpenGLTexture2D::TextureSaver saver;
+
+				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
-				
+
 				if (mHasMipmaps) {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR);
 				}
 				else {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST);
 				}
-
-				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
 			}
 		}
 	}
@@ -210,15 +207,11 @@ namespace zr
 			mIsRepeated = repeatEnabled;
 
 			if (mTextureId != 0U) {
-				unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
-				if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-					GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-				}
+				OpenGLTexture2D::TextureSaver saver;
 
+				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
 				GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-
-				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
 			}
 		}
 	}
@@ -228,17 +221,14 @@ namespace zr
 		if (mTextureId == 0U)
 			return false;
 
-		unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
-		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		}
+		OpenGLTexture2D::TextureSaver saver;
 
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 		GL_ERR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
 
 		mHasMipmaps = true;
 
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
 		return true;
 	}
 
@@ -247,16 +237,12 @@ namespace zr
 		if (!mHasMipmaps)
 			return;
 
-		unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
-		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-		}
+		OpenGLTexture2D::TextureSaver saver;
 
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 		GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 
 		mHasMipmaps = false;
-
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
 	}
 
 	bool OpenGLTexture2D::loadToImage(Image& image) const
@@ -264,15 +250,11 @@ namespace zr
 		if (mTextureId) {
 			int texWidth = 0, texHeight = 0;
 
-			unsigned lastBoundTexture = OpenGLTexture2D::sCurrentlyBoundTexture;
-			if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
-				GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
-			}
+			OpenGLTexture2D::TextureSaver saver;
 
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texWidth));
 			GL_ERR_CHECK(glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight));
-
-			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, lastBoundTexture));
 
 			if (texWidth != 0 && texHeight != 0) {
 				std::vector<unsigned char> pixels(texWidth * texHeight * 4);
@@ -287,5 +269,10 @@ namespace zr
 	unsigned OpenGLTexture2D::getHandle() const
 	{
 		return mTextureId;
+	}
+
+	OpenGLTexture2D::TextureSaver::~TextureSaver()
+	{
+		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mLastBoundTexture));
 	}
 }

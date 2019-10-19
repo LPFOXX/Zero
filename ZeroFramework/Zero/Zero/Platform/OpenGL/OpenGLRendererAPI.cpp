@@ -16,6 +16,11 @@ namespace zr
 	{
 	}
 
+	void OpenGLRendererAPI::init()
+	{
+		enableBlend(true);
+	}
+
 	void OpenGLRendererAPI::drawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));

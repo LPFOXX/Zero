@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../Renderer/Texture.h"
-#include "../../Renderer/Image.h"
+#include "../../Image.h"
 #include "../../../vendor/glm/include/glm/glm.hpp"
 
 namespace zr
@@ -31,6 +31,21 @@ namespace zr
 		virtual bool loadFromFile(const std::string& filePath, bool flipVertically = false, Texture2D::Type textureType = Texture2D::Type::None) override;
 		virtual bool loadFromMemory(float width, float height, const unsigned char* data) override;
 		virtual bool loadFromImage(const Image& image, Texture2D::Type textureType = Texture2D::Type::None) override;
+
+	private:
+		class TextureSaver
+		{
+		public:
+			TextureSaver() :
+				mLastBoundTexture(OpenGLTexture2D::sCurrentlyBoundTexture)
+			{
+			}
+
+			~TextureSaver();
+
+		private:
+			unsigned mLastBoundTexture;
+		};
 
 	private:
 		static unsigned sCurrentlyBoundTexture;

@@ -115,7 +115,7 @@ namespace zr
 		 *
 		 * @returns A named vector containing the position and size of the quad containing the text.
 		 */
-		virtual const glm::uvec2& getSize() const;
+		virtual const glm::vec2& getSize() const;
 
 	protected:
 		/**
@@ -142,7 +142,7 @@ namespace zr
 		//void updateProjectionMatrix();
 
 	protected:
-		mutable glm::uvec2 mQuadSize;			/**< The size of the quad containing the text. */
+		mutable glm::vec2 mQuadSize;			/**< The size of the quad containing the text. */
 		unsigned mOutlineThickness;				/**< The value of the text outline in pixels. */
 
 	private:
@@ -156,7 +156,7 @@ namespace zr
 		static unsigned sMaxCharactersToDraw;		/**< Maximum characteres to draw. */
 
 	private:
-		glm::vec2 mActualPosition;
+		float mViewportHeight;
 		std::shared_ptr<Font> mFont;			/**< The font object reference. */
 		unsigned mFontSize;						/**< The size of the font. */
 		std::string mString;					/**< The text to display. */

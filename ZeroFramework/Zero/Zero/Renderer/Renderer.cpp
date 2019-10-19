@@ -1,6 +1,7 @@
 #include <zr_pch.h>
 
 #include "Renderer.h"
+#include "Renderer2D.h"
 #include "Texture.h"
 
 namespace zr
@@ -13,6 +14,12 @@ namespace zr
 
 	Renderer::~Renderer()
 	{
+	}
+
+	void Renderer::Init()
+	{
+		RenderCommand::Init();
+		Renderer2D::Init();
 	}
 
 	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera, const std::shared_ptr<zr::Framebuffer>& framebuffer)
@@ -31,8 +38,8 @@ namespace zr
 	void Renderer::EndScene()
 	{
 		if (Renderer::sSceneData->Framebuffer != nullptr) {
-			zr::Framebuffer::BindDefault();
-			zr::Texture::ActivateTextureUnit(0, 0);
+			Framebuffer::BindDefault();
+			Texture2D::ActivateTextureUnit(0, 0);
 			Renderer::sSceneData->Framebuffer->draw();
 		}
 	}
@@ -62,5 +69,10 @@ namespace zr
 	void Renderer::Submit(const std::shared_ptr<Text>& text)
 	{
 		text->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
+	}
+
+	void Renderer::Submit(const std::shared_ptr<Sprite>& sprite)
+	{
+		sprite->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}
 }

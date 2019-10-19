@@ -4,7 +4,7 @@
 #include "HUDLayer.h"
 #include "SandboxApplication.h"
 
-#include "Zero/Zero/EntryPoint.h"
+#include "Zero/Zero/Core/EntryPoint.h"
 
 namespace lp
 {

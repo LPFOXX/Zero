@@ -5,8 +5,8 @@
 #include "OpenGLBuffer.h"
 #include "OpenGLTexture.h"
 
-#include "../../Renderer/Image.h" 
-#include "../../Renderer/ImageReader.h" 
+#include "../../Image.h" 
+#include "../../ImageReader.h" 
 
 namespace zr
 {

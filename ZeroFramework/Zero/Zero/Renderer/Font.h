@@ -1,17 +1,19 @@
 #pragma once
 
-#include "Image.h"
-#include "Texture.h"
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 #include FT_STROKER_H
 
+#include "../Core/Core.h"
+#include "../Image.h"
+
+#include "Texture.h"
+
 namespace zr
 {
 	/**
-	* @brief lp::Font represents a loaded font that can be used to generate text.
+	* @brief zr::Font represents a loaded font that can be used to generate text.
 	*
 	* This is a heavyweight object and should be used only to provide funtions to display text.
 	* It only needs to be instanciated and passed to the lp::Text object.
@@ -27,14 +29,14 @@ namespace zr
 			Character() :
 				Size(0, 0),
 				Bearing(0, 0),
-				Advance(0),
+				Advance(0.f),
 				CharacterRectOrigin(0, 0)
 			{
 			}
 
 			glm::vec2 Size;				/**< Size of the glyph.	*/
 			glm::vec2 Bearing;				/**< Offset from baseline. */
-			int Advance;					/**< Offset to advance to the next glyph. */
+			float Advance;					/**< Offset to advance to the next glyph. */
 			glm::vec2 CharacterRectOrigin;	/**< Position of the begining of the glyph in the texture. */
 		};
 
@@ -90,13 +92,13 @@ namespace zr
 				Image image;
 				image.create(128, 128, glm::uvec4(255, 255, 255, 0));
 
-				Texture.reset(Texture->Create());
+				Texture = Texture2D::Create();
 				Texture->loadFromImage(image);
-				Texture->setSmoothFilter(true);
+				Texture->setSmooth(true);
 			}
 
 			Characters CharacterMap;			/**< A map containg character information that are already loaded. */
-			std::shared_ptr<Texture> Texture;	/**< The texture containing the glyphs loaded from the font file. */
+			Ref<Texture2D> Texture;				/**< The texture containing the glyphs loaded from the font file. */
 			Rows Rows;							/**< Information about the rows of glyphs in the texture. */
 			unsigned NextRowVerticalOffset;		/**< The offset of the next available row to add glyphs into in the texture. */
 		};
@@ -162,7 +164,7 @@ namespace zr
 		* @return A reference to the texture requested.
 		*
 		*/
-		const std::shared_ptr<Texture>& getTexture(unsigned fontSize) const;
+		const Ref<Texture2D>& getTexture(unsigned fontSize) const;
 
 		/**
 		* @brief Gets the distance that should be added or taken from the normal advance of the two given characters.

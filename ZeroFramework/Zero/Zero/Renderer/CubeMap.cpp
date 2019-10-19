@@ -2,6 +2,7 @@
 
 #include "../Renderer/Renderer.h"
 #include "../Platform/OpenGL/OpenGLCubeMap.h"
+
 #include "CubeMap.h"
 
 namespace zr
@@ -16,7 +17,7 @@ namespace zr
 
 	}
 
-	CubeMap* CubeMap::Create()
+	Ref<CubeMap> CubeMap::Create()
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -29,7 +30,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLCubeMap;
+				return std::make_shared<OpenGLCubeMap>();
 			}
 			case RendererAPI::API::Vulkan:
 			{

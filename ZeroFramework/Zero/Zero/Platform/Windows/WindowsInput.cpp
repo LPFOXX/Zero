@@ -1,6 +1,6 @@
 #include <zr_pch.h>
 
-#include "Zero/Application.h"
+#include "Zero/Core/Application.h"
 #include "WindowsInput.h"
 
 namespace zr
@@ -18,14 +18,14 @@ namespace zr
 
 	bool WindowsInput::isKeyPressedImpl(Keyboard key)
 	{
-		auto& window = Application::GetInstance().getWindow();
+		auto& window = Application::GetWindow();
 		auto state = glfwGetKey(static_cast<GLFWwindow*>(window.getNativeHandle()), static_cast<int>(key));
 		return (state == GLFW_PRESS) || (state == GLFW_REPEAT);
 	}
 
 	bool WindowsInput::isMouseButtonPressedImpl(MouseButton button)
 	{
-		auto& window = Application::GetInstance().getWindow();
+		auto& window = Application::GetWindow();
 		return glfwGetMouseButton(static_cast<GLFWwindow*>(window.getNativeHandle()), static_cast<int>(button)) == GLFW_PRESS;
 	}
 
@@ -36,7 +36,7 @@ namespace zr
 
 	float WindowsInput::getMouseXImpl()
 	{
-		auto& window = Application::GetInstance().getWindow();
+		auto& window = Application::GetWindow();
 		double xPos = 0.0;
 		glfwGetCursorPos(static_cast<GLFWwindow*>(window.getNativeHandle()), &xPos, nullptr);
 		return static_cast<float>(xPos);
@@ -44,7 +44,7 @@ namespace zr
 
 	float WindowsInput::getMouseYImpl()
 	{
-		auto& window = Application::GetInstance().getWindow();
+		auto& window = Application::GetWindow();
 		double yPos = 0.0;
 		glfwGetCursorPos(static_cast<GLFWwindow*>(window.getNativeHandle()), nullptr, &yPos);
 		return static_cast<float>(yPos);

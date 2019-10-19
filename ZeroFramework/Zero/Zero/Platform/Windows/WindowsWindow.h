@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Zero/Window.h>
+#include <Zero/Core/Window.h>
 #include <Zero/Renderer/GraphicsContext.h>
 
 namespace zr

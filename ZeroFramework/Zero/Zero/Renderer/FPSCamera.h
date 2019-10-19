@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../vendor/glm/include/glm/glm.hpp"
-#include "../InputCodes.h"
-#include "../Clock.h"
+#include "../Core/InputCodes.h"
+#include "../Core/Clock.h"
 #include "Camera.h"
 
 namespace zr

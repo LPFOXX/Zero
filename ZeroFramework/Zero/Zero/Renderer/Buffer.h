@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Core/Core.h"
+
 namespace zr
 {
 	enum class ShaderDataType
@@ -28,18 +30,23 @@ namespace zr
 
 	struct BufferElement
 	{
-		std::string Name;
-		ShaderDataType Type;
-		unsigned Size;
-		unsigned Offset;
-		bool Normalized;
-
-		BufferElement()
+		BufferElement() :
+			Name(),
+			Type(ShaderDataType::None),
+			Size(0U),
+			Offset(0U),
+			Normalized(false),
+			Divisor(0U)
 		{
 		}
 
-		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
-			: Name(name), Type(type), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized)
+		BufferElement(ShaderDataType type, const std::string& name, bool normalized = false, unsigned divisor = 0U) :
+			Name(name),
+			Type(type),
+			Size(ShaderDataTypeSize(type)),
+			Offset(0),
+			Normalized(normalized),
+			Divisor(divisor)
 		{
 		}
 
@@ -61,6 +68,13 @@ namespace zr
 
 			return 0;
 		}
+
+		std::string Name;
+		ShaderDataType Type;
+		unsigned Size;
+		unsigned Offset;
+		bool Normalized;
+		unsigned Divisor;
 	};
 
 	class BufferLayout
@@ -131,7 +145,7 @@ namespace zr
 		VertexBuffer();
 		virtual ~VertexBuffer();
 
-		static VertexBuffer* Create(float* data, unsigned size, DrawMode drawMode);
+		static Ref<VertexBuffer> Create(float* data, unsigned size, DrawMode drawMode);
 
 		virtual void setData(float* data, unsigned size) = 0;
 		virtual void bind() const = 0;
@@ -146,7 +160,7 @@ namespace zr
 		IndexBuffer();
 		virtual ~IndexBuffer();
 
-		static IndexBuffer* Create(unsigned* data, unsigned count, DrawMode drawMode);
+		static Ref<IndexBuffer> Create(unsigned* data, unsigned count, DrawMode drawMode);
 
 		virtual void bind() const = 0;
 		virtual void unbind() const = 0;
@@ -160,14 +174,14 @@ namespace zr
 		VertexArray();
 		virtual ~VertexArray();
 
-		static VertexArray* Create(bool createAndBind = false);
+		static Ref<VertexArray> Create(bool createAndBind = false);
 
-		virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) = 0;
-		virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) = 0;
+		virtual void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) = 0;
+		virtual void setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) = 0;
 		virtual void setLayout(const BufferLayout&) = 0;
 
-		virtual const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const = 0;
-		virtual const std::shared_ptr<IndexBuffer>& getIndexBuffer() const = 0;
+		virtual const std::vector<Ref<VertexBuffer>>& getVertexBuffers() const = 0;
+		virtual const Ref<IndexBuffer>& getIndexBuffer() const = 0;
 
 		virtual void bind() = 0;
 		virtual void unbind() = 0;

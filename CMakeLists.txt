@@ -17,7 +17,15 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/ZeroFramework/Zero/vendor/imgui/
 	${PROJECT_SOURCE_DIR}/ZeroFramework/Zero/vendor/spdlog/include/
 	${PROJECT_SOURCE_DIR}/ZeroFramework/Zero/vendor/stb_image/include/
+	${PROJECT_SOURCE_DIR}/ZeroFramework/Zero/vendor/sfml/include/
+	${PROJECT_SOURCE_DIR}/ZeroFramework/Zero/vendor/sfml/src/
 )
+
+message("Sandbox include directories")
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+	message(STATUS "dir='${dir}'")
+endforeach()
 
 file(GLOB SANDBOX_SRC_FILES ${PROJECT_SOURCE_DIR}/Sandbox/*.cpp)
 
@@ -27,5 +35,6 @@ target_link_libraries(Sandbox
 	freetype
 	glfw
 	spdlog
+	sfmlthread
 	Zero
 )

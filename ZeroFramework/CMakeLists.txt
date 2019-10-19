@@ -5,6 +5,14 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("Zero")
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	set(OS_WINDOWS 1)
+	message("Compiling for Windows")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(OS_LINUX 1)
+	message("Compiling for Linux")
+endif()
+
 set(GLFW_BUILD_EXAMPLES 0)
 set(GLFW_BUILD_TESTS 0)
 set(GLFW_BUILD_DOCS 0)
@@ -30,16 +38,25 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/Zero/vendor/imgui/
 	${PROJECT_SOURCE_DIR}/Zero/vendor/spdlog/include/
 	${PROJECT_SOURCE_DIR}/Zero/vendor/stb_image/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/sfml/include/
+	${PROJECT_SOURCE_DIR}/Zero/vendor/sfml/src/
 )
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+	message(STATUS "dir='${dir}'")
+endforeach()
 
 add_subdirectory("Zero/vendor/assimp")
 add_subdirectory("Zero/vendor/freetype")
 add_subdirectory("Zero/vendor/glfw")
 add_subdirectory("Zero/vendor/spdlog")
+add_subdirectory("Zero/vendor/sfml")
 
 file(GLOB ZR_SRC_FILES
 	${PROJECT_SOURCE_DIR}/Zero/Zero/*.cpp
-	${PROJECT_SOURCE_DIR}/Zero/Zero/Events/*.cpp
+	${PROJECT_SOURCE_DIR}/Zero/Zero/Core/*.cpp
+	${PROJECT_SOURCE_DIR}/Zero/Zero/Core/Events/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/Zero/ImGui/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/Zero/Platform/OpenGL/*.cpp
 	${PROJECT_SOURCE_DIR}/Zero/Zero/Platform/Windows/*.cpp
@@ -63,4 +80,5 @@ target_link_libraries(Zero
 	freetype
 	glfw
 	spdlog
+	sfmlthread
 )
