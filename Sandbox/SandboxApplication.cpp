@@ -11,8 +11,8 @@ namespace lp
 	SandboxApplication::SandboxApplication() :
 		zr::Application()
 	{
-		//pushLayer(new SandboxLayer);
-		pushLayer(new HUDLayer);
+		pushLayer(new SandboxLayer);
+		//pushLayer(new HUDLayer);
 	}
 
 	SandboxApplication::~SandboxApplication()

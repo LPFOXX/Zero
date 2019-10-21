@@ -90,6 +90,11 @@ namespace zr
 			calculateOffsetsAndStride();
 		}
 
+		inline void addElement(BufferElement& element)
+		{
+			mElements.push_back(element);
+			calculateOffsetsAndStride();
+		}
 		inline unsigned getStride() const
 		{
 			return mStride;

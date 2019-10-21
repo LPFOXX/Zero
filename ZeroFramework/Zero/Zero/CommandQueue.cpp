@@ -7,7 +7,7 @@ namespace zr
 	std::queue<std::function<void()>> CommandQueue::sCommands;
 	sf::Mutex CommandQueue::sQueueMutex;
 
-	void CommandQueue::Enqueue(std::function<void()>& command)
+	void CommandQueue::Enqueue(std::function<void()> command)
 	{
 		sf::Lock l(sQueueMutex);
 		sCommands.push(command);

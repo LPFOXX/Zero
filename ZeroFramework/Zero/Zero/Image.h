@@ -105,6 +105,8 @@ namespace zr
 		*/
 		const unsigned char* getData() const;
 
+		const std::string& getPath() const;
+
 		/**
 		* @brief Set a pixel color.
 		*
@@ -127,5 +129,6 @@ namespace zr
 		unsigned mHeight;
 		unsigned mChannelCount;
 		std::vector<unsigned char> mBuffer;
+		std::string mFilePath;
 	};
 }

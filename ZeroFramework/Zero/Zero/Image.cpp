@@ -11,7 +11,8 @@ namespace zr
 	Image::Image() :
 		mWidth(0U),
 		mHeight(0U),
-		mChannelCount(0U)
+		mChannelCount(0U),
+		mFilePath()
 	{
 
 	}
@@ -91,6 +92,7 @@ namespace zr
 		unsigned char* data = ImageReader::LoadDataFromFile(imageFilePath, width, height, nrChannel, flipImage);
 
 		if (data) {
+			mFilePath = imageFilePath;
 			mWidth = width;
 			mHeight = height;
 			mChannelCount = 4U;
@@ -98,7 +100,6 @@ namespace zr
 			// width * height * 4 bytes (one per channel) per pixel
 			mBuffer.resize(static_cast<size_t>(mWidth) * mHeight * 4U);
 			std::memcpy(&mBuffer[0], data, static_cast<size_t>(mWidth) * mHeight * 4U);
-
 			ImageReader::CleanData(data);
 			return true;
 		}
@@ -123,6 +124,11 @@ namespace zr
 	const unsigned char* Image::getData() const
 	{
 		return &mBuffer[0] ? &mBuffer[0] : nullptr;
+	}
+
+	const std::string& Image::getPath() const
+	{
+		return mFilePath;
 	}
 
 	bool Image::setPixel(unsigned x, unsigned y, const glm::uvec4& pixelColor)

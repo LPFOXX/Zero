@@ -9,7 +9,15 @@ namespace zr
 {
 	const std::string Texture2D::typeToString(Type textureType)
 	{
-		return std::string();
+		switch (textureType) {
+			case Texture2D::Type::Ambient:	return "Ambient";
+			case Texture2D::Type::Diffuse:	return "Diffuse";
+			case Texture2D::Type::Specular:	return "Specular";
+			case Texture2D::Type::Normal:	return "Normal";
+			case Texture2D::Type::Height:	return "Height";
+			case Texture2D::Type::None:
+			default: return "None";
+		}
 	}
 
 	Texture2D::Texture2D() :

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <assimp/Logger.hpp>
+
 namespace zr
 {
 	class Logger
@@ -12,7 +14,7 @@ namespace zr
 	class ModelLogger : public Assimp::Logger, public Logger
 	{
 	public:
-		ModelLogger() = default;
+		ModelLogger(Assimp::Logger::LogSeverity logSeverity);
 		virtual ~ModelLogger();
 
 		virtual bool attachStream(Assimp::LogStream* pStream, unsigned int severity = Debugging | Err | Warn | Info) override;

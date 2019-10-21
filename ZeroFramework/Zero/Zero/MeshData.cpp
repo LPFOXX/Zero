@@ -4,7 +4,7 @@
 
 namespace zr
 {
-	MeshData::MeshData(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::unordered_map<Texture2D::Type, std::vector<Image>>& textures) :
+	MeshData::MeshData(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::unordered_map<Texture2D::Type, std::vector<std::string>>& textures) :
 		mProperties(new MeshProperties(meshProps)),
 		mVertices(vertices),
 		mIndices(indices),
@@ -17,12 +17,12 @@ namespace zr
 
 	}
 
-	const std::vector<MeshData::Vertex>& MeshData::getVertices() const
+	std::vector<MeshData::Vertex>& MeshData::getVertices()
 	{
 		return mVertices;
 	}
 
-	const std::vector<unsigned>& MeshData::getIndices() const
+	std::vector<unsigned>& MeshData::getIndices()
 	{
 		return mIndices;
 	}
@@ -32,7 +32,7 @@ namespace zr
 		return *mProperties;
 	}
 
-	const std::unordered_map<Texture2D::Type, std::vector<Image>>& MeshData::getTextures() const
+	const std::unordered_map<Texture2D::Type, std::vector<std::string>>& MeshData::getTextures() const
 	{
 		return mTextures;
 	}

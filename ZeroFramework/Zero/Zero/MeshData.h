@@ -60,16 +60,16 @@ namespace zr
 		};
 
 	public:
-		MeshData(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::unordered_map<Texture2D::Type, std::vector<Image>>& textures);
+		MeshData(const MeshProperties& meshProps, std::vector<Vertex>& vertices, std::vector<unsigned>& indices, const std::unordered_map<Texture2D::Type, std::vector<std::string>>& textures);
 		virtual ~MeshData();
 
-		const std::vector<MeshData::Vertex>& getVertices() const;
-		const std::vector<unsigned>& getIndices() const;
+		std::vector<MeshData::Vertex>& getVertices();
+		std::vector<unsigned>& getIndices();
 		const MeshData::MeshProperties& getProperties() const;
-		const std::unordered_map<Texture2D::Type, std::vector<Image>>& getTextures() const;
+		const std::unordered_map<Texture2D::Type, std::vector<std::string>>& getTextures() const;
 
 	private:
-		std::unordered_map<Texture2D::Type, std::vector<Image>> mTextures;
+		std::unordered_map<Texture2D::Type, std::vector<std::string>> mTextures;
 		std::vector<MeshData::Vertex> mVertices;
 		std::vector<unsigned> mIndices;
 		Ref<MeshData::MeshProperties> mProperties;

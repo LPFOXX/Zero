@@ -12,7 +12,7 @@ namespace zr
 	public:
 		CommandQueue() = default;
 		virtual ~CommandQueue() = default;
-		static void Enqueue(std::function<void()>& command);
+		static void Enqueue(std::function<void()> command);
 		static void ExecuteCommands();
 
 	private:

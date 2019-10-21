@@ -225,6 +225,11 @@ namespace zr
 			return mIsRepeated;
 		}
 
+		virtual inline bool hasMipMaps() const
+		{
+			return mHasMipmaps;
+		}
+
 		virtual bool generateMipMaps() = 0;
 
 		virtual void invalidateMipmaps() = 0;

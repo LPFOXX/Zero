@@ -90,7 +90,7 @@ namespace zr
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
 
-			GL_ERR_CHECK(glFlush());
+			//GL_ERR_CHECK(glFlush());
 
 			// Update texture width and height attributes
 			mSize.x = width;
@@ -106,6 +106,7 @@ namespace zr
 	{
 		if (loadFromMemory((float)image.getWidth(), (float)image.getHeight(), image.getData())) {
 			mTextureType = textureType;
+			mFilePath = image.getPath();
 			return true;
 		}
 		return false;

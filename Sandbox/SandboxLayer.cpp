@@ -7,22 +7,6 @@
 
 namespace lp
 {
-	struct ModelLoader
-	{
-		ModelLoader()
-		{
-		}
-
-		~ModelLoader()
-		{
-		}
-
-		void operator()()
-		{
-			ZR_INFO("Model loading thread execution started.");
-		}
-	};
-
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
 		mOrthographicCameraController(nullptr),
@@ -32,20 +16,21 @@ namespace lp
 		mModelLoadingThread(&SandboxLayer::loadModel, this),
 		mModelLoadingMutex()
 	{
-		/*zr::ModelLoader::Get()->setProgressHandler(std::make_shared<zr::ModelProgressHandler>());
-		zr::Ref<zr::ModelLogger> modelLogger = std::make_shared<zr::ModelLogger>();
-		modelLogger->setLogSeverity(Assimp::Logger::LogSeverity::VERBOSE);
-		zr::ModelLoader::Get()->setLogger(modelLogger);*/
+		zr::ModelLoader::Get()->setProgressHandler(std::make_shared<zr::ModelProgressHandler>());
+		zr::ModelLoader::Get()->setLogger(std::make_shared<zr::ModelLogger>(Assimp::Logger::LogSeverity::VERBOSE));
 
-		//mModelLoadingThread.launch();
 		mOrthographicCameraController = std::shared_ptr<zr::OrthographicCameraController>(new zr::OrthographicCameraController(1280.f / 600.f, true));
 		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
 		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
-		/*mModel = std::make_shared<zr::Model3D>("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
+		mModel = std::make_shared<zr::Model>("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
+			mProgress = progress;
+		});
+		/*mModel = std::make_shared<zr::Model>("resources/anim_model/anim_model.dae", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
 			mProgress = progress;
 		});*/
+		
 
 		mCubeMap = zr::CubeMap::Create();
 		bool success = mCubeMap->loadFromFiles({
@@ -204,12 +189,13 @@ namespace lp
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
 		mOrthographicCameraController->onUpdate(elapsedTime);
+		mModel->update(elapsedTime);
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
 			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Forward, elapsedTime);
 		}
-		
+
 		if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
 			mPerspectiveCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Backward, elapsedTime);
@@ -232,15 +218,14 @@ namespace lp
 
 		glm::mat4 model(1.f);
 		model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
-		/*mModel->setTransformationMatrix(model);
-		mModel->setCameraPosition(mFPSCamera->getPosition());*/
+		//mModel->setTransformationMatrix(model);
+		//mModel->setCameraPosition(mFPSCamera->getPosition());
+		
 
 		//zr::Renderer::BeginScene(mFPSCamera);
 		//{
-		//	zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
-		//	zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
-
-		//mModel->render(mFPSCamera->getViewProjectionMatrix());
+		//zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
+		//zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
 		//	//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
 		//	//zr::RenderCommand::EnableFaceCulling(false);
@@ -276,6 +261,8 @@ namespace lp
 			zr::Renderer::EndScene();
 		}
 
+		//mModel->render(mFPSCamera->getViewProjectionMatrix());
+		mModel->render(mOrthographicCameraController->getCamera()->getViewProjectionMatrix());
 		mLastDeltaTime = zr::Time::Seconds(elapsedTime.asSeconds());
 	}
 
@@ -315,8 +302,6 @@ namespace lp
 			//auto& resizeEvent = (zr::WindowResizeEvent&) e;
 			//mOrthographicCameraController->setZoomLevel(resizeEvent.fe)
 		}
-
-
 
 		if (e.getType() == zr::EventType::MouseMove) {
 			if (zr::Input::isKeyPressed(zr::Keyboard::X)) {
