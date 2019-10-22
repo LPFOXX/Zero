@@ -1,7 +1,7 @@
 #pragma once
 
 #include <assimp/ProgressHandler.hpp>
-#include "Core/Log.h"
+#include "ImGui/ImGuiConsole.h"
 #include "Progressable.h"
 
 namespace zr
@@ -49,7 +49,7 @@ namespace zr
 		// Inherited via ProgressHandler
 		virtual bool Update(float percentage = (-1.0F))
 		{
-			ZR_CORE_INFO("Model loading progress: {0:.2f}%", percentage * 100.f);
+			ZR_IMGUI_LOG(ConsoleItem::Info, "[ASSIMP] Model loading progress: %.2f%%", percentage * 100.f);
 			notify(percentage);
 			if (mProgressFunction) {
 				mProgressFunction(percentage);

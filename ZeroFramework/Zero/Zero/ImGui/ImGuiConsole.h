@@ -1,21 +1,41 @@
 #pragma once
 
+#include <memory>
 #include <imgui.h>
+
+#include "../../vendor/sfml/include/SFML/System.hpp"
 
 namespace zr
 {
+	struct ConsoleItem
+	{
+		enum Type
+		{
+			Fatal,
+			Error,
+			Warn,
+			Info,
+			Trace,
+			Normal
+		};
+
+		std::string Message;
+		Type MessageType;
+	};
+
 	// Demonstrate creating a simple console window, with scrolling, filtering, completion and history.
 	// For the console example, here we are using a more C++ like approach of declaring a class to hold the data and the functions.
 	struct ImGuiConsole
 	{
 		char                  InputBuf[256];
-		ImVector<char*>       Items;
+		std::vector<ConsoleItem> Items;
 		ImVector<const char*> Commands;
 		ImVector<char*>       History;
 		int                   HistoryPos;    // -1: new line, 0..History.Size-1 browsing history.
 		ImGuiTextFilter       Filter;
 		bool                  AutoScroll;
 		bool                  ScrollToBottom;
+		sf::Mutex			  LogMutex;
 
 		ImGuiConsole()
 		{
@@ -28,7 +48,7 @@ namespace zr
 			Commands.push_back("CLASSIFY");  // "classify" is only here to provide an example of "C"+[tab] completing to "CL" and displaying matches.
 			AutoScroll = true;
 			ScrollToBottom = true;
-			AddLog("Welcome to Dear ImGui!");
+			AddLog(ConsoleItem::Info, "Welcome to Dear ImGui!");
 		}
 
 		~ImGuiConsole()
@@ -62,14 +82,15 @@ namespace zr
 
 		void    ClearLog()
 		{
-			for (int i = 0; i < Items.Size; i++)
-				free(Items[i]);
+			/*for (int i = 0; i < Items.Size; i++)
+				free(Items[i]);*/
 			Items.clear();
 			ScrollToBottom = true;
 		}
 
-		void    AddLog(const char* fmt, ...) IM_FMTARGS(2)
+		void    AddLog(ConsoleItem::Type messageType, const char* fmt, ...) IM_FMTARGS(2)
 		{
+			sf::Lock l(LogMutex);
 			// FIXME-OPT
 			char buf[1024];
 			va_list args;
@@ -77,7 +98,10 @@ namespace zr
 			vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
 			buf[IM_ARRAYSIZE(buf) - 1] = 0;
 			va_end(args);
-			Items.push_back(Strdup(buf));
+			ConsoleItem ci;
+			ci.MessageType = messageType;
+			ci.Message = buf;
+			Items.push_back(ci);
 			if (AutoScroll)
 				ScrollToBottom = true;
 		}
@@ -103,15 +127,7 @@ namespace zr
 
 			// TODO: display items starting from the bottom
 
-			if (ImGui::SmallButton("Add Dummy Text")) {
-				AddLog("%d some text", Items.Size); AddLog("some more text"); AddLog("display very important message here!");
-			} ImGui::SameLine();
-			if (ImGui::SmallButton("Add Dummy Error")) {
-				AddLog("[error] something went wrong");
-			} ImGui::SameLine();
-			if (ImGui::SmallButton("Clear")) {
-				ClearLog();
-			} ImGui::SameLine();
+
 			bool copy_to_clipboard = ImGui::SmallButton("Copy"); ImGui::SameLine();
 			if (ImGui::SmallButton("Scroll to bottom")) ScrollToBottom = true;
 			//static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
@@ -119,12 +135,12 @@ namespace zr
 			ImGui::Separator();
 
 			// Options menu
-			if (ImGui::BeginPopup("Options")) {
+			/*if (ImGui::BeginPopup("Options")) {
 				if (ImGui::Checkbox("Auto-scroll", &AutoScroll))
 					if (AutoScroll)
 						ScrollToBottom = true;
 				ImGui::EndPopup();
-			}
+			}*/
 
 			// Options, Filter
 			if (ImGui::Button("Options"))
@@ -154,15 +170,29 @@ namespace zr
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 			if (copy_to_clipboard)
 				ImGui::LogToClipboard();
-			for (int i = 0; i < Items.Size; i++) {
-				const char* item = Items[i];
+			for (int i = 0; i < Items.size(); i++) {
+				const char* item = Items[i].Message.c_str();
 				if (!Filter.PassFilter(item))
 					continue;
-
 				// Normally you would store more information in your item (e.g. make Items[] an array of structure, store color/type etc.)
 				bool pop_color = false;
-				if (strstr(item, "[error]")) {
+				if (Items[i].MessageType == ConsoleItem::Normal) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.f)); pop_color = true;
+				}
+				else if (Items[i].MessageType == ConsoleItem::Error) {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true;
+				}
+				else if (Items[i].MessageType == ConsoleItem::Info) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.4f, 1.f, 0.4f, 1.0f)); pop_color = true;
+				}
+				else if (Items[i].MessageType == ConsoleItem::Trace) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(.5f, 0.5f, 0.5f, 1.0f)); pop_color = true;
+				}
+				else if (Items[i].MessageType == ConsoleItem::Warn) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 0.f, 1.0f)); pop_color = true;
+				}
+				else if (Items[i].MessageType == ConsoleItem::Fatal) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.f, 0.f, 1.0f)); pop_color = true;
 				}
 				else if (strncmp(item, "# ", 2) == 0) {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true;
@@ -201,7 +231,7 @@ namespace zr
 
 		void    ExecCommand(const char* command_line)
 		{
-			AddLog("# %s\n", command_line);
+			AddLog(ConsoleItem::Normal, "# %s\n", command_line);
 
 			// Insert into history. First find match and delete it so it can be pushed to the back. This isn't trying to be smart or optimal.
 			HistoryPos = -1;
@@ -218,17 +248,17 @@ namespace zr
 				ClearLog();
 			}
 			else if (Stricmp(command_line, "HELP") == 0) {
-				AddLog("Commands:");
+				AddLog(ConsoleItem::Normal, "Commands:");
 				for (int i = 0; i < Commands.Size; i++)
-					AddLog("- %s", Commands[i]);
+					AddLog(ConsoleItem::Normal, "- %s", Commands[i]);
 			}
 			else if (Stricmp(command_line, "HISTORY") == 0) {
 				int first = History.Size - 10;
 				for (int i = first > 0 ? first : 0; i < History.Size; i++)
-					AddLog("%3d: %s\n", i, History[i]);
+					AddLog(ConsoleItem::Normal, "%3d: %s\n", i, History[i]);
 			}
 			else {
-				AddLog("Unknown command: '%s'\n", command_line);
+				AddLog(ConsoleItem::Warn, "Unknown command: '%s'\n", command_line);
 			}
 
 			// On commad input, we scroll to bottom even if AutoScroll==false
@@ -243,7 +273,7 @@ namespace zr
 
 		int     TextEditCallback(ImGuiInputTextCallbackData* data)
 		{
-			AddLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
+			AddLog(ConsoleItem::Normal, "cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
 			switch (data->EventFlag) {
 				case ImGuiInputTextFlags_CallbackCompletion:
 				{
@@ -267,7 +297,7 @@ namespace zr
 
 					if (candidates.Size == 0) {
 						// No match
-						AddLog("No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
+						AddLog(ConsoleItem::Warn, "No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
 					}
 					else if (candidates.Size == 1) {
 						// Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
@@ -297,9 +327,9 @@ namespace zr
 						}
 
 						// List matches
-						AddLog("Possible matches:\n");
+						AddLog(ConsoleItem::Normal, "Possible matches:\n");
 						for (int i = 0; i < candidates.Size; i++)
-							AddLog("- %s\n", candidates[i]);
+							AddLog(ConsoleItem::Normal, "- %s\n", candidates[i]);
 					}
 
 					break;
@@ -331,4 +361,19 @@ namespace zr
 			return 0;
 		}
 	};
+
+	class Console
+	{
+	public:
+		static std::shared_ptr<ImGuiConsole>& GetConsole()
+		{
+			return sImGuiConsole;
+		}
+
+	private:
+		static std::shared_ptr<ImGuiConsole> sImGuiConsole;
+	};
 }
+
+#define ZR_IMGUI_LOG(...) zr::Console::GetConsole()->AddLog(__VA_ARGS__)
+#define ZR_IMGUI_DRAW(Title, Open) zr::Console::GetConsole()->Draw(Title, Open)

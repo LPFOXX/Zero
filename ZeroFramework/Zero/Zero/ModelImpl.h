@@ -14,5 +14,6 @@ namespace zr
 
 		virtual void update(const Time& elapsedTime) = 0;
 		virtual void render(const glm::mat4& viewProjectionMatrix) = 0;
+		virtual void setModelTransform(const glm::mat4& modelTranform) = 0;
 	};
 }

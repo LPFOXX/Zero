@@ -35,11 +35,14 @@ namespace zr
 	class Model
 	{
 	public:
-		Model(const std::string& filePath, unsigned componentsToLoad = MeshData::Normals | MeshData::TangentsAndBitangents | MeshData::TextureCoordinates, const ProgressFunction& progressUpdateFunction = nullptr);
+		Model(const std::string& filePath, unsigned componentsToLoad = MeshData::Normals | MeshData::TangentsAndBitangents | MeshData::TextureCoordinates | MeshData::Animations, const ProgressFunction& progressUpdateFunction = nullptr);
 		virtual ~Model();
 
+		void setModelTransform(const glm::mat4& modelTransform);
 		void update(const Time& elapsedTime);
 		void render(const glm::mat4& viewProjectionMatrix);
+
+		float getLoadingProgress() const;
 
 	private:
 		void loadModel();
@@ -48,6 +51,8 @@ namespace zr
 		std::string mFilePath;
 		ProgressFunction mProgressFunction;
 		sf::Thread mModelLoadingThread;
+		mutable sf::Mutex mProgressHandlerMutex;
+		float mLoadingProgress;
 		Ref<ModelData> mModelData;
 		Scope<ModelImpl> mModelInstance;
 		unsigned mComponents;

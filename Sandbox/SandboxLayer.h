@@ -36,7 +36,9 @@ namespace lp
 
 		zr::Ref<zr::CubeMap> mCubeMap;
 
-		zr::Ref<zr::Model> mModel;
+		zr::Ref<zr::Model> mModel1;
+		zr::Ref<zr::Model> mModel2;
+		std::vector<zr::Ref<zr::Model>> mModels;
 		sf::Thread mModelLoadingThread;
 		sf::Mutex mModelLoadingMutex;
 		float mModelScaleFactor = .01f;

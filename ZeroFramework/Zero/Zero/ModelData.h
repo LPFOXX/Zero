@@ -22,7 +22,7 @@ namespace zr
 		ModelData() = default;
 		virtual ~ModelData() = default;
 
-		bool loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned componentsToLoad = MeshData::Normals | MeshData::TangentsAndBitangents | MeshData::TextureCoordinates);
+		bool loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned& componentsToLoad);
 
 		void walkThroughChildren(const aiNode* rootNode, const aiScene* scene);
 
@@ -46,9 +46,12 @@ namespace zr
 		}
 
 	private:
+		void updateFlag(unsigned& flags, unsigned bit, bool hasComponent) const;
+
+	private:
 		std::vector<Scope<MeshData>> mMeshesData;
 		std::vector<Image> mLoadedTextures;
 		std::string mDirectory;
-		unsigned mComponents = 0;
+		unsigned mComponents;
 	};
 }

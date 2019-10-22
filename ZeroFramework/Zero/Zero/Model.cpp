@@ -5,6 +5,7 @@
 #include <assimp/ProgressHandler.hpp>
 
 #include "Core/Log.h"
+#include "ImGui/ImGuiConsole.h"
 
 #include "ProgressHandler.h"
 #include "ModelLoader.h"
@@ -32,6 +33,11 @@ namespace zr
 		mModelLoadingThread.wait();
 	}
 
+	void Model::setModelTransform(const glm::mat4& modelTransform)
+	{
+		mModelInstance->setModelTransform(modelTransform);
+	}
+
 	void Model::update(const Time& elapsedTime)
 	{
 		mModelInstance->update(elapsedTime);
@@ -42,6 +48,12 @@ namespace zr
 		mModelInstance->render(viewProjectionMatrix);
 	}
 
+	float Model::getLoadingProgress() const
+	{
+		sf::Lock l(mProgressHandlerMutex);
+		return mLoadingProgress;
+	}
+
 	void Model::loadModel()
 	{
 		Assimp::Importer importer;
@@ -50,13 +62,18 @@ namespace zr
 		const Ref<ModelProgressHandler>& progressHandler = ModelLoader::Get()->getProgressHandler();
 		if (progressHandler != nullptr) {
 			ModelProgressHandler* newProgressHandler = new ModelProgressHandler(*progressHandler);
-			newProgressHandler->setUpdateFunction(mProgressFunction);
+			//newProgressHandler->setUpdateFunction(mProgressFunction);
+			newProgressHandler->setUpdateFunction([&](float& progress) {
+				sf::Lock l(mProgressHandlerMutex);
+				mLoadingProgress = progress;
+			});
 			importer.SetProgressHandler(dynamic_cast<Assimp::ProgressHandler*>(newProgressHandler));
 			#ifdef ZR_DEBUG_BUILD
 			importer.SetExtraVerbose(true); // debug feature
 			#endif
 		}
-		unsigned flags = (mComponents & MeshData::TangentsAndBitangents ? aiProcess_CalcTangentSpace : 0U) |
+		unsigned flags =
+			(mComponents & MeshData::TangentsAndBitangents ? aiProcess_CalcTangentSpace : 0U) |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_Triangulate |
 			aiProcess_RemoveComponent |
@@ -71,15 +88,16 @@ namespace zr
 			aiProcess_FlipUVs;
 
 		mModelData.reset(new ModelData());
-		if (!mModelData->loadFromFile(importer, mFilePath, mComponents)) {
+		if (!mModelData->loadFromFile(importer, mFilePath, flags, mComponents)) {
 			ZR_CORE_ERROR("[Model] Can't load model from '{0}'", mFilePath);
+			ZR_IMGUI_LOG(ConsoleItem::Error, "[Model] Can't load model from '%s'", mFilePath.c_str());
 		}
 		else {
 			CommandQueue::Enqueue([&]() {
 				mModelInstance.reset(new Model3D(mFilePath, mModelData));
 				mModelData.reset();
 			});
-			ZR_CORE_INFO("Finished loading model data from '{0}'", mFilePath);
+			ZR_IMGUI_LOG(ConsoleItem::Info, "[Model] Finished loading model data from '%s'", mFilePath.c_str());
 		}
 	}
 	//	sf::Mutex ModelLoader::sInstanceMutex;

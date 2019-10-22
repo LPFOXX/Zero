@@ -7,6 +7,8 @@
 
 namespace lp
 {
+	//zr::ImGuiConsole SandboxLayer::sImguiConsole;
+
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
 		mOrthographicCameraController(nullptr),
@@ -24,13 +26,43 @@ namespace lp
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
 		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
-		mModel = std::make_shared<zr::Model>("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
-			mProgress = progress;
-		});
-		/*mModel = std::make_shared<zr::Model>("resources/anim_model/anim_model.dae", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
+		unsigned componentsToLoad =
+			zr::MeshData::Normals |
+			zr::MeshData::TangentsAndBitangents |
+			zr::MeshData::TextureCoordinates |
+			zr::MeshData::Textures |
+			zr::MeshData::Animations |
+			zr::MeshData::Materials;
+		std::vector<std::string> modelsToLoad{ {
+			{"resources/nanosuit/nanosuit.obj"},
+			{"resources/anim_model/anim_model.dae"},
+			{"resources/iron_man_fixed/iron_man_fixed.obj"},
+			{"resources/teapot3/teapot.obj"}
+			} };
+
+		{
+			//mModel1 = std::make_shared<zr::Model>("resources/iron_man_fixed/iron_man_fixed.obj", componentsToLoad);
+		}
+		for (unsigned i = 0; i < modelsToLoad.size(); ++i) {
+			ZR_IMGUI_LOG(zr::ConsoleItem::Info, "Model file name: %s", modelsToLoad[i].c_str());
+			mModels.push_back(std::make_shared<zr::Model>(modelsToLoad[i], componentsToLoad, [&](float& progress) {
+				//mModelLoadingProgress[i] = progress;
+				ZR_INFO("Progress: {0:.2f}", progress);
+			}));
+		}
+		/*mModel = std::make_shared<zr::Model>("resources/nanosuit/nanosuit.obj", componentsToLoad, [&](float& progress) {
 			mProgress = progress;
 		});*/
-		
+		/*mModel = std::make_shared<zr::Model>("resources/anim_model/anim_model.dae", componentsToLoad, [&](float& progress) {
+			mProgress = progress;
+		});*/
+		/*mModel = std::make_shared<zr::Model>("resources/iron_man_fixed/iron_man_fixed.obj",componentsToLoad, [&](float& progress) {
+			mProgress = progress;
+		});*/
+		/*mModel = std::make_shared<zr::Model>("resources/teapot3/teapot.obj",componentsToLoad, [&](float& progress) {
+			mProgress = progress;
+		});*/
+
 
 		mCubeMap = zr::CubeMap::Create();
 		bool success = mCubeMap->loadFromFiles({
@@ -189,7 +221,9 @@ namespace lp
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
 		mOrthographicCameraController->onUpdate(elapsedTime);
-		mModel->update(elapsedTime);
+		for (auto& model : mModels) {
+			model->update(elapsedTime);
+		}
 
 		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
 			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
@@ -220,7 +254,7 @@ namespace lp
 		model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
 		//mModel->setTransformationMatrix(model);
 		//mModel->setCameraPosition(mFPSCamera->getPosition());
-		
+
 
 		//zr::Renderer::BeginScene(mFPSCamera);
 		//{
@@ -262,7 +296,12 @@ namespace lp
 		}
 
 		//mModel->render(mFPSCamera->getViewProjectionMatrix());
-		mModel->render(mOrthographicCameraController->getCamera()->getViewProjectionMatrix());
+		for (unsigned i = 0; i < mModels.size(); ++i) {
+			glm::mat4 model = glm::mat4(1.f);
+			model = glm::translate(model, glm::vec3(10.f * i, 5.f * i, 0.f));
+			mModels[i]->setModelTransform(model);
+			mModels[i]->render(mOrthographicCameraController->getCamera()->getViewProjectionMatrix());
+		}
 		mLastDeltaTime = zr::Time::Seconds(elapsedTime.asSeconds());
 	}
 
@@ -284,15 +323,16 @@ namespace lp
 
 			// Typically we would use ImVec2(-1.0f,0.0f) or ImVec2(-FLT_MIN,0.0f) to use all available width, 
 			// or ImVec2(width,0.0f) for a specified width. ImVec2(0.0f,0.0f) uses ItemWidth.
-			ImGui::ProgressBar(mProgress, ImVec2(0.0f, 0.0f));
-			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-			ImGui::Text("Progress Bar");
+			for (unsigned i = 0; i < mModels.size(); ++i) {
+				ImGui::ProgressBar(mModels[i]->getLoadingProgress(), ImVec2(0.0f, 0.0f));
+				ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+				ImGui::Text("Model loading progress %i", i);
+			}
 			ImGui::End();
 		}
 
-		static zr::ImGuiConsole imguiConsole;
 		static bool isOpen = true;
-		imguiConsole.Draw("Example: Console", &isOpen);
+		ZR_IMGUI_DRAW("ExampleConsole", &isOpen);
 	}
 
 	void SandboxLayer::onEvent(zr::Event& e)

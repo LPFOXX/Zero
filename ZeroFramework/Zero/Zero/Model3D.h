@@ -20,6 +20,7 @@ namespace zr
 		// Inherited via ModelImpl
 		virtual void render(const glm::mat4& viewProjectionMatrix) override;
 		virtual void update(const Time& elapsedTime) override;
+		virtual void setModelTransform(const glm::mat4& modelTranform) override;
 
 	private:
 		void generateBuffers();

@@ -7,12 +7,13 @@ namespace zr
 	class Timer
 	{
 	public:
-		Timer();
-		virtual ~Timer();
+		Timer(const std::string& identifier);
+		~Timer();
 
-		Time restart();
+		Time Timer::restart();
 
 	private:
-		Time mRestartTimePoint;
+		Time mStartTime;
+		std::string mIdentifier;
 	};
 }

@@ -4,7 +4,7 @@
 
 #include "Mesh.h"
 #include "Renderer/RenderCommand.h"
-#include "Core/Log.h"
+#include "ImGui/ImGuiConsole.h"
 
 namespace zr
 {
@@ -45,15 +45,15 @@ namespace zr
 		mTextures(),
 		mProperties(meshData.getProperties())
 	{
-		ZR_CORE_INFO("Mesh name: {0}", mProperties.Name);
-		auto& textures = meshData.getTextures();
+		ZR_IMGUI_LOG(ConsoleItem::Info, "Mesh name: %s", mProperties.Name.c_str());
+		/*auto& textures = meshData.getTextures();
 		ZR_CORE_INFO("\tTextures");
 		for (auto& t : textures) {
 			ZR_CORE_INFO("\tTexture type {0}: ", Texture2D::typeToString(t.first));
 			for (auto& imagePath : t.second) {
 				ZR_CORE_INFO("\t\tImage path: {0}", imagePath);
 			}
-		}
+		}*/
 		
 		mVAO = VertexArray::Create();
 		std::vector<MeshData::Vertex>& v = meshData.getVertices();
@@ -62,16 +62,16 @@ namespace zr
 		BufferLayout bl;
 		bl.addElement(BufferElement(ShaderDataType::Float3, "aPosition"));
 
-		if (mProperties.Components & MeshData::Components::Normals) {
+		if (mProperties.Components & MeshData::Normals) {
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aNormal"));
 		}
 
-		if (mProperties.Components & MeshData::Components::TangentsAndBitangents) {
+		if (mProperties.Components & MeshData::TangentsAndBitangents) {
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aTangent"));
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aBitangent"));
 		}
 
-		if (mProperties.Components & MeshData::Components::Textures) {
+		if (mProperties.Components & MeshData::TextureCoordinates) {
 			bl.addElement(BufferElement(ShaderDataType::Float2, "aTexturesCoordinates"));
 		}
 
@@ -88,6 +88,16 @@ namespace zr
 		mTextures(),
 		mProperties(meshData.getProperties())
 	{
+		ZR_IMGUI_LOG(ConsoleItem::Info, "Mesh name: %s", mProperties.Name.c_str());
+		//auto& textures = meshData.getTextures();
+		/*ZR_CORE_INFO("\tTextures");
+		for (auto& t : textures) {
+			ZR_CORE_INFO("\tTexture type {0}: ", Texture2D::typeToString(t.first));
+			for (auto& imagePath : t.second) {
+				ZR_CORE_INFO("\t\tImage path: {0}", imagePath);
+			}
+		}*/
+
 		auto& textures = meshData.getTextures();
 		for (auto& t : textures) {
 			for (auto& imagePath : t.second) {
@@ -117,7 +127,7 @@ namespace zr
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aBitangent"));
 		}
 
-		if (mProperties.Components & MeshData::Components::Textures) {
+		if (mProperties.Components & MeshData::Components::TextureCoordinates) {
 			bl.addElement(BufferElement(ShaderDataType::Float2, "aTexturesCoordinates"));
 		}
 

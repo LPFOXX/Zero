@@ -1,6 +1,9 @@
+#include "ModelData.h"
 #include <zr_pch.h>
 
 #include "Core/Log.h"
+#include "Core/Timer.h"
+#include "ImGui/ImGuiConsole.h"
 
 #include <assimp/Importer.hpp>
 
@@ -8,39 +11,39 @@
 
 namespace zr
 {
-	bool ModelData::loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned componentsToLoad)
+	bool ModelData::loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned& componentsToLoad)
 	{
-		mComponents = componentsToLoad;
-
+		Timer t("ModelData::loadFromFile");
 		const aiScene* scene = importer.ReadFile(filePath.c_str(), flags);
 		if (!scene) {
 			ZR_CORE_ERROR("[ASSIMP] {0}", importer.GetErrorString());
+			ZR_IMGUI_LOG(ConsoleItem::Error, "[ASSIMP] %s", importer.GetErrorString());
 			return false;
 		}
 
 		mDirectory = filePath.substr(0, filePath.find_last_of("/\\") + 1);
-		mComponents |= scene->HasTextures() ? MeshData::Textures : 0;
+		updateFlag(componentsToLoad, MeshData::Textures, scene->HasTextures());
+		updateFlag(componentsToLoad, MeshData::Materials, scene->HasMaterials());
+		updateFlag(componentsToLoad, MeshData::Animations, scene->HasAnimations());
+
+		mComponents = componentsToLoad;
 
 		walkThroughChildren(scene->mRootNode, scene);
+		return true;
 	}
 
 	void ModelData::walkThroughChildren(const aiNode* rootNode, const aiScene* scene)
 	{
-		for (unsigned i = 0; i < rootNode->mNumChildren; i++) {
-			for (unsigned j = 0; j < rootNode->mChildren[i]->mNumMeshes; j++) {
-				mMeshesData.emplace_back(processMesh(scene->mMeshes[rootNode->mChildren[i]->mMeshes[j]], scene));
+		if (rootNode->mNumChildren > 0) {
+			for (unsigned i = 0; i < rootNode->mNumChildren; ++i) {
+				walkThroughChildren(rootNode->mChildren[i], scene);
 			}
-			walkThroughChildren(rootNode->mChildren[i], scene);
-		}
-
-		/*if (rootNode->mNumChildren != 0) {
-			
 		}
 		else {
-			for (unsigned i = 0; i < rootNode->mNumMeshes; i++) {
+			for (unsigned i = 0; i < rootNode->mNumMeshes; ++i) {
 				mMeshesData.emplace_back(processMesh(scene->mMeshes[rootNode->mMeshes[i]], scene));
 			}
-		}*/
+		}
 	}
 
 	MeshData* ModelData::processMesh(const aiMesh* mesh, const aiScene* scene)
@@ -48,11 +51,24 @@ namespace zr
 		std::vector<MeshData::Vertex> vertices;
 		std::vector<unsigned> indices;
 		std::unordered_map<Texture2D::Type, std::vector<std::string>> textures;
+		std::map<std::string, MeshData::Bone> meshBones;
 
 		bool meshHasNormals = mesh->HasNormals() && (mComponents & MeshData::Normals);
 		bool meshHasTangentsAndBitangents = mesh->HasTangentsAndBitangents() && (mComponents & MeshData::TangentsAndBitangents);
 		bool meshHasTextureCoordinates = mesh->HasTextureCoords(0) && (mComponents & MeshData::TextureCoordinates);
+		bool meshHasBones = mesh->HasBones() && (mComponents & MeshData::Animations);
+		bool searchForMaterials = mComponents & MeshData::Materials;
+		bool searchForTextures = mComponents & MeshData::Textures;
 		bool meshHasFaces = mesh->HasFaces();
+
+		MeshData::MeshProperties props;
+		props.Name = mesh->mName.C_Str();
+		updateFlag(props.Components, MeshData::Normals, meshHasNormals);
+		updateFlag(props.Components, MeshData::TangentsAndBitangents, meshHasTangentsAndBitangents);
+		updateFlag(props.Components, MeshData::TextureCoordinates, meshHasTextureCoordinates);
+		updateFlag(props.Components, MeshData::Textures, searchForTextures);
+		updateFlag(props.Components, MeshData::Materials, searchForMaterials);
+		updateFlag(props.Components, MeshData::Animations, meshHasBones);
 
 		// Loads the vertex positions values into the vector.
 		// While doing it a vertex object is created.
@@ -106,66 +122,81 @@ namespace zr
 			}
 		}
 
-		// process materials
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-		// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-		// Same applies to other texture as the following list summarizes:
-		// diffuse: texture_diffuseN
-		// specular: texture_specularN
-		// normal: texture_normalN
-
-		aiColor4D ambient, diffuse, specular, emissive;
-		float shininess = 0.f;
-		aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambient);
-		aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
-		aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specular);
-		aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &emissive);
-		aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
-
-		MeshData::MeshProperties props;
-		props.mMaterial.Ambient = glm::vec4(ambient.r, ambient.g, ambient.b, ambient.a);
-		props.mMaterial.Diffuse = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-		props.mMaterial.Specular = glm::vec4(specular.r, specular.g, specular.b, specular.a);
-		props.mMaterial.Emissive = glm::vec4(emissive.r, emissive.g, emissive.b, emissive.a);
-		props.mMaterial.Shininess = shininess;
-
-		// 1. ambient maps
-		std::vector<std::string>& ambientMap = processMaterial(material, Texture2D::Type::Ambient);
-		if (!ambientMap.empty()) {
-			textures[Texture2D::Type::Ambient] = ambientMap;
+		// Gets bones
+		if (meshHasBones) {
+			// mesh->mBones[vertexIndex];
+			for (unsigned bonesIndex = 0; bonesIndex < mesh->mNumBones; bonesIndex++) {
+				const aiBone* bone = mesh->mBones[bonesIndex];
+				ZR_IMGUI_LOG(ConsoleItem::Info, "Bone name: %s", bone->mName.C_Str());
+				MeshData::Bone newBone(bone->mName.data);
+				newBone.OffsetMatrix = glm::mat4(
+					{ bone->mOffsetMatrix[0][0], bone->mOffsetMatrix[1][0], bone->mOffsetMatrix[2][0], bone->mOffsetMatrix[3][0] },
+					{ bone->mOffsetMatrix[0][1], bone->mOffsetMatrix[1][1], bone->mOffsetMatrix[2][1], bone->mOffsetMatrix[3][1] },
+					{ bone->mOffsetMatrix[0][2], bone->mOffsetMatrix[1][2], bone->mOffsetMatrix[2][2], bone->mOffsetMatrix[3][2] },
+					{ bone->mOffsetMatrix[0][3], bone->mOffsetMatrix[1][3], bone->mOffsetMatrix[2][3], bone->mOffsetMatrix[3][3] });
+				for (unsigned boneWeightsIndex = 0; boneWeightsIndex < bone->mNumWeights; boneWeightsIndex++) {
+					newBone.Weights.emplace_back(bone->mWeights[boneWeightsIndex].mVertexId, bone->mWeights[boneWeightsIndex].mWeight);
+				}
+				meshBones[newBone.Name] = std::move(newBone);
+			}
 		}
 
-		// 2. diffuse maps 
-		std::vector<std::string>& diffuseMap = processMaterial(material, Texture2D::Type::Diffuse);
-		if (!diffuseMap.empty()) {
-			textures[Texture2D::Type::Diffuse] = diffuseMap;
+		if (searchForMaterials) {
+			// process materials
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
+			// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+			// Same applies to other texture as the following list summarizes:
+			// diffuse: texture_diffuseN
+			// specular: texture_specularN
+			// normal: texture_normalN
+
+			aiColor4D ambient, diffuse, specular, emissive;
+			float shininess = 0.f;
+			aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambient);
+			aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
+			aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specular);
+			aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &emissive);
+			aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
+
+			props.mMaterial.Ambient = glm::vec4(ambient.r, ambient.g, ambient.b, ambient.a);
+			props.mMaterial.Diffuse = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+			props.mMaterial.Specular = glm::vec4(specular.r, specular.g, specular.b, specular.a);
+			props.mMaterial.Emissive = glm::vec4(emissive.r, emissive.g, emissive.b, emissive.a);
+			props.mMaterial.Shininess = shininess;
+
+			if (searchForTextures) {
+				// 1. ambient maps
+				std::vector<std::string>& ambientMap = processMaterial(material, Texture2D::Type::Ambient);
+				if (!ambientMap.empty()) {
+					textures[Texture2D::Type::Ambient] = ambientMap;
+				}
+
+				// 2. diffuse maps 
+				std::vector<std::string>& diffuseMap = processMaterial(material, Texture2D::Type::Diffuse);
+				if (!diffuseMap.empty()) {
+					textures[Texture2D::Type::Diffuse] = diffuseMap;
+				}
+
+				// 3. specular maps
+				std::vector<std::string>& specularMap = processMaterial(material, Texture2D::Type::Specular);
+				if (!specularMap.empty()) {
+					textures[Texture2D::Type::Specular] = specularMap;
+				}
+
+				// 4. normal maps
+				std::vector<std::string>& normalMap = processMaterial(material, Texture2D::Type::Normal);
+				if (!normalMap.empty()) {
+					textures[Texture2D::Type::Normal] = normalMap;
+				}
+
+				// 5. height maps
+				std::vector<std::string>& heightMap = processMaterial(material, Texture2D::Type::Height);
+				if (!heightMap.empty()) {
+					textures[Texture2D::Type::Height] = heightMap;
+				}
+			}
 		}
-
-		// 3. specular maps
-		std::vector<std::string>& specularMap = processMaterial(material, Texture2D::Type::Specular);
-		if (!specularMap.empty()) {
-			textures[Texture2D::Type::Specular] = specularMap;
-		}
-
-		// 4. normal maps
-		std::vector<std::string>& normalMap = processMaterial(material, Texture2D::Type::Normal);
-		if (!normalMap.empty()) {
-			textures[Texture2D::Type::Normal] = normalMap;
-		}
-
-		// 5. height maps
-		std::vector<std::string>& heightMap = processMaterial(material, Texture2D::Type::Height);
-		if (!heightMap.empty()) {
-			textures[Texture2D::Type::Height] = heightMap;
-		}
-
-		props.Components |= meshHasNormals ? MeshData::Normals : 0U;
-		props.Components |= meshHasTangentsAndBitangents ? MeshData::TangentsAndBitangents : 0U;
-		props.Components |= meshHasTextureCoordinates ? MeshData::TextureCoordinates : 0U;
-		props.Components |= textures.size() != 0U ? MeshData::Textures : 0U;
-
-		props.Name = mesh->mName.C_Str();
 
 		// return a meshdata object created from the extracted mesh data
 		return new MeshData(props, vertices, indices, textures);
@@ -243,5 +274,17 @@ namespace zr
 		}
 
 		return meshTexturesPath;
+	}
+
+	void ModelData::updateFlag(unsigned& flags, unsigned bit, bool hasComponent) const
+	{
+		if (hasComponent) {
+			// Add component flag
+			flags |= bit;
+		}
+		else {
+			// Remove component flag
+			flags &= ~(unsigned)bit;
+		}
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assimp/Logger.hpp>
+#include "../sfml/include/SFML/System.hpp"
 
 namespace zr
 {
@@ -25,5 +26,8 @@ namespace zr
 		virtual void OnInfo(const char* message) override;
 		virtual void OnWarn(const char* message) override;
 		virtual void OnError(const char* message) override;
+
+	private:
+		static sf::Mutex sLogMutex;
 	};
 }

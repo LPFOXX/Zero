@@ -17,5 +17,9 @@ namespace zr
 		virtual void update(const Time& elapsedTime) override
 		{
 		}
+
+		virtual void setModelTransform(const glm::mat4& modelTranform) override
+		{
+		}
 	};
 }

@@ -123,7 +123,7 @@ namespace zr
 
 	const unsigned char* Image::getData() const
 	{
-		return &mBuffer[0] ? &mBuffer[0] : nullptr;
+		return !mBuffer.empty() ? &mBuffer[0] : nullptr;
 	}
 
 	const std::string& Image::getPath() const

@@ -1,5 +1,6 @@
 #include "Model3D.h"
 #include "Model3D.h"
+#include "Model3D.h"
 #include <zr_pch.h>
 
 #include <assimp/scene.h>
@@ -18,6 +19,7 @@ namespace zr
 		mFilePath(filePath),
 		mModelData(modelData),
 		mShader(nullptr),
+		mTransformationMatrix(glm::mat4(1.f)),
 		mComponents(mModelData->getComponents())
 	{
 		generateBuffers();
@@ -45,6 +47,7 @@ namespace zr
 		//ZR_CORE_INFO("Model3D::render");
 		mShader->bind();
 		mShader->setUniform("uViewProjection", viewProjectionMatrix);
+		mShader->setUniform("uTranformMatrix", mTransformationMatrix);
 		mShader->setUniform("uColor", {.1f, .3f, .8f, 1.f});
 		for (auto& m : mMeshes) {
 			m->render(mShader);
@@ -54,6 +57,11 @@ namespace zr
 	void Model3D::update(const Time& elapsedTime)
 	{
 		//ZR_CORE_INFO("Model3D::update");
+	}
+
+	void Model3D::setModelTransform(const glm::mat4& modelTranform)
+	{
+		mTransformationMatrix = modelTranform;
 	}
 
 	void Model3D::generateBuffers()
@@ -254,10 +262,11 @@ namespace zr
 			layout(location = 4) in vec3 aTexCoords;
 
 			uniform mat4 uViewProjection;
+			uniform mat4 uTranformMatrix;
 
 			void main()
 			{
-				gl_Position = uViewProjection * vec4(aPosition, 1.f);
+				gl_Position = uViewProjection * uTranformMatrix * vec4(aPosition, 1.f);
 			}
 		)";
 		std::string fragment = R"(

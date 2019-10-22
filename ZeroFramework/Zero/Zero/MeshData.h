@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../vendor/glm/include/glm/glm.hpp"
+
 #include "Renderer/Texture.h"
 #include "Renderer/Material.h"
 #include "Image.h"
@@ -11,10 +13,12 @@ namespace zr
 	public:
 		enum Components
 		{
-			Normals = 1 << 0,
-			TangentsAndBitangents = 1 << 1,
-			TextureCoordinates = 1 << 2,
-			Textures = 1 << 3
+			Normals					= 1 << 0,
+			TangentsAndBitangents	= 1 << 1,
+			TextureCoordinates		= 1 << 2,
+			Textures				= 1 << 3,
+			Animations				= 1 << 4,
+			Materials				= 1 << 5
 		};
 
 		struct MeshProperties
@@ -37,7 +41,7 @@ namespace zr
 
 			std::string Name;
 			Material mMaterial;
-			unsigned char Components;
+			unsigned Components;
 		};
 
 		struct Vertex
@@ -57,6 +61,40 @@ namespace zr
 			glm::vec3 Tangent;
 			glm::vec3 Bitangent;
 			glm::vec2 TextureCoordinates;
+		};
+
+		struct Bone
+		{
+			Bone() :
+				Name(),
+				Weights()
+			{
+
+			}
+
+			Bone(const std::string& boneName) :
+				Name(boneName),
+				Weights()
+			{
+
+			}
+
+			struct Weight
+			{
+				Weight(unsigned vertexIndex, float weight) :
+					VertexIndex(vertexIndex),
+					WeightValue(weight)
+				{
+
+				}
+
+				unsigned VertexIndex;
+				float WeightValue;
+			};
+
+			std::string Name;
+			std::vector<Weight> Weights;
+			glm::mat4 OffsetMatrix;
 		};
 
 	public:
