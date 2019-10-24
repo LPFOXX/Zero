@@ -99,4 +99,18 @@ namespace zr
 	{
 		return mIndexBuffer;
 	}
+
+	std::string OpenGLVertexArray::getShaderLayouts() const
+	{
+		std::stringstream ss;
+		unsigned location = 0U;
+		for (auto& vertexBuffer : mVertexBuffers) {
+			const auto& layout = vertexBuffer->getLayout().getElements();
+			for (auto& layoutElement : layout) {
+				ss << "layout (location = " << location << ") in " << ShaderDataTypeGLType(layoutElement.Type) << " " << layoutElement.Name << ";\n";
+				++location;
+			}
+		}
+		return ss.str();
+	}
 }
