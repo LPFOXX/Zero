@@ -15,7 +15,7 @@ namespace zr
 	class OpenGLVertexBuffer : public VertexBuffer
 	{
 	public:
-		OpenGLVertexBuffer(float* data, unsigned size, DrawMode drawMode);
+		OpenGLVertexBuffer(void* data, unsigned size, DrawMode drawMode);
 		virtual ~OpenGLVertexBuffer();
 
 		// Inherited via VertexBuffer
@@ -24,10 +24,13 @@ namespace zr
 		virtual void unbind() const override;
 		virtual const BufferLayout& getLayout() const override;
 		virtual void setLayout(const BufferLayout& layout) override;
+		virtual unsigned computeNextLayoutIndex() override;
+		virtual unsigned getMaxLayoutIndex() override;
 
 	private:
 		unsigned mId;
 		BufferLayout mLayout;
+		unsigned mMaxLayoutIndex;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer

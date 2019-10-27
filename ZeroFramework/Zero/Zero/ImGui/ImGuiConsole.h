@@ -91,6 +91,9 @@ namespace zr
 		void    AddLog(ConsoleItem::Type messageType, const char* fmt, ...) IM_FMTARGS(2)
 		{
 			sf::Lock l(LogMutex);
+			if (Items.size() == Items.max_size() - 1U || Items.size() >= 5000) {
+				Items.erase(Items.begin());
+			}
 			// FIXME-OPT
 			char buf[1024];
 			va_list args;
@@ -108,6 +111,7 @@ namespace zr
 
 		void    Draw(const char* title, bool* p_open)
 		{
+			sf::Lock l(LogMutex);
 			ImGui::SetNextWindowSize(ImVec2(520, 600), ImGuiCond_FirstUseEver);
 			if (!ImGui::Begin(title, p_open)) {
 				ImGui::End();
@@ -122,8 +126,8 @@ namespace zr
 				ImGui::EndPopup();
 			}
 
-			ImGui::TextWrapped("This example implements a console with basic coloring, completion and history. A more elaborate implementation may want to store entries along with extra data such as timestamp, emitter, etc.");
-			ImGui::TextWrapped("Enter 'HELP' for help, press TAB to use text completion.");
+			// ImGui::TextWrapped("This example implements a console with basic coloring, completion and history. A more elaborate implementation may want to store entries along with extra data such as timestamp, emitter, etc.");
+			// ImGui::TextWrapped("Enter 'HELP' for help, press TAB to use text completion.");
 
 			// TODO: display items starting from the bottom
 
@@ -376,4 +380,10 @@ namespace zr
 }
 
 #define ZR_IMGUI_LOG(...) zr::Console::GetConsole()->AddLog(__VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_FATAL(...)		zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Fatal, __VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_ERROR(...)		zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Error, __VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_WARN(...)		zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Warn, __VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_INFO(...)		zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Info, __VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_TRACE(...)		zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Trace, __VA_ARGS__)
+#define ZR_IMGUI_CONSOLE_NORMAL(...)	zr::Console::GetConsole()->AddLog(zr::ConsoleItem::Normal, __VA_ARGS__)
 #define ZR_IMGUI_DRAW(Title, Open) zr::Console::GetConsole()->Draw(Title, Open)

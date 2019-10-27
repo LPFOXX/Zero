@@ -20,10 +20,6 @@ namespace lp
 		virtual void onEvent(zr::Event& e) override;
 
 	private:
-		void loadModel();
-		void onLoadModelFinished();
-
-	private:
 		zr::Ref<zr::VertexArray> mVertexArray;
 		zr::Ref<zr::Shader> mShader;
 
@@ -31,24 +27,18 @@ namespace lp
 		zr::Ref<zr::VertexArray> mSquareVA;
 
 		zr::Ref<zr::OrthographicCameraController> mOrthographicCameraController;
-		zr::Ref<zr::Camera> mPerspectiveCamera;
+		zr::Ref<zr::PerspectiveCameraController> mPerspectiveCameraController;
 		zr::Ref<zr::FPSCamera> mFPSCamera;
 
 		zr::Ref<zr::CubeMap> mCubeMap;
 
-		zr::Ref<zr::Model> mModel1;
-		zr::Ref<zr::Model> mModel2;
 		std::vector<zr::Ref<zr::Model>> mModels;
-		sf::Thread mModelLoadingThread;
-		sf::Mutex mModelLoadingMutex;
-		float mModelScaleFactor = .01f;
+		float mModelScaleFactor = .5f;
 
 		//float mCameraRotationSpeed = 45.f;	// 45 degrees per second
 		float mCameraSpeed = 5.f;			// 5 units per second
 
 		zr::Time mLastDeltaTime;
-		float mProgress = 0.f;
-
 
 		zr::Ref<zr::Framebuffer> mFramebuffer;
 

@@ -22,6 +22,8 @@ namespace zr
 		~Mesh();
 
 		void render(const Ref<Shader>& shader);
+		unsigned getVertexArrayMaxLayoutIndex() const;
+		std::string getShaderLayoutLocation() const;
 
 	private:
 		Ref<VertexArray> mVAO;

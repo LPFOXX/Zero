@@ -1,6 +1,3 @@
-#include "Model3D.h"
-#include "Model3D.h"
-#include "Model3D.h"
 #include <zr_pch.h>
 
 #include <assimp/scene.h>
@@ -20,8 +17,15 @@ namespace zr
 		mModelData(modelData),
 		mShader(nullptr),
 		mTransformationMatrix(glm::mat4(1.f)),
-		mComponents(mModelData->getComponents())
+		mComponents(mModelData->getComponents()),
+		mCurrentAnimation(-1),
+		mModelScene(mModelData->getScene())
 	{
+		mBoneMap = modelData->getBoneMap();
+		mBoneOffsets = modelData->getBoneOffsets();
+		mBoneTransformations.resize(mBoneMap.size(), glm::mat4(1.f));
+		mBoneTransformations.shrink_to_fit();
+
 		generateBuffers();
 		generateShader();
 
@@ -48,7 +52,7 @@ namespace zr
 		mShader->bind();
 		mShader->setUniform("uViewProjection", viewProjectionMatrix);
 		mShader->setUniform("uTranformMatrix", mTransformationMatrix);
-		mShader->setUniform("uColor", {.1f, .3f, .8f, 1.f});
+		mShader->setUniform("uColor", { .1f, .3f, .8f, 1.f });
 		for (auto& m : mMeshes) {
 			m->render(mShader);
 		}
@@ -57,11 +61,36 @@ namespace zr
 	void Model3D::update(const Time& elapsedTime)
 	{
 		//ZR_CORE_INFO("Model3D::update");
+		computeBonesTransformations(elapsedTime);
 	}
 
 	void Model3D::setModelTransform(const glm::mat4& modelTranform)
 	{
 		mTransformationMatrix = modelTranform;
+	}
+
+	bool Model3D::setAnimation(const std::string& animationName)
+	{
+		return false;
+	}
+
+	bool Model3D::setAnimation(unsigned animationIndex)
+	{
+		return false;
+	}
+
+	bool Model3D::getAvailableAnimations(std::vector<std::string>& animations)
+	{
+		return false;
+	}
+
+	std::string Model3D::getShaderLayoutLocations() const
+	{
+		auto& it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
+			return a->getVertexArrayMaxLayoutIndex() < b->getVertexArrayMaxLayoutIndex();
+		});
+
+		return (*it)->getShaderLayoutLocation();
 	}
 
 	void Model3D::generateBuffers()
@@ -85,25 +114,10 @@ namespace zr
 
 	void Model3D::generateShader()
 	{
+		ZR_IMGUI_CONSOLE_INFO("Shader\n%s", getShaderLayoutLocations().c_str());
 		std::stringstream vertexShader;
-		vertexShader <<R"(
-			#version 330 core
-			layout(location = 0) in vec3 aPosition;	
-		)";
-
-		int location = 1;
-		if (mComponents & MeshData::Components::Normals) {
-			vertexShader << "layout(location = " << location++ << ") in vec3 aNormal;\n";
-		}
-
-		if (mComponents & MeshData::Components::TangentsAndBitangents) {
-			vertexShader << "layout(location = " << location++ << ") in vec3 aTangent;\n";
-			vertexShader << "layout(location = " << location++ << ") in vec3 aBitangent;\n";
-		}
-
-		if (mComponents & MeshData::Components::TextureCoordinates) {
-			vertexShader << "layout(location = " << location++ << ") in vec2 aTexCoords;\n";
-		}
+		vertexShader << "#version 330 core\n";
+		vertexShader << getShaderLayoutLocations();
 
 		vertexShader << R"(
 			out vec2 vTexCoords;
@@ -136,7 +150,7 @@ namespace zr
 		)";
 
 		if (mComponents & MeshData::Textures) {
-			for (unsigned i = 0; i < mMaxAmbientTextures; i++) {
+			/*for (unsigned i = 0; i < mMaxAmbientTextures; i++) {
 				fragmentShader << "uniform sampler2D texture_ambient" << i + 1 << ";\n";
 			}
 
@@ -154,7 +168,7 @@ namespace zr
 
 			for (unsigned i = 0; i < mMaxHeightTextures; i++) {
 				fragmentShader << "uniform sampler2D texture_height" << i + 1 << ";\n";
-			}
+			}*/
 
 			fragmentShader <<
 				"\n"
@@ -253,17 +267,11 @@ namespace zr
 		// ZR_CORE_TRACE("Generated Vertex Shader\n{0}", vertexShader.str());
 		// ZR_CORE_TRACE("Generated Fragment Shader\n{0}", fragmentShader.str());
 
-		std::string vertex = R"(
-			#version 330 core
-			layout(location = 0) in vec3 aPosition;	
-			layout(location = 1) in vec3 aNormal;	
-			layout(location = 2) in vec3 aTangent;	
-			layout(location = 3) in vec3 aBitangent;	
-			layout(location = 4) in vec3 aTexCoords;
-
-			uniform mat4 uViewProjection;
-			uniform mat4 uTranformMatrix;
-
+		std::stringstream vertex;
+		vertex << "#version 330 core\n";
+		vertex << getShaderLayoutLocations() << "\n";
+		vertex << generateVertexShaderUniforms();
+		vertex << R"(
 			void main()
 			{
 				gl_Position = uViewProjection * uTranformMatrix * vec4(aPosition, 1.f);
@@ -282,9 +290,150 @@ namespace zr
 		)";
 
 		mShader = Shader::Create();
-		if (!mShader->loadFromStrings(vertex, fragment)) {
+		if (!mShader->loadFromStrings(vertex.str(), fragment)) {
 			std::cout << "Can't create model shader object.\n";
 		}
+	}
+
+	std::string Model3D::generateVertexShaderUniforms() const
+	{
+		std::stringstream ss;
+		ss << "uniform mat4 uViewProjection;\n";
+		ss << "uniform mat4 uTranformMatrix;\n";
+		return ss.str();
+	}
+
+	void Model3D::computeBonesTransformations(const Time& elapsedTime)
+	{
+		if (!isAnimating || mCurrentAnimation == -1) {
+			return;
+		}
+
+		const ModelData::Animation* animation = mModelScene->getAnimation(mCurrentAnimation);
+
+		mAnimationTime += elapsedTime;
+		float timeInTicks = mAnimationTime.asSeconds() * animation->getTicksPerSecond();
+		float animationTime = fmod(timeInTicks, animation->getDuration());
+
+		traverseSceneTree(animation, animationTime, mModelScene->getRootNode(), glm::mat4(1.f));
+	}
+
+	void Model3D::traverseSceneTree(const ModelData::Animation* animation, float animationTime, const Ref<ModelData::SceneObject>& sceneNode, const glm::mat4& parentTransform)
+	{
+		const std::string& nodeName = sceneNode->getName();
+		const ModelData::NodeAnimation* nodeAnimation = animation->getNodeAnimation(nodeName);
+		glm::mat4 nodeTransformation = sceneNode->getTransform();
+		if (nodeAnimation != nullptr) {
+			glm::vec3 scale;
+			glm::quat rotation;
+			glm::vec3 translation;
+			computeScaleValues(scale, animationTime, nodeAnimation);
+			computeRotationValues(rotation, animationTime, nodeAnimation);
+			computeTranslationValues(translation, animationTime, nodeAnimation);
+
+			nodeTransformation = glm::translate(glm::mat4(1.f), translation) * glm::mat4(rotation) * glm::scale(glm::mat4(1.f), scale);
+		}
+
+		glm::mat4 globalTransformation = parentTransform * nodeTransformation;
+
+		if (mBoneMap.find(nodeName) != mBoneMap.end()) {
+			unsigned boneIndex = mBoneMap[nodeName];
+			mBoneTransformations[boneIndex] = mModelScene->getRootNode()->getTransform() * globalTransformation * mBoneOffsets[boneIndex];
+		}
+
+		const auto& sceneNodeChildren = sceneNode->getChildren();
+		for (const auto& child : sceneNodeChildren) {
+			traverseSceneTree(animation, animationTime, child, globalTransformation);
+		}
+	}
+
+	void Model3D::computeScaleValues(glm::vec3& scale, float animationTime, const ModelData::NodeAnimation* nodeAnimation)
+	{
+		const std::vector<ModelData::NodeAnimation::ScaleKey>& scaleKeys = nodeAnimation->getScales();
+		if (scaleKeys.size() == 1) {
+			scale = scaleKeys[0].Scale;
+			return;
+		}
+
+		/*std::find_if(scaleKeys.begin(), scaleKeys.end(), [&animationTime](const ModelData::NodeAnimation::ScaleKey& sk) {
+			return sk.Time > animationTime;
+		});*/
+
+		unsigned index = 0;
+		unsigned next = 0;
+		for (unsigned i = 0; i < scaleKeys.size() - 1; i++) {
+			if (animationTime < scaleKeys[i + 1].Time) {
+				index = i;
+				next = index + 1;
+				break;
+			}
+		}
+
+		float deltaTime = scaleKeys[next].Time - scaleKeys[index].Time;
+		float factor = (animationTime - scaleKeys[index].Time) / deltaTime;
+		factor = clamp(0.f, 1.f, factor);
+		glm::vec3& delta = scaleKeys[next].Scale - scaleKeys[index].Scale;
+		scale = scaleKeys[index].Scale + factor * delta;
+	}
+
+	void Model3D::computeRotationValues(glm::quat& rotation, float animationTime, const ModelData::NodeAnimation* nodeAnimation)
+	{
+		const std::vector<ModelData::NodeAnimation::RotationKey>& rotationKeys = nodeAnimation->getRotations();
+		if (rotationKeys.size() == 1) {
+			rotation = rotationKeys[0].Rotation;
+			return;
+		}
+
+		/*std::find_if(scaleKeys.begin(), scaleKeys.end(), [&animationTime](const ModelData::NodeAnimation::ScaleKey& sk) {
+			return sk.Time > animationTime;
+		});*/
+
+		unsigned index = 0;
+		unsigned next = 0;
+		for (unsigned i = 0; i < rotationKeys.size() - 1; i++) {
+			if (animationTime < rotationKeys[i + 1].Time) {
+				index = i;
+				next = index + 1;
+				break;
+			}
+		}
+
+		float deltaTime = rotationKeys[next].Time - rotationKeys[index].Time;
+		float factor = (animationTime - rotationKeys[index].Time) / deltaTime;
+		factor = clamp(0.f, 1.f, factor);
+		const glm::quat& end = rotationKeys[next].Rotation;
+		const glm::quat& start = rotationKeys[index].Rotation;
+		rotation = glm::lerp(start, end, factor);
+		rotation = glm::normalize(rotation);
+	}
+
+	void Model3D::computeTranslationValues(glm::vec3& translation, float animationTime, const ModelData::NodeAnimation* nodeAnimation)
+	{
+		const std::vector<ModelData::NodeAnimation::TranslationKey>& translationKeys = nodeAnimation->getTranslations();
+		if (translationKeys.size() == 1) {
+			translation = translationKeys[0].Position;
+			return;
+		}
+
+		/*std::find_if(scaleKeys.begin(), scaleKeys.end(), [&animationTime](const ModelData::NodeAnimation::ScaleKey& sk) {
+			return sk.Time > animationTime;
+		});*/
+
+		unsigned index = 0;
+		unsigned next = 0;
+		for (unsigned i = 0; i < translationKeys.size() - 1; i++) {
+			if (animationTime < translationKeys[i + 1].Time) {
+				index = i;
+				next = index + 1;
+				break;
+			}
+		}
+
+		float deltaTime = translationKeys[next].Time - translationKeys[index].Time;
+		float factor = (animationTime - translationKeys[index].Time) / deltaTime;
+		factor = clamp(0.f, 1.f, factor);
+		glm::vec3& delta = translationKeys[next].Position - translationKeys[index].Position;
+		translation = translationKeys[index].Position + factor * delta;
 	}
 }
 

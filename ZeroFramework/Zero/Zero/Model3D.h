@@ -21,10 +21,21 @@ namespace zr
 		virtual void render(const glm::mat4& viewProjectionMatrix) override;
 		virtual void update(const Time& elapsedTime) override;
 		virtual void setModelTransform(const glm::mat4& modelTranform) override;
+		virtual bool setAnimation(const std::string& animationName) override;
+		virtual bool setAnimation(unsigned animationIndex) override;
+		virtual bool getAvailableAnimations(std::vector<std::string>& animations) override;
+		
+		virtual std::string getShaderLayoutLocations() const;
 
 	private:
 		void generateBuffers();
 		void generateShader();
+		std::string generateVertexShaderUniforms() const;
+		void computeBonesTransformations(const Time& elapsedTime);
+		void traverseSceneTree(const ModelData::Animation* animation, float animationTime, const Ref<ModelData::SceneObject>& sceneNode, const glm::mat4& parentTransform);
+		void computeScaleValues(glm::vec3& scale, float animationTime, const ModelData::NodeAnimation* nodeAnimation);
+		void computeRotationValues(glm::quat& rotation, float animationTime, const ModelData::NodeAnimation* nodeAnimation);
+		void computeTranslationValues(glm::vec3& translation, float animationTime, const ModelData::NodeAnimation* nodeAnimation);
 
 	private:
 		std::string mFilePath;
@@ -37,15 +48,19 @@ namespace zr
 
 		glm::mat4 mTransformationMatrix;
 
-		unsigned mMaxAmbientTextures = 0;
-		unsigned mMaxDiffuseTextures = 0;
-		unsigned mMaxSpecularTextures = 0;
-		unsigned mMaxNormalTextures = 0;
-		unsigned mMaxHeightTextures = 0;
-
 		unsigned mComponents = 0;
+		int mCurrentAnimation;
+		Ref<ModelData::Scene> mModelScene;
 
 		zr::DirectionalLight mDirectionalLight;
 		glm::vec3 mCameraPosition = glm::vec3(0.f, 0.f, 0.f);
+
+		std::map<std::string, unsigned> mBoneMap;
+		std::map<unsigned, glm::mat4> mBoneOffsets;
+
+		std::vector<glm::mat4> mBoneTransformations;
+
+		Time mAnimationTime;
+		bool isAnimating = false;
 	};
 }

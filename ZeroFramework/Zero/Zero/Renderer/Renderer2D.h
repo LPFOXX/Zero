@@ -11,7 +11,6 @@ namespace zr
 	{
 		Ref<VertexArray> QuadVertexArray;
 		Ref<Shader> FlatColorShader;
-
 	};
 
 	static Renderer2DStorage* sData;
@@ -25,7 +24,7 @@ namespace zr
 		static void BeginScene(const Ref<OrthographicCamera>& camera);
 		static void EndScene();
 
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
+		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color);
 	};
 }

@@ -106,7 +106,10 @@ namespace lp
 			zr::RenderCommand::SetClearColor(0.f, 0.f, 0.f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
-			zr::Renderer2D::DrawQuad({ 0.f, 0.f }, { 1.f, 1.f }, { .8f, .2f, .3f, 1.f });
+			const zr::Time& time = zr::Application::GetTime();
+
+			zr::Renderer2D::DrawQuad({ -1.f, 0.f }, { .8f, .8f }, time.asSeconds() * 45.f, { .8f, .2f, .3f, 1.f });
+			zr::Renderer2D::DrawQuad({ 0.5f, -.5f }, { .5f, .75f }, -time.asSeconds() * 45.f, { .2f, .3f, .8f, 1.f });
 			zr::Renderer2D::EndScene();
 		}
 		////zr::Renderer::Submit(mSprite);

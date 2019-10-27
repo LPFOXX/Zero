@@ -58,14 +58,18 @@ namespace zr
 	class PerspectiveCamera : public Camera
 	{
 	public:
-		PerspectiveCamera(float fieldOfView, float width, float height);
+		PerspectiveCamera(float aspectRatio, float fieldOfView = 45.f);
 		virtual ~PerspectiveCamera();
+
+		void setProjection(float aspectRatio, float fieldOfView = 45.f);
 
 		// Inherited via Camera
 		virtual void setRotationAngle(float angle) override;
 		virtual void rotate(float angleOffset) override;
 		virtual void setPosition(const glm::vec3& position) override;
 		virtual void move(const glm::vec3& offset) override;
+
+		virtual void setFieldOfView(float angle);
 
 	private:
 		// Inherited via Camera

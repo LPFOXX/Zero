@@ -12,9 +12,9 @@ namespace zr
 		mUp(up),
 		mWorldUp(up),
 		mRight(1.f, 0.f, 0.f),
-		mYawAngle(0U),
-		mPitchAngle(0U),
-		mRollAngle(0U),
+		mYawAngle(0.f),
+		mPitchAngle(0.f),
+		mRollAngle(0.f),
 		mFieldOfView(fieldOfView),
 		mIsMouseInverted(false)
 	{
@@ -23,6 +23,7 @@ namespace zr
 			aspectRatio = width / height;
 		}
 		mPosition = initialPosition;
+		recomputeMatrices();
 		mProjectionMatrix = glm::perspective(glm::radians(mFieldOfView), aspectRatio, 0.1f, 100.f);
 		mViewMatrix = glm::lookAt(mPosition, mPosition + mFront, mUp);
 	}

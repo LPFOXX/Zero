@@ -67,22 +67,24 @@ namespace zr
 	{
 		sData->FlatColorShader->bind();
 		sData->FlatColorShader->setUniform("uViewProjection", camera->getViewProjectionMatrix());
-		sData->FlatColorShader->setUniform("uTransform", glm::mat4(1.f));
 	}
 
 	void Renderer2D::EndScene()
 	{
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
-		DrawQuad({position.x, position.y, 0.f}, size, color);
+		DrawQuad({position.x, position.y, 0.f}, size, angle, color);
 	}
 		
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
 		sData->FlatColorShader->bind();
 		sData->FlatColorShader->setUniform("uColor", color);
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		sData->FlatColorShader->setUniform("uTransform", transform);
 
 		sData->QuadVertexArray->bind();
 		RenderCommand::DrawIndexed(sData->QuadVertexArray);

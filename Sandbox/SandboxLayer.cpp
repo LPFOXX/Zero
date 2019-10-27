@@ -12,17 +12,15 @@ namespace lp
 	SandboxLayer::SandboxLayer() :
 		zr::Layer("SandboxLayer"),
 		mOrthographicCameraController(nullptr),
-		mPerspectiveCamera(nullptr),
+		mPerspectiveCameraController(nullptr),
 		mFramebuffer(nullptr),
-		mFPSCamera(nullptr),
-		mModelLoadingThread(&SandboxLayer::loadModel, this),
-		mModelLoadingMutex()
+		mFPSCamera(nullptr)
 	{
 		zr::ModelLoader::Get()->setProgressHandler(std::make_shared<zr::ModelProgressHandler>());
 		zr::ModelLoader::Get()->setLogger(std::make_shared<zr::ModelLogger>(Assimp::Logger::LogSeverity::VERBOSE));
 
-		mOrthographicCameraController = std::shared_ptr<zr::OrthographicCameraController>(new zr::OrthographicCameraController(1280.f / 600.f, true));
-		mPerspectiveCamera = std::shared_ptr<zr::Camera>(new zr::PerspectiveCamera(45.f, 1280, 600));
+		mOrthographicCameraController = std::make_shared<zr::OrthographicCameraController>(1280.f / 600.f, true);
+		mPerspectiveCameraController = std::make_shared<zr::PerspectiveCameraController>(1280.f / 600.f, true);
 		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
 		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
@@ -34,19 +32,15 @@ namespace lp
 			zr::MeshData::Animations |
 			zr::MeshData::Materials;
 		std::vector<std::string> modelsToLoad{ {
-			{"resources/nanosuit/nanosuit.obj"},
+			//{"resources/nanosuit/nanosuit.obj"},
 			{"resources/anim_model/anim_model.dae"},
-			{"resources/iron_man_fixed/iron_man_fixed.obj"},
-			{"resources/teapot3/teapot.obj"}
+			//{"resources/iron_man_fixed/iron_man_fixed.obj"},
+			{"resources/bob_lamp/boblampclean.md5mesh"},
+			//{"resources/teapot3/teapot.obj"}
 			} };
 
-		{
-			//mModel1 = std::make_shared<zr::Model>("resources/iron_man_fixed/iron_man_fixed.obj", componentsToLoad);
-		}
 		for (unsigned i = 0; i < modelsToLoad.size(); ++i) {
-			ZR_IMGUI_LOG(zr::ConsoleItem::Info, "Model file name: %s", modelsToLoad[i].c_str());
 			mModels.push_back(std::make_shared<zr::Model>(modelsToLoad[i], componentsToLoad, [&](float& progress) {
-				//mModelLoadingProgress[i] = progress;
 				ZR_INFO("Progress: {0:.2f}", progress);
 			}));
 		}
@@ -207,7 +201,6 @@ namespace lp
 
 	SandboxLayer::~SandboxLayer()
 	{
-		mModelLoadingThread.wait();
 	}
 
 	void SandboxLayer::onAttach()
@@ -221,61 +214,60 @@ namespace lp
 	void SandboxLayer::onUpdate(const zr::Time& elapsedTime)
 	{
 		mOrthographicCameraController->onUpdate(elapsedTime);
+		mPerspectiveCameraController->onUpdate(elapsedTime);
+
 		for (auto& model : mModels) {
 			model->update(elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
-			mPerspectiveCamera->move({ 0.f, mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::I)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Forward, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
-			mPerspectiveCamera->move({ 0.f, -mCameraSpeed * elapsedTime.asSeconds(), 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::K)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Backward, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Left)) {
-			mPerspectiveCamera->move({ -mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::J)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Left, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::Right)) {
-			mPerspectiveCamera->move({ mCameraSpeed * elapsedTime.asSeconds(), 0.f, 0.f });
+		if (zr::Input::isKeyPressed(zr::Keyboard::L)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Right, elapsedTime);
 		}
 
-		const zr::Time& time = zr::Application::GetTime();
-		//mFPSCamera->setPosition({ 1.f * cos(time.asSeconds()), .0f, 1.f * sin(time.asSeconds()) });
+		if (zr::Input::isKeyPressed(zr::Keyboard::U)) {
+			mFPSCamera->rotate(elapsedTime.asSeconds());
+		}
 
-		zr::RenderCommand::EnableDepthTest(true);
+		if (zr::Input::isKeyPressed(zr::Keyboard::P)) {
+			mFPSCamera->rotate(-elapsedTime.asSeconds());
+		}
 
-		glm::mat4 model(1.f);
-		model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
-		//mModel->setTransformationMatrix(model);
-		//mModel->setCameraPosition(mFPSCamera->getPosition());
+		zr::Renderer::BeginScene(mFPSCamera);
+		{
+			zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
+			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+			zr::RenderCommand::EnableDepthTest(true);
+			zr::RenderCommand::EnableFaceCulling(true);
 
+			zr::Renderer::Submit(mCubeMap, true);
 
-		//zr::Renderer::BeginScene(mFPSCamera);
-		//{
-		//zr::RenderCommand::SetClearColor(.2f, .2f, .2f, 1.f);
-		//zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+			for (unsigned i = 0; i < mModels.size(); ++i) {
+				glm::mat4& model = glm::mat4(1.f);
+				model = glm::translate(model, glm::vec3(10.f * i, 5.f * i, 0.f));
+				model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
+				mModels[i]->setModelTransform(model);
+				mModels[i]->render(mFPSCamera->getViewProjectionMatrix());
+			}
+			
+			zr::Renderer::EndScene();
+		}
 
-		//	//zr::RenderCommand::EnableFaceCulling(true, zr::RendererAPI::CullFace::Front);
-		//	//zr::RenderCommand::EnableFaceCulling(false);
-		//	/*zr::Renderer::Submit(mBlueShader, mSquareVA);
-		//	zr::Renderer::Submit(mShader, mVertexArray);*/
-		//	zr::Renderer::Submit(mCubeMap, true);
-		//	zr::Renderer::EndScene();
-		//}
-
-		//zr::Renderer::BeginScene(std::make_shared<zr::OrthographicCamera>(mOrthographicCameraController->getCamera()));
-		zr::Renderer::BeginScene(mOrthographicCameraController->getCamera());
+		/*zr::Renderer::BeginScene(mOrthographicCameraController->getCamera());
 		{
 			zr::RenderCommand::SetClearColor(1.f, 0.f, 1.f, 1.f);
 			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
-
-			//mModel->render(mOrthographicCameraController->getCamera().getViewProjectionMatrix());
 
 			glm::vec4 blueColor(.2f, .3f, .8f, 1.f);
 			glm::vec4 redColor(.8f, .2f, .3, 1.f);
@@ -289,20 +281,10 @@ namespace lp
 					zr::Renderer::Submit(mBlueShader, mSquareVA, transform);
 				}
 			}
-
-			/*zr::Renderer::Submit(mShader, mVertexArray);
-			zr::Renderer::Submit(mCubeMap);*/
 			zr::Renderer::EndScene();
-		}
+		}*/
 
-		//mModel->render(mFPSCamera->getViewProjectionMatrix());
-		for (unsigned i = 0; i < mModels.size(); ++i) {
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, glm::vec3(10.f * i, 5.f * i, 0.f));
-			mModels[i]->setModelTransform(model);
-			mModels[i]->render(mOrthographicCameraController->getCamera()->getViewProjectionMatrix());
-		}
-		mLastDeltaTime = zr::Time::Seconds(elapsedTime.asSeconds());
+		mLastDeltaTime = elapsedTime;
 	}
 
 	void SandboxLayer::OnImGuiRender()
@@ -338,6 +320,8 @@ namespace lp
 	void SandboxLayer::onEvent(zr::Event& e)
 	{
 		mOrthographicCameraController->onEvent(e);
+		mPerspectiveCameraController->onEvent(e);
+
 		if (e.getType() == zr::EventType::WindowResize) {
 			//auto& resizeEvent = (zr::WindowResizeEvent&) e;
 			//mOrthographicCameraController->setZoomLevel(resizeEvent.fe)
@@ -384,32 +368,5 @@ namespace lp
 				mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 			}
 		}
-	}
-
-	void SandboxLayer::loadModel()
-	{
-		ZR_INFO("Model loading started.");
-		/*zr::ModelLoader::Get()->loadFromFile("resources/nanosuit/nanosuit.obj", zr::MeshData::Normals | zr::MeshData::TextureCoordinates, [&](float& progress) {
-			mProgress = progress;
-		});*/
-		//zr::Ref<zr::Model> temp = std::make_shared<zr::Model3D>("resources/nanosuit/nanosuit.obj");
-		//temp->loadFromFile("resources/iron_man/IronMan.obj", zr::Model3D::LoadComponents::Normals | zr::Model3D::LoadComponents::TextureCoordinates);
-		//temp->sub
-		//mModel.reset(new zr::Model("resources/iron_man/IronMan.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
-		//mModel.reset(new zr::Model("resources/iron_man_fixed/iron_man_fixed.obj", zr::Model::LoadComponents::Normals | zr::Model::LoadComponents::TextureCoordinates));
-		//mModel.reset(new zr::Model("resources/ghost/disk_g.obj"));
-
-		//progress = temp->getLoadingProgress();
-
-		{
-			sf::Lock lock(mModelLoadingMutex);
-			//mModel = temp;
-		}
-		onLoadModelFinished();
-	}
-
-	void SandboxLayer::onLoadModelFinished()
-	{
-		ZR_INFO("Model loading finished.");
 	}
 }

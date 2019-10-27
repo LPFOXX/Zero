@@ -28,9 +28,10 @@ namespace zr
 		}
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float* data, unsigned size, DrawMode drawMode) :
+	OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned size, DrawMode drawMode) :
 		VertexBuffer(),
-		mId(0)
+		mId(0),
+		mMaxLayoutIndex(0U)
 	{
 		if (mId == 0) {
 			GL_ERR_CHECK(glGenBuffers(1, &mId));
@@ -72,6 +73,26 @@ namespace zr
 	void OpenGLVertexBuffer::setLayout(const BufferLayout& layout)
 	{
 		mLayout = layout;
+	}
+
+	unsigned OpenGLVertexBuffer::computeNextLayoutIndex()
+	{
+		mMaxLayoutIndex = 0U;
+		const auto& elements = mLayout.getElements();
+		for (auto& element : elements) {
+			if (element.VectorSize >= 2) {
+				mMaxLayoutIndex += element.VectorSize;
+			}
+			else {
+				++mMaxLayoutIndex;
+			}
+		}
+		return mMaxLayoutIndex;
+	}
+
+	unsigned OpenGLVertexBuffer::getMaxLayoutIndex()
+	{
+		return mMaxLayoutIndex;
 	}
 
 	OpenGLIndexBuffer::OpenGLIndexBuffer(unsigned* data, unsigned count, DrawMode drawMode) :

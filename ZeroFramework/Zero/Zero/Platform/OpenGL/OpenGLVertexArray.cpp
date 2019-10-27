@@ -49,20 +49,42 @@ namespace zr
 		GL_ERR_CHECK(glBindVertexArray(mId));
 		vertexBuffer->bind();
 
-		unsigned index = 0;
+		unsigned index = computeNextIndexLocation();
 		const auto& layout = vertexBuffer->getLayout();
 		for (const auto& element : layout) {
 			GL_ERR_CHECK(glEnableVertexAttribArray(index));
-			GL_ERR_CHECK(glVertexAttribPointer(index,
-				element.getComponentCount(),
-				ShaderDataTypeToOpenGLBaseType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE,
-				layout.getStride(),
-				(const void*)element.Offset));
+			if (
+				element.Type == ShaderDataType::Int ||
+				element.Type == ShaderDataType::Int2 ||
+				element.Type == ShaderDataType::Int3 ||
+				element.Type == ShaderDataType::Int4
+				) {
+				GL_ERR_CHECK(glVertexAttribIPointer(
+					index,
+					element.getComponentCount(),
+					ShaderDataTypeToOpenGLBaseType(element.Type),
+					layout.getStride(),
+					(const void*) element.Offset));
+			}
+			else {
+				GL_ERR_CHECK(glVertexAttribPointer(
+					index,											// index
+					element.getComponentCount(),					// number of components (1|2|3|4)
+					ShaderDataTypeToOpenGLBaseType(element.Type),	// type of each component
+					element.Normalized ? GL_TRUE : GL_FALSE,		// whether or not to normalized fixed point values
+					layout.getStride(),								// stride in bytes. if 0 then is thighly packed
+					(const void*)element.Offset));					// offset from very first byte on the buffer
+			}
 			if (element.Divisor != 0U) {
 				GL_ERR_CHECK(glVertexAttribDivisor(index, element.Divisor));
 			}
-			index++;
+
+			if (element.VectorSize >= 2) {
+				index += element.VectorSize;
+			}
+			else {
+				index++;
+			}
 		}
 
 		mVertexBuffers.push_back(vertexBuffer);
@@ -107,10 +129,25 @@ namespace zr
 		for (auto& vertexBuffer : mVertexBuffers) {
 			const auto& layout = vertexBuffer->getLayout().getElements();
 			for (auto& layoutElement : layout) {
-				ss << "layout (location = " << location << ") in " << ShaderDataTypeGLType(layoutElement.Type) << " " << layoutElement.Name << ";\n";
-				++location;
+				std::string& layoutIdentifier = layoutElement.Name + (layoutElement.VectorSize >= 2 ? "[" + std::to_string(layoutElement.VectorSize) + "]" : "");
+				ss << "layout (location = " << location << ") in " << ShaderDataTypeGLType(layoutElement.Type) << " " << layoutIdentifier << ";\n";
+				if (layoutElement.VectorSize >= 2) {
+					location += layoutElement.VectorSize;
+				}
+				else {
+					++location;
+				}
 			}
 		}
 		return ss.str();
+	}
+
+	unsigned OpenGLVertexArray::computeNextIndexLocation() const
+	{
+		unsigned returnValue = 0U;
+		for (auto& vertexBuffer : mVertexBuffers) {
+			returnValue += vertexBuffer->computeNextLayoutIndex();
+		}
+		return returnValue;
 	}
 }

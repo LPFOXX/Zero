@@ -21,5 +21,20 @@ namespace zr
 		virtual void setModelTransform(const glm::mat4& modelTranform) override
 		{
 		}
+
+		virtual bool setAnimation(const std::string& animationName) override
+		{
+			return false;
+		}
+
+		virtual bool setAnimation(unsigned animationIndex) override
+		{
+			return false;
+		}
+
+		virtual bool getAvailableAnimations(std::vector<std::string>& animations) override
+		{
+			return false;
+		}
 	};
 }

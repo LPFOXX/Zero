@@ -16,7 +16,7 @@ namespace zr
 	{
 	}
 
-	Ref<VertexBuffer> VertexBuffer::Create(float* vertices, unsigned size, DrawMode drawMode)
+	Ref<VertexBuffer> VertexBuffer::Create(void* vertices, unsigned size, DrawMode drawMode)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:

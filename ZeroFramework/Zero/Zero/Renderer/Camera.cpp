@@ -1,4 +1,6 @@
 #include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
 #include <zr_pch.h>
 
 #include "Camera.h"
@@ -98,20 +100,21 @@ namespace zr
 		recomputeMatrices();
 	}
 
-	PerspectiveCamera::PerspectiveCamera(float fieldOfView, float width, float height) :
+	PerspectiveCamera::PerspectiveCamera(float aspectRatio, float fieldOfView) :
 		Camera()
 	{
-		float aspectRatio = 1.f;
-		if (height != 0) {
-			aspectRatio = width / height;
-		}
-
 		mProjectionMatrix = glm::perspective(glm::radians(fieldOfView), aspectRatio, -1.f, 1.f);
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 	}
 
 	PerspectiveCamera::~PerspectiveCamera()
 	{
+	}
+
+	void PerspectiveCamera::setProjection(float aspectRatio, float fieldOfView)
+	{
+		mProjectionMatrix = glm::perspective(glm::radians(fieldOfView), aspectRatio, -1.f, 1.f);
+		recomputeMatrices();
 	}
 
 	void PerspectiveCamera::recomputeMatrices()
@@ -135,6 +138,10 @@ namespace zr
 	{
 		mPosition += offset;
 		recomputeMatrices();
+	}
+
+	void PerspectiveCamera::setFieldOfView(float angle)
+	{
 	}
 
 	void PerspectiveCamera::setRotationAngle(float angle)

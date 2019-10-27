@@ -1,5 +1,6 @@
-#include "ModelData.h"
 #include <zr_pch.h>
+
+#include <numeric>
 
 #include "Core/Log.h"
 #include "Core/Timer.h"
@@ -14,6 +15,7 @@ namespace zr
 	bool ModelData::loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned& componentsToLoad)
 	{
 		Timer t("ModelData::loadFromFile");
+		importer.SetPropertyBool(AI_CONFIG_GLOB_MEASURE_TIME, true);
 		const aiScene* scene = importer.ReadFile(filePath.c_str(), flags);
 		if (!scene) {
 			ZR_CORE_ERROR("[ASSIMP] {0}", importer.GetErrorString());
@@ -25,33 +27,86 @@ namespace zr
 		updateFlag(componentsToLoad, MeshData::Textures, scene->HasTextures());
 		updateFlag(componentsToLoad, MeshData::Materials, scene->HasMaterials());
 		updateFlag(componentsToLoad, MeshData::Animations, scene->HasAnimations());
-
 		mComponents = componentsToLoad;
 
-		walkThroughChildren(scene->mRootNode, scene);
+		Ref<SceneObject> sceneRootNode = std::make_shared<SceneObject>();
+		mScene = std::make_shared<Scene>(sceneRootNode);
+		walkThroughChildren(scene, scene->mRootNode, sceneRootNode, glm::mat4(1.f));
+		if (scene->HasAnimations()) {
+			for (unsigned animationsIndex = 0; animationsIndex < scene->mNumAnimations; ++animationsIndex) {
+				const aiAnimation* animation = scene->mAnimations[animationsIndex];
+				Animation an(animation->mName.data);
+				an.setDuration(animation->mDuration, animation->mTicksPerSecond);
+				for (unsigned meshChannelsIndex = 0; meshChannelsIndex < animation->mNumMeshChannels; ++meshChannelsIndex) {
+					const aiMeshAnim* meshAnim = animation->mMeshChannels[meshChannelsIndex];
+					for (unsigned keyFramesIndex = 0; keyFramesIndex < meshAnim->mNumKeys; ++keyFramesIndex) {
+						const aiMeshKey meshKey = meshAnim->mKeys[keyFramesIndex];
+					}
+				}
+				for (unsigned nodeChannelsIndex = 0; nodeChannelsIndex < animation->mNumChannels; ++nodeChannelsIndex) {
+					const aiNodeAnim* nodeAnim = animation->mChannels[nodeChannelsIndex];
+					NodeAnimation nodeAnimation(nodeAnim->mNodeName.data);
+					for (unsigned positionKeysIndex = 0; positionKeysIndex < nodeAnim->mNumPositionKeys; ++positionKeysIndex) {
+						const aiVectorKey& positionKey = nodeAnim->mPositionKeys[positionKeysIndex];
+						nodeAnimation.addTranslationKey(NodeAnimation::TranslationKey((float)positionKey.mTime, { positionKey.mValue.x, positionKey.mValue.y, positionKey.mValue.z }));
+					}
+					for (unsigned rotationKeysIndex = 0; rotationKeysIndex < nodeAnim->mNumRotationKeys; ++rotationKeysIndex) {
+						const aiQuatKey& quatKey = nodeAnim->mRotationKeys[rotationKeysIndex];
+						nodeAnimation.addRotationKey(NodeAnimation::RotationKey((float)quatKey.mTime, quat_cast(quatKey.mValue)));
+					}
+					for (unsigned scalingKeysIndex = 0; scalingKeysIndex < nodeAnim->mNumScalingKeys; ++scalingKeysIndex) {
+						const aiVectorKey& scalingKey = nodeAnim->mScalingKeys[scalingKeysIndex];
+						nodeAnimation.addScaleKey(NodeAnimation::ScaleKey((float)scalingKey.mTime, { scalingKey.mValue.x , scalingKey.mValue.y, scalingKey.mValue.z }));
+					}
+					an.addNodeAnimation(nodeAnimation);
+					/*nodeAnim->mPostState;
+					nodeAnim->mPreState;*/
+				}
+				mScene->addAnimation(an);
+			}
+			
+			//mScene->printAnimationData(filePath.substr(filePath.find_last_of("/\\") + 1, std::string::npos) + ".txt");
+		}
+		//mScene->printHierachy();
 		return true;
 	}
 
-	void ModelData::walkThroughChildren(const aiNode* rootNode, const aiScene* scene)
+	void ModelData::walkThroughChildren(const aiScene* scene, const aiNode* node, Ref<SceneObject>& parent, const glm::mat4& accumulatedTransform)
 	{
-		if (rootNode->mNumChildren > 0) {
-			for (unsigned i = 0; i < rootNode->mNumChildren; ++i) {
-				walkThroughChildren(rootNode->mChildren[i], scene);
+		Ref<SceneObject> currentParent = nullptr;
+		glm::mat4 transform(1.f);
+
+		if (node->mParent == nullptr) {
+			// This is the root node
+			currentParent = parent;
+			currentParent->setName(node->mName.C_Str());
+			transform = glm::inverse(mat4_cast(node->mTransformation));
+			currentParent->setTransform(transform);
+		}
+		else {
+			transform = mat4_cast(node->mTransformation) * accumulatedTransform;
+			currentParent = std::make_shared<SceneObject>(node->mName.C_Str());
+			currentParent->setParent(parent);
+			currentParent->setTransform(transform);
+			parent->addChild(currentParent);
+		}
+
+		if (node->mNumChildren > 0) {
+			for (unsigned i = 0; i < node->mNumChildren; ++i) {
+				walkThroughChildren(scene, node->mChildren[i], currentParent, transform);
 			}
 		}
 		else {
-			for (unsigned i = 0; i < rootNode->mNumMeshes; ++i) {
-				mMeshesData.emplace_back(processMesh(scene->mMeshes[rootNode->mMeshes[i]], scene));
+			for (unsigned i = 0; i < node->mNumMeshes; ++i) {
+				mMeshesData.emplace_back(processMesh(scene, scene->mMeshes[node->mMeshes[i]]));
 			}
 		}
 	}
 
-	MeshData* ModelData::processMesh(const aiMesh* mesh, const aiScene* scene)
+	MeshData* ModelData::processMesh(const aiScene* scene, const aiMesh* mesh)
 	{
-		std::vector<MeshData::Vertex> vertices;
-		std::vector<unsigned> indices;
+		MeshData::VertexSeparated vs;
 		std::unordered_map<Texture2D::Type, std::vector<std::string>> textures;
-		std::map<std::string, MeshData::Bone> meshBones;
 
 		bool meshHasNormals = mesh->HasNormals() && (mComponents & MeshData::Normals);
 		bool meshHasTangentsAndBitangents = mesh->HasTangentsAndBitangents() && (mComponents & MeshData::TangentsAndBitangents);
@@ -75,39 +130,36 @@ namespace zr
 		// So, in order to fill the remaining data (normals, texture coordinates, tangents
 		// and bitangent) we just need to access the element and copy the data).
 		for (unsigned vertexIndex = 0; vertexIndex < mesh->mNumVertices; vertexIndex++) {
-			MeshData::Vertex newVertex;
 
 			// Positions
-			newVertex.Position.x = mesh->mVertices[vertexIndex].x;
-			newVertex.Position.y = mesh->mVertices[vertexIndex].y;
-			newVertex.Position.z = mesh->mVertices[vertexIndex].z;
+			vs.VertexData[MeshData::Positions].push_back(mesh->mVertices[vertexIndex].x);
+			vs.VertexData[MeshData::Positions].push_back(mesh->mVertices[vertexIndex].y);
+			vs.VertexData[MeshData::Positions].push_back(mesh->mVertices[vertexIndex].z);
 
 			// Gets normal vectors
 			if (meshHasNormals) {
-				newVertex.Normal.x = mesh->mNormals[vertexIndex].x;
-				newVertex.Normal.y = mesh->mNormals[vertexIndex].y;
-				newVertex.Normal.z = mesh->mNormals[vertexIndex].z;
+				vs.VertexData[MeshData::Normals].push_back(mesh->mNormals[vertexIndex].x);
+				vs.VertexData[MeshData::Normals].push_back(mesh->mNormals[vertexIndex].y);
+				vs.VertexData[MeshData::Normals].push_back(mesh->mNormals[vertexIndex].z);
 			}
 
 			// Gets tangents and bitangents vectors
 			if (meshHasTangentsAndBitangents) {
 				// Tangents
-				newVertex.Tangent.x = mesh->mTangents[vertexIndex].x;
-				newVertex.Tangent.y = mesh->mTangents[vertexIndex].y;
-				newVertex.Tangent.z = mesh->mTangents[vertexIndex].z;
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mTangents[vertexIndex].x);
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mTangents[vertexIndex].y);
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mTangents[vertexIndex].z);
 				// Bitangents
-				newVertex.Bitangent.x = mesh->mBitangents[vertexIndex].x;
-				newVertex.Bitangent.y = mesh->mBitangents[vertexIndex].y;
-				newVertex.Bitangent.z = mesh->mBitangents[vertexIndex].z;
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mBitangents[vertexIndex].x);
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mBitangents[vertexIndex].y);
+				vs.VertexData[MeshData::TangentsAndBitangents].push_back(mesh->mBitangents[vertexIndex].z);
 			}
 
 			// Gets texture coordinates
 			if (meshHasTextureCoordinates) {
-				newVertex.TextureCoordinates.x = mesh->mTextureCoords[0][vertexIndex].x;
-				newVertex.TextureCoordinates.y = mesh->mTextureCoords[0][vertexIndex].y;
+				vs.VertexData[MeshData::TextureCoordinates].push_back(mesh->mTextureCoords[0][vertexIndex].x);
+				vs.VertexData[MeshData::TextureCoordinates].push_back(mesh->mTextureCoords[0][vertexIndex].y);
 			}
-
-			vertices.push_back(newVertex);
 		}
 
 		// Process the faces (the primitives that forms a face) a set of several points.
@@ -115,29 +167,37 @@ namespace zr
 		if (meshHasFaces) {
 			for (unsigned facesIndex = 0; facesIndex < mesh->mNumFaces; facesIndex++) {
 				const aiFace& face = mesh->mFaces[facesIndex];
-
 				for (unsigned indicesIndex = 0; indicesIndex < face.mNumIndices; indicesIndex++) {
-					indices.push_back(face.mIndices[indicesIndex]);
+					vs.Indices.push_back(face.mIndices[indicesIndex]);
 				}
 			}
 		}
 
-		// Gets bones
+		// Gets bones and animations
 		if (meshHasBones) {
-			// mesh->mBones[vertexIndex];
-			for (unsigned bonesIndex = 0; bonesIndex < mesh->mNumBones; bonesIndex++) {
+			for (unsigned bonesIndex = 0; bonesIndex < mesh->mNumBones; ++bonesIndex) {
 				const aiBone* bone = mesh->mBones[bonesIndex];
-				ZR_IMGUI_LOG(ConsoleItem::Info, "Bone name: %s", bone->mName.C_Str());
-				MeshData::Bone newBone(bone->mName.data);
-				newBone.OffsetMatrix = glm::mat4(
-					{ bone->mOffsetMatrix[0][0], bone->mOffsetMatrix[1][0], bone->mOffsetMatrix[2][0], bone->mOffsetMatrix[3][0] },
-					{ bone->mOffsetMatrix[0][1], bone->mOffsetMatrix[1][1], bone->mOffsetMatrix[2][1], bone->mOffsetMatrix[3][1] },
-					{ bone->mOffsetMatrix[0][2], bone->mOffsetMatrix[1][2], bone->mOffsetMatrix[2][2], bone->mOffsetMatrix[3][2] },
-					{ bone->mOffsetMatrix[0][3], bone->mOffsetMatrix[1][3], bone->mOffsetMatrix[2][3], bone->mOffsetMatrix[3][3] });
-				for (unsigned boneWeightsIndex = 0; boneWeightsIndex < bone->mNumWeights; boneWeightsIndex++) {
-					newBone.Weights.emplace_back(bone->mWeights[boneWeightsIndex].mVertexId, bone->mWeights[boneWeightsIndex].mWeight);
+				unsigned boneIndex = 0U;
+				if (mBonesMap.find(bone->mName.C_Str()) == mBonesMap.end()) {
+					// Bone does not exist: allocate space for a new one
+					boneIndex = mBonesOffsets.size();
+					mBonesOffsets[boneIndex] = mat4_cast(bone->mOffsetMatrix);
+					mBonesMap[bone->mName.C_Str()] = boneIndex;
 				}
-				meshBones[newBone.Name] = std::move(newBone);
+				else {
+					boneIndex = mBonesMap[bone->mName.C_Str()];
+				}
+
+				MeshData::Bone newBone(boneIndex);
+				for (unsigned boneWeightsIndex = 0; boneWeightsIndex < bone->mNumWeights; ++boneWeightsIndex) {
+					vs.AddVertexData(bone->mWeights[boneWeightsIndex].mVertexId, boneIndex, bone->mWeights[boneWeightsIndex].mWeight);
+				}
+			}
+
+			vs.FixBoneData(mesh->mNumVertices);
+
+			for (unsigned animationsIndex = 0; animationsIndex < mesh->mNumAnimMeshes; ++animationsIndex) {
+
 			}
 		}
 
@@ -167,31 +227,31 @@ namespace zr
 
 			if (searchForTextures) {
 				// 1. ambient maps
-				std::vector<std::string>& ambientMap = processMaterial(material, Texture2D::Type::Ambient);
+				std::vector<std::string>& ambientMap = processMaterial(scene, material, Texture2D::Type::Ambient);
 				if (!ambientMap.empty()) {
 					textures[Texture2D::Type::Ambient] = ambientMap;
 				}
 
 				// 2. diffuse maps 
-				std::vector<std::string>& diffuseMap = processMaterial(material, Texture2D::Type::Diffuse);
+				std::vector<std::string>& diffuseMap = processMaterial(scene, material, Texture2D::Type::Diffuse);
 				if (!diffuseMap.empty()) {
 					textures[Texture2D::Type::Diffuse] = diffuseMap;
 				}
 
 				// 3. specular maps
-				std::vector<std::string>& specularMap = processMaterial(material, Texture2D::Type::Specular);
+				std::vector<std::string>& specularMap = processMaterial(scene, material, Texture2D::Type::Specular);
 				if (!specularMap.empty()) {
 					textures[Texture2D::Type::Specular] = specularMap;
 				}
 
 				// 4. normal maps
-				std::vector<std::string>& normalMap = processMaterial(material, Texture2D::Type::Normal);
+				std::vector<std::string>& normalMap = processMaterial(scene, material, Texture2D::Type::Normal);
 				if (!normalMap.empty()) {
 					textures[Texture2D::Type::Normal] = normalMap;
 				}
 
 				// 5. height maps
-				std::vector<std::string>& heightMap = processMaterial(material, Texture2D::Type::Height);
+				std::vector<std::string>& heightMap = processMaterial(scene, material, Texture2D::Type::Height);
 				if (!heightMap.empty()) {
 					textures[Texture2D::Type::Height] = heightMap;
 				}
@@ -199,10 +259,10 @@ namespace zr
 		}
 
 		// return a meshdata object created from the extracted mesh data
-		return new MeshData(props, vertices, indices, textures);
+		return new MeshData(props, vs, textures);
 	}
 
-	std::vector<std::string> ModelData::processMaterial(const aiMaterial* material, Texture2D::Type textureType)
+	std::vector<std::string> ModelData::processMaterial(const aiScene* scene, const aiMaterial* material, Texture2D::Type textureType)
 	{
 		std::vector<std::string> meshTexturesPath;
 
@@ -252,25 +312,61 @@ namespace zr
 		aiTextureType_LIGHTMAP
 		aiTextureType_REFLECTION*/
 
-
 		unsigned materialCount = material->GetTextureCount(type);
 
 		for (unsigned i = 0; i < materialCount; i++) {
 			aiString texturePath;
 			material->GetTexture(type, i, &texturePath);
+			std::string texPath = texturePath.data;
 
 			// check if texture was loaded before
 			auto found = std::find_if(mLoadedTextures.begin(), mLoadedTextures.end(), [&](const Image& image) {
-				return (mDirectory + std::string(texturePath.C_Str())) == image.getPath();
+				return (mDirectory + texPath) == image.getPath();
 			});
 
 			if (found == mLoadedTextures.end()) {
 				// Not loaded yet: load it
 				Image image;
-				image.loadFromFile(mDirectory + texturePath.C_Str());
+				if (texPath[0] == '*') {
+					// Texture is embeded in the file
+					// Load from scene object
+					unsigned index = std::stoi(texPath.substr(1, std::string::npos));
+					const aiTexture* imageTexture = scene->mTextures[index];
+					if (imageTexture->mHeight != 0) {
+						// uncompressed format: load from aiTexels
+						// imageTexture->mHeight is the height in pixels
+						// imageTexture->mWidth is the width in pixels
+						// imageTexture->pcData contains the texels in
+						unsigned size = imageTexture->mHeight * imageTexture->mWidth * 4;
+						std::vector<unsigned char> pixelData(size);
+						unsigned char* begin = &pixelData[0];
+						unsigned char* end = begin + size;
+						unsigned texelIndex = 0;
+						while (begin != end) {
+							*begin++ = imageTexture->pcData[texelIndex].r;
+							*begin++ = imageTexture->pcData[texelIndex].g;
+							*begin++ = imageTexture->pcData[texelIndex].b;
+							*begin++ = imageTexture->pcData[texelIndex].a;
+							++texelIndex;
+						}
+						image.create(imageTexture->mWidth, imageTexture->mHeight, pixelData);
+					}
+					else {
+						// compressed format
+						// imageTexture->mWidth is the size in bytes of texture
+						// imageTexture->achFormatHint contains the extension on the image:
+						// imageTexture->achFormatHint is null if there is no information
+						// imageTexture->pcData is just a pointer for the data 
+					}
+					//image.create()
+				}
+				else {
+					image.loadFromFile(mDirectory + texPath);
+				}
+
 				mLoadedTextures.emplace_back(image);
 			}
-			meshTexturesPath.emplace_back(mDirectory + texturePath.C_Str());
+			meshTexturesPath.emplace_back(mDirectory + texPath);
 		}
 
 		return meshTexturesPath;

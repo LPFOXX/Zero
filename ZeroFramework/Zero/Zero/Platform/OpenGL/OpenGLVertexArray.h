@@ -18,7 +18,8 @@ namespace zr
 		virtual const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const override;
 		virtual const std::shared_ptr<IndexBuffer>& getIndexBuffer() const override;
 
-		virtual std::string getShaderLayouts() const;
+		virtual std::string getShaderLayouts() const override;
+		virtual unsigned computeNextIndexLocation() const;
 
 	private:
 		unsigned mId;
