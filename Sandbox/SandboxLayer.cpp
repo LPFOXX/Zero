@@ -44,6 +44,10 @@ namespace lp
 				ZR_INFO("Progress: {0:.2f}", progress);
 			}));
 		}
+
+		/*for (auto& model : mModels) {
+			model->setAnimation(0, true);
+		}*/
 		/*mModel = std::make_shared<zr::Model>("resources/nanosuit/nanosuit.obj", componentsToLoad, [&](float& progress) {
 			mProgress = progress;
 		});*/
@@ -309,6 +313,11 @@ namespace lp
 				ImGui::ProgressBar(mModels[i]->getLoadingProgress(), ImVec2(0.0f, 0.0f));
 				ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 				ImGui::Text("Model loading progress %i", i);
+				if (mModels[i]->isLoaded() && mModels[i]->hasAnimations()) {
+					if (ImGui::Button("Start animation")) {
+						mModels[i]->setAnimation(0, true);
+					}
+				}
 			}
 			ImGui::End();
 		}

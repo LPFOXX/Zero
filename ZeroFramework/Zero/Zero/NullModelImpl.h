@@ -22,17 +22,27 @@ namespace zr
 		{
 		}
 
-		virtual bool setAnimation(const std::string& animationName) override
+		virtual bool setAnimation(const std::string& animationName, bool startAnimation = false) override
 		{
 			return false;
 		}
 
-		virtual bool setAnimation(unsigned animationIndex) override
+		virtual bool setAnimation(unsigned animationIndex, bool startAnimation = false) override
 		{
 			return false;
 		}
 
 		virtual bool getAvailableAnimations(std::vector<std::string>& animations) override
+		{
+			return false;
+		}
+
+		virtual bool isLoaded() override
+		{
+			return false;
+		}
+
+		virtual bool hasAnimations() override
 		{
 			return false;
 		}

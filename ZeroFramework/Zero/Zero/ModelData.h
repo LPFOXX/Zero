@@ -323,6 +323,32 @@ namespace zr
 				return nullptr;
 			}
 
+			const Animation* getAnimation(const std::string& animationName) const
+			{
+				auto& it = std::find_if(mAnimations.cbegin(), mAnimations.cend(), [&animationName](const Animation& animation) {
+					return animation.getName() == animationName;
+				});
+
+				if (it != mAnimations.cend()) {
+					return &(*it);
+				}
+
+				return nullptr;
+			}
+
+			int getAnimationIndex(const std::string& animationName) const
+			{
+				auto& it = std::find_if(mAnimations.begin(), mAnimations.end(), [&animationName](const Animation& animation) {
+					return animation.getName() == animationName;
+				});
+
+				if (it != mAnimations.end()) {
+					return (int)std::distance(mAnimations.begin(), it);
+				}
+
+				return -1;
+			}
+
 			void printHierachy()
 			{
 				mRootNode->printHierachy(0);

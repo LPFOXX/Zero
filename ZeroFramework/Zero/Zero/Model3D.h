@@ -21,9 +21,11 @@ namespace zr
 		virtual void render(const glm::mat4& viewProjectionMatrix) override;
 		virtual void update(const Time& elapsedTime) override;
 		virtual void setModelTransform(const glm::mat4& modelTranform) override;
-		virtual bool setAnimation(const std::string& animationName) override;
-		virtual bool setAnimation(unsigned animationIndex) override;
-		virtual bool getAvailableAnimations(std::vector<std::string>& animations) override;
+		virtual bool setAnimation(const std::string& animationName, bool startAnimation = false) override;
+		virtual bool setAnimation(unsigned animationIndex, bool startAnimation = false) override;
+		virtual bool getAvailableAnimations(std::vector<std::string>& animationNames) override;
+		virtual bool isLoaded() override;
+		virtual bool hasAnimations() override;
 		
 		virtual std::string getShaderLayoutLocations() const;
 
@@ -42,6 +44,7 @@ namespace zr
 		Ref<ModelData> mModelData;
 		std::vector<Ref<Texture2D>> mTextures;
 		Ref<Shader> mShader;
+		bool mIsFinishedLoading;
 
 		std::vector<Ref<Mesh>> mMeshes;
 		std::string mDirectory;
@@ -61,6 +64,6 @@ namespace zr
 		std::vector<glm::mat4> mBoneTransformations;
 
 		Time mAnimationTime;
-		bool isAnimating = false;
+		bool mIsAnimating = false;
 	};
 }

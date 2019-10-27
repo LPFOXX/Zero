@@ -18,6 +18,11 @@ namespace zr
 		Time();
 		virtual ~Time();
 
+		static Time Zero()
+		{
+			return Time(0LL);
+		}
+
 		static Time Now()
 		{
 			return Time(std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count());

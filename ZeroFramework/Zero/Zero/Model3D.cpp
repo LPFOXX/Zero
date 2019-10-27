@@ -15,7 +15,9 @@ namespace zr
 		ModelImpl(),
 		mFilePath(filePath),
 		mModelData(modelData),
+		mTextures(),
 		mShader(nullptr),
+		mIsFinishedLoading(false),
 		mTransformationMatrix(glm::mat4(1.f)),
 		mComponents(mModelData->getComponents()),
 		mCurrentAnimation(-1),
@@ -30,6 +32,7 @@ namespace zr
 		generateShader();
 
 		mModelData.reset();
+		mIsFinishedLoading = true;
 	}
 
 	Model3D::~Model3D()
@@ -69,19 +72,39 @@ namespace zr
 		mTransformationMatrix = modelTranform;
 	}
 
-	bool Model3D::setAnimation(const std::string& animationName)
+	bool Model3D::setAnimation(const std::string& animationName, bool startAnimation)
 	{
-		return false;
+		return setAnimation(mModelScene->getAnimationIndex(animationName), startAnimation);
 	}
 
-	bool Model3D::setAnimation(unsigned animationIndex)
+	bool Model3D::setAnimation(unsigned animationIndex, bool startAnimation)
 	{
-		return false;
+		ZR_IMGUI_CONSOLE_INFO("Animation has started");
+		// TODO: validate animation after loading
+		mCurrentAnimation = animationIndex;
+		mAnimationTime = Time::Zero();
+		mIsAnimating = (mCurrentAnimation != -1) && startAnimation;
+		return true;
 	}
 
-	bool Model3D::getAvailableAnimations(std::vector<std::string>& animations)
+	bool Model3D::getAvailableAnimations(std::vector<std::string>& animationNames)
 	{
-		return false;
+		animationNames.clear();
+		const std::vector<ModelData::Animation>& animations = mModelScene->getAnimations();
+		for (auto& animation : animations) {
+			animationNames.push_back(animation.getName());
+		}
+		return !animationNames.empty();
+	}
+
+	bool Model3D::isLoaded()
+	{
+		return mIsFinishedLoading;
+	}
+
+	bool Model3D::hasAnimations()
+	{
+		return (mComponents & MeshData::Components::Animations);
 	}
 
 	std::string Model3D::getShaderLayoutLocations() const
@@ -305,7 +328,7 @@ namespace zr
 
 	void Model3D::computeBonesTransformations(const Time& elapsedTime)
 	{
-		if (!isAnimating || mCurrentAnimation == -1) {
+		if (!mIsAnimating || mCurrentAnimation == -1) {
 			return;
 		}
 
@@ -331,7 +354,10 @@ namespace zr
 			computeRotationValues(rotation, animationTime, nodeAnimation);
 			computeTranslationValues(translation, animationTime, nodeAnimation);
 
-			nodeTransformation = glm::translate(glm::mat4(1.f), translation) * glm::mat4(rotation) * glm::scale(glm::mat4(1.f), scale);
+			nodeTransformation =
+				glm::translate(glm::mat4(1.f), translation) *
+				glm::mat4_cast(rotation) *
+				glm::scale(glm::mat4(1.f), scale);
 		}
 
 		glm::mat4 globalTransformation = parentTransform * nodeTransformation;
@@ -391,7 +417,7 @@ namespace zr
 		unsigned index = 0;
 		unsigned next = 0;
 		for (unsigned i = 0; i < rotationKeys.size() - 1; i++) {
-			if (animationTime < rotationKeys[i + 1].Time) {
+			if (animationTime < rotationKeys[1 + i].Time) {
 				index = i;
 				next = index + 1;
 				break;
@@ -403,7 +429,7 @@ namespace zr
 		factor = clamp(0.f, 1.f, factor);
 		const glm::quat& end = rotationKeys[next].Rotation;
 		const glm::quat& start = rotationKeys[index].Rotation;
-		rotation = glm::lerp(start, end, factor);
+		rotation = glm::slerp(start, end, factor);
 		rotation = glm::normalize(rotation);
 	}
 
@@ -422,7 +448,7 @@ namespace zr
 		unsigned index = 0;
 		unsigned next = 0;
 		for (unsigned i = 0; i < translationKeys.size() - 1; i++) {
-			if (animationTime < translationKeys[i + 1].Time) {
+			if (animationTime < translationKeys[1 + i].Time) {
 				index = i;
 				next = index + 1;
 				break;

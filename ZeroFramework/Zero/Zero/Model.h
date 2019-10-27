@@ -1,28 +1,5 @@
 #pragma once
 
-//#include <assimp/scene.h>
-//#include <assimp/Logger.hpp>
-//#include <assimp/ProgressHandler.hpp>
-//#include <assimp/DefaultLogger.hpp>
-//#include <assimp/Importer.hpp>
-//#include <assimp/material.h>
-//#include <assimp/postprocess.h>
-
-//#include <SFML/System.hpp>
-//
-//#include "Renderer/Texture.h"
-//#include "Renderer/Shader.h"
-//
-//#include "Mesh.h"
-//#include "MeshData.h"
-//#include "Core/Log.h"
-//#include "Core/Core.h"
-//#include "Image.h"
-//#include "ModelData.h"
-//#include "ModelLoader.h"
-//
-//#include "ProgressHandler.h"
-
 #include "../vendor/glm/include/glm/glm.hpp"
 #include "Core/Clock.h"
 #include "Core/Core.h"
@@ -41,6 +18,11 @@ namespace zr
 		void setModelTransform(const glm::mat4& modelTransform);
 		void update(const Time& elapsedTime);
 		void render(const glm::mat4& viewProjectionMatrix);
+		bool setAnimation(const std::string& animationName, bool startAnimation = false);
+		bool setAnimation(unsigned animationIndex, bool startAnimation = false);
+		bool getAvailableAnimations(std::vector<std::string>& animationNames);
+		bool isLoaded();
+		bool hasAnimations();
 
 		float getLoadingProgress() const;
 

@@ -21,6 +21,8 @@ namespace zr
 		mFilePath(filePath),
 		mProgressFunction(progressUpdateFunction),
 		mModelLoadingThread(&Model::loadModel, this),
+		mProgressHandlerMutex(),
+		mLoadingProgress(0.f),
 		mModelData(nullptr),
 		mModelInstance(new NullModelImpl),
 		mComponents(componentsToLoad)
@@ -46,6 +48,31 @@ namespace zr
 	void Model::render(const glm::mat4& viewProjectionMatrix)
 	{
 		mModelInstance->render(viewProjectionMatrix);
+	}
+
+	bool Model::setAnimation(const std::string& animationName, bool startAnimation)
+	{
+		return mModelInstance->setAnimation(animationName, startAnimation);
+	}
+
+	bool Model::setAnimation(unsigned animationIndex, bool startAnimation)
+	{
+		return mModelInstance->setAnimation(animationIndex, startAnimation);
+	}
+
+	bool Model::getAvailableAnimations(std::vector<std::string>& animationNames)
+	{
+		return mModelInstance->getAvailableAnimations(animationNames);
+	}
+
+	bool Model::isLoaded()
+	{
+		return mModelInstance->isLoaded();
+	}
+
+	bool Model::hasAnimations()
+	{
+		return mModelInstance->hasAnimations();
 	}
 
 	float Model::getLoadingProgress() const
