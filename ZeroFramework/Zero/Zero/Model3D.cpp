@@ -56,6 +56,11 @@ namespace zr
 		mShader->setUniform("uViewProjection", viewProjectionMatrix);
 		mShader->setUniform("uTranformMatrix", mTransformationMatrix);
 		mShader->setUniform("uColor", { .1f, .3f, .8f, 1.f });
+
+		if (mComponents & MeshData::Components::Animations) {
+			mShader->setUniform("boneTransformations", mBoneTransformations);
+		}
+
 		for (auto& m : mMeshes) {
 			m->render(mShader);
 		}
@@ -84,6 +89,12 @@ namespace zr
 		mCurrentAnimation = animationIndex;
 		mAnimationTime = Time::Zero();
 		mIsAnimating = (mCurrentAnimation != -1) && startAnimation;
+		return true;
+	}
+
+	bool Model3D::stopAnimation()
+	{
+		mIsAnimating = false;
 		return true;
 	}
 
@@ -137,7 +148,6 @@ namespace zr
 
 	void Model3D::generateShader()
 	{
-		ZR_IMGUI_CONSOLE_INFO("Shader\n%s", getShaderLayoutLocations().c_str());
 		std::stringstream vertexShader;
 		vertexShader << "#version 330 core\n";
 		vertexShader << getShaderLayoutLocations();
@@ -294,26 +304,18 @@ namespace zr
 		vertex << "#version 330 core\n";
 		vertex << getShaderLayoutLocations() << "\n";
 		vertex << generateVertexShaderUniforms();
-		vertex << R"(
-			void main()
-			{
-				gl_Position = uViewProjection * uTranformMatrix * vec4(aPosition, 1.f);
-			}
-		)";
-		std::string fragment = R"(
-			#version 330 core
-			
-			out vec4 vColor;
-			uniform vec4 uColor;
+		vertex << generateVertexShaderMain();
 
-			void main()
-			{
-				vColor = uColor;		
-			}
-		)";
+		std::stringstream fragment;
+		fragment << "#version 330 core\n";
+		fragment << generateFragmentShaderUniforms();
+		fragment << generateFragmentShaderMain();
+
+		ZR_CORE_INFO("Vertex shader:\n{0}", vertex.str());
+		ZR_CORE_INFO("Fragment shader:\n{0}", fragment.str());
 
 		mShader = Shader::Create();
-		if (!mShader->loadFromStrings(vertex.str(), fragment)) {
+		if (!mShader->loadFromStrings(vertex.str(), fragment.str())) {
 			std::cout << "Can't create model shader object.\n";
 		}
 	}
@@ -323,6 +325,103 @@ namespace zr
 		std::stringstream ss;
 		ss << "uniform mat4 uViewProjection;\n";
 		ss << "uniform mat4 uTranformMatrix;\n";
+		if (mComponents & MeshData::Components::Normals) {
+			ss << "out vec4 vNormal;\n";
+		}
+		if (mComponents & MeshData::Components::TangentsAndBitangents) {
+			ss << "out vec3 vTangent;\n";
+			ss << "out vec3 vBitangent;\n";
+		}
+		if (mComponents & MeshData::Components::TextureCoordinates) {
+			ss << "out vec2 vTextureCoordinates;\n";
+		}
+		if (mComponents & MeshData::Components::Animations) {
+			ss << "const int BONE_COUNT = " << mBoneOffsets.size() << ";\n";
+			ss << "uniform mat4 boneTransformations[BONE_COUNT];\n";
+		}
+		return ss.str();
+	}
+
+	std::string Model3D::generateVertexShaderMain() const
+	{
+		std::stringstream ss;
+		ss << "\n";
+		ss << "void main(){\n";
+		if (mComponents & MeshData::Components::TextureCoordinates) {
+			ss << "vTextureCoordinates = aTexturesCoordinates;\n";
+		}
+		if (mComponents & MeshData::Components::TangentsAndBitangents) {
+			ss << "vTangent = aTangent;\n";
+			ss << "vBitangent = aBitangent;\n";
+		}
+		if (mComponents & MeshData::Components::Animations) {
+			unsigned maxAttribLength = getMaxAttributeLength();
+			ss << "mat4 boneTransform = mat4(1.f);\n";
+			if (maxAttribLength == 1) {
+				for (unsigned j = 0; j < 4; ++j) {
+					ss << "boneTransform += boneTransformations[aBoneIndeces[" << j << "]] * aBoneWeights[" << j << "];\n";
+				}
+			}
+			else {
+				for (unsigned i = 0; i < maxAttribLength; ++i) {
+					for (unsigned j = 0; j < 4; ++j) {
+						ss << "boneTransform += boneTransformations[aBoneIndeces[" << i << "][" << j << "]] * aBoneWeights[" << i << "][" << j << "];\n";
+					}
+				}
+			}
+
+			if (mComponents & MeshData::Components::Normals) {
+				ss << "vNormal = boneTransform * vec4(aNormal, 0.f);\n";
+			}
+			ss << "vec4 transformPosition = boneTransform * vec4(aPosition, 1.f);\n";
+			ss << "gl_Position = uViewProjection * uTranformMatrix * transformPosition;\n";
+		}
+		else {
+			ss << "gl_Position = uViewProjection * uTranformMatrix * vec4(aPosition, 1.f);\n";
+			if (mComponents & MeshData::Components::Normals) {
+				ss << "vNormal = vec4(aNormal, 0.f);\n";
+			}
+		}
+		ss << "}\n";
+		return ss.str();
+	}
+
+	std::string Model3D::generateFragmentShaderUniforms() const
+	{
+		std::stringstream ss;
+		ss << "uniform vec4 uColor;\n";
+		ss << "out vec4 vColor;\n";
+		if (mComponents & MeshData::Components::Normals) {
+			ss << "in vec3 vNormal;\n";
+		}
+		if (mComponents & MeshData::Components::TangentsAndBitangents) {
+			ss << "in vec3 vTangent;\n";
+			ss << "in vec3 vBitangent;\n";
+		}
+		if (mComponents & MeshData::Components::TextureCoordinates) {
+			ss << "in vec2 vTextureCoordinates;\n";
+		}
+		if (mComponents & MeshData::Components::Textures) {
+
+		}
+		else if (mComponents & MeshData::Components::Materials) {
+			ss << "struct Material { vec4 Ambient; vec4 Diffuse; vec4 Specular; vec4 Emissive; float Shininess; };\n";
+			ss << "uniform Material uMaterial;\n";
+		}
+		return ss.str();
+	}
+
+	std::string Model3D::generateFragmentShaderMain() const
+	{
+		std::stringstream ss;
+		ss << "void main(){\n";
+		if (mComponents & MeshData::Components::Materials) {
+			ss << "vColor = uMaterial.Diffuse;\n";
+		}
+		else {
+			ss << "vColor = uColor;\n";
+		}
+		ss << "}\n";
 		return ss.str();
 	}
 
@@ -336,7 +435,7 @@ namespace zr
 
 		mAnimationTime += elapsedTime;
 		float timeInTicks = mAnimationTime.asSeconds() * animation->getTicksPerSecond();
-		float animationTime = fmod(timeInTicks, animation->getDuration());
+		float animationTime = fmod(timeInTicks, animation->getDuration() * animation->getTicksPerSecond());
 
 		traverseSceneTree(animation, animationTime, mModelScene->getRootNode(), glm::mat4(1.f));
 	}
@@ -460,6 +559,14 @@ namespace zr
 		factor = clamp(0.f, 1.f, factor);
 		glm::vec3& delta = translationKeys[next].Position - translationKeys[index].Position;
 		translation = translationKeys[index].Position + factor * delta;
+	}
+
+	unsigned Model3D::getMaxAttributeLength() const
+	{
+		auto& it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
+			return a->getAttributeLength() < b->getAttributeLength();
+		});
+		return (*it)->getAttributeLength();
 	}
 }
 

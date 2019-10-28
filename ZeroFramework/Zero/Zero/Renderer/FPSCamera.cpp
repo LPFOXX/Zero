@@ -23,9 +23,9 @@ namespace zr
 			aspectRatio = width / height;
 		}
 		mPosition = initialPosition;
-		recomputeMatrices();
 		mProjectionMatrix = glm::perspective(glm::radians(mFieldOfView), aspectRatio, 0.1f, 100.f);
 		mViewMatrix = glm::lookAt(mPosition, mPosition + mFront, mUp);
+		recomputeMatrices();
 	}
 
 	FPSCamera::~FPSCamera()
@@ -79,6 +79,7 @@ namespace zr
 
 	void FPSCamera::recomputeMatrices()
 	{
+		glm::quat q = glm::quat({mPitchAngle, mYawAngle, mRollAngle});
 		// Calculate the new Front vector
 		glm::vec3 newFront;
 		newFront.x = cos(glm::radians(mPitchAngle)) * cos(glm::radians(mYawAngle))/* * cos(glm::radians(mRollAngle))*/;
@@ -90,6 +91,9 @@ namespace zr
 		mUp = glm::normalize(glm::cross(mRight, mFront));
 
 		mViewMatrix = glm::lookAt(mPosition, mPosition + mFront, mUp);
+		//glm::mat4 f = glm::mat4_cast(glm::normalize(q));
+		//mViewMatrix = glm::inverse(f);
+		//mViewMatrix = f;
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 	}
 

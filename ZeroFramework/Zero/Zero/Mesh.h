@@ -24,10 +24,12 @@ namespace zr
 		void render(const Ref<Shader>& shader);
 		unsigned getVertexArrayMaxLayoutIndex() const;
 		std::string getShaderLayoutLocation() const;
+		unsigned getAttributeLength() const;
 
 	private:
 		Ref<VertexArray> mVAO;
 		std::unordered_map<Texture2D::Type, std::vector<Ref<Texture2D>>> mTextures;
 		MeshData::MeshProperties mProperties;
+		unsigned mAttributeLength;
 	};
 }

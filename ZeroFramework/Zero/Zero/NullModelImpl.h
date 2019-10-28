@@ -32,6 +32,11 @@ namespace zr
 			return false;
 		}
 
+		virtual bool stopAnimation() override
+		{
+			return false;
+		}
+
 		virtual bool getAvailableAnimations(std::vector<std::string>& animations) override
 		{
 			return false;

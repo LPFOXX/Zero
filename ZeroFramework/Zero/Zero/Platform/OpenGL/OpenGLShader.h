@@ -38,6 +38,7 @@ namespace zr
 		virtual void setUniform(const char* uniformName, const glm::mat4& value) const override;
 		virtual void setUniform(const char* uniformName, const Material& value) const override;
 		virtual void setUniform(const char* uniformName, const Light& value) const override;
+		virtual void setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const override;
 
 	private:
 		/**

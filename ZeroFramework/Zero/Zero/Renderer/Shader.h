@@ -317,6 +317,8 @@ namespace zr
 		virtual void setUniform(const char* uniformName, const Material& value) const = 0;
 
 		virtual void setUniform(const char* uniformName, const Light& value) const = 0;
+
+		virtual void setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const = 0;
 	};
 }
 

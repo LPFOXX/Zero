@@ -346,6 +346,14 @@ namespace zr
 		}
 	}
 
+	void OpenGLShader::setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const
+	{
+		int uniformLocation = getUniformLocation(uniformName);
+		if (uniformLocation != -1) {
+			GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, (GLsizei)value.size(), GL_FALSE, glm::value_ptr(value[0])));
+		}
+	}
+
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const
 	{
 		std::stringstream errorStream;

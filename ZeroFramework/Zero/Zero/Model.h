@@ -20,6 +20,7 @@ namespace zr
 		void render(const glm::mat4& viewProjectionMatrix);
 		bool setAnimation(const std::string& animationName, bool startAnimation = false);
 		bool setAnimation(unsigned animationIndex, bool startAnimation = false);
+		bool stopAnimation();
 		bool getAvailableAnimations(std::vector<std::string>& animationNames);
 		bool isLoaded();
 		bool hasAnimations();

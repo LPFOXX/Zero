@@ -64,7 +64,7 @@ namespace zr
 				}
 				mScene->addAnimation(an);
 			}
-			
+
 			//mScene->printAnimationData(filePath.substr(filePath.find_last_of("/\\") + 1, std::string::npos) + ".txt");
 		}
 		//mScene->printHierachy();
@@ -124,6 +124,7 @@ namespace zr
 		updateFlag(props.Components, MeshData::Textures, searchForTextures);
 		updateFlag(props.Components, MeshData::Materials, searchForMaterials);
 		updateFlag(props.Components, MeshData::Animations, meshHasBones);
+		mComponents = props.Components;
 
 		// Loads the vertex positions values into the vector.
 		// While doing it a vertex object is created.
@@ -195,10 +196,6 @@ namespace zr
 			}
 
 			vs.FixBoneData(mesh->mNumVertices);
-
-			for (unsigned animationsIndex = 0; animationsIndex < mesh->mNumAnimMeshes; ++animationsIndex) {
-
-			}
 		}
 
 		if (searchForMaterials) {
@@ -211,13 +208,14 @@ namespace zr
 			// specular: texture_specularN
 			// normal: texture_normalN
 
+			bool isMaterialValid = true;
 			aiColor4D ambient, diffuse, specular, emissive;
 			float shininess = 0.f;
-			aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambient);
-			aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse);
-			aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specular);
-			aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &emissive);
-			aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
+			isMaterialValid = isMaterialValid && (aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambient) == aiReturn_SUCCESS);
+			isMaterialValid = isMaterialValid && (aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == aiReturn_SUCCESS);
+			isMaterialValid = isMaterialValid && (aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specular) == aiReturn_SUCCESS);
+			isMaterialValid = isMaterialValid && (aiGetMaterialColor(material, AI_MATKEY_COLOR_EMISSIVE, &emissive) == aiReturn_SUCCESS);
+			isMaterialValid = isMaterialValid && (aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess) == aiReturn_SUCCESS);
 
 			props.mMaterial.Ambient = glm::vec4(ambient.r, ambient.g, ambient.b, ambient.a);
 			props.mMaterial.Diffuse = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);

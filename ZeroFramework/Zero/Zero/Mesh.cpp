@@ -48,7 +48,8 @@ namespace zr
 	Mesh::Mesh(MeshData& meshData) :
 		mVAO(nullptr),
 		mTextures(),
-		mProperties(meshData.getProperties())
+		mProperties(meshData.getProperties()),
+		mAttributeLength(0)
 	{
 		ZR_IMGUI_LOG(ConsoleItem::Info, "Mesh name: %s", mProperties.Name.c_str());
 		/*auto& textures = meshData.getTextures();
@@ -91,7 +92,8 @@ namespace zr
 	Mesh::Mesh(MeshData& meshData, std::vector<Ref<Texture2D>>& modelTextures) :
 		mVAO(nullptr),
 		mTextures(),
-		mProperties(meshData.getProperties())
+		mProperties(meshData.getProperties()),
+		mAttributeLength(0)
 	{
 		/*ZR_IMGUI_LOG(ConsoleItem::Info, "Mesh name: %s", mProperties.Name.c_str());
 		auto& meshTextures = meshData.getTextures();
@@ -144,14 +146,14 @@ namespace zr
 		}
 		
 		if (mProperties.Components & MeshData::Components::Animations) {
-			unsigned attributeLength = (v.MaxBonesPerVertex / 4) + (v.MaxBonesPerVertex % 4 == 0 ? 0 : 1);
+			mAttributeLength = (v.MaxBonesPerVertex / 4) + (v.MaxBonesPerVertex % 4 == 0 ? 0 : 1);
 
 			std::vector<unsigned> boneIndices;
 			std::vector<float> boneWeights;
 
 			for (auto& vertexBoneData : v.BoneData) {
 				unsigned currentVertexBoneCount = vertexBoneData.second.BoneIndices.size();
-				unsigned fillWithZeros = attributeLength * 4 - currentVertexBoneCount;
+				unsigned fillWithZeros = mAttributeLength * 4 - currentVertexBoneCount;
 
 				for (unsigned i = 0; i < currentVertexBoneCount; ++i) {
 					boneIndices.push_back(vertexBoneData.second.BoneIndices[i]);
@@ -165,8 +167,8 @@ namespace zr
 
 			BufferLayout boneIndicesLayout;
 			BufferLayout boneWeightsLayout;
-			boneIndicesLayout.addElement(BufferElement(ShaderDataType::Int4, "aBoneIndeces", attributeLength));
-			boneWeightsLayout.addElement(BufferElement(ShaderDataType::Float4, "aBoneWeights", attributeLength));
+			boneIndicesLayout.addElement(BufferElement(ShaderDataType::Int4, "aBoneIndeces", mAttributeLength));
+			boneWeightsLayout.addElement(BufferElement(ShaderDataType::Float4, "aBoneWeights", mAttributeLength));
 
 			Ref<VertexBuffer>& boneIndicesVBO = VertexBuffer::Create(&boneIndices[0], boneIndices.size() * sizeof(unsigned), DrawMode::Static);
 			boneIndicesVBO->setLayout(boneIndicesLayout);
@@ -263,6 +265,11 @@ namespace zr
 			mVAO->bind();
 			glDrawElements(GL_TRIANGLES, mVAO->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 		}*/
+		if (mProperties.Components & MeshData::Components::Materials) {
+			shader->setUniform("uMaterial", mProperties.mMaterial);
+			//mProperties.mMaterial.
+		}
+
 		mVAO->bind();
 		RenderCommand::DrawIndexed(mVAO);
 	}
@@ -279,5 +286,10 @@ namespace zr
 	std::string Mesh::getShaderLayoutLocation() const
 	{
 		return mVAO->getShaderLayouts();
+	}
+
+	unsigned Mesh::getAttributeLength() const
+	{
+		return mAttributeLength;
 	}
 }

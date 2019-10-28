@@ -60,6 +60,11 @@ namespace zr
 		return mModelInstance->setAnimation(animationIndex, startAnimation);
 	}
 
+	bool Model::stopAnimation()
+	{
+		return mModelInstance->stopAnimation();
+	}
+
 	bool Model::getAvailableAnimations(std::vector<std::string>& animationNames)
 	{
 		return mModelInstance->getAvailableAnimations(animationNames);

@@ -32,12 +32,12 @@ namespace lp
 			zr::MeshData::Animations |
 			zr::MeshData::Materials;
 		std::vector<std::string> modelsToLoad{ {
-			//{"resources/nanosuit/nanosuit.obj"},
-			{"resources/anim_model/anim_model.dae"},
-			//{"resources/iron_man_fixed/iron_man_fixed.obj"},
-			{"resources/bob_lamp/boblampclean.md5mesh"},
-			//{"resources/teapot3/teapot.obj"}
-			} };
+				//{"resources/nanosuit/nanosuit.obj"},
+				//{"resources/anim_model/anim_model.dae"},
+				{"resources/iron_man_fixed/iron_man_fixed.obj"},
+				//{"resources/bob_lamp/boblampclean.md5mesh"},
+				//{"resources/teapot3/teapot.obj"}
+				} };
 
 		for (unsigned i = 0; i < modelsToLoad.size(); ++i) {
 			mModels.push_back(std::make_shared<zr::Model>(modelsToLoad[i], componentsToLoad, [&](float& progress) {
@@ -259,12 +259,13 @@ namespace lp
 
 			for (unsigned i = 0; i < mModels.size(); ++i) {
 				glm::mat4& model = glm::mat4(1.f);
-				model = glm::translate(model, glm::vec3(10.f * i, 5.f * i, 0.f));
+				model = glm::translate(model, glm::vec3(10.f * i, 0.f, 0.f));
 				model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
 				mModels[i]->setModelTransform(model);
 				mModels[i]->render(mFPSCamera->getViewProjectionMatrix());
+				//mModels[i]->render(mOrthographicCameraController->getCamera()->getViewProjectionMatrix());
 			}
-			
+
 			zr::Renderer::EndScene();
 		}
 
@@ -314,8 +315,13 @@ namespace lp
 				ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
 				ImGui::Text("Model loading progress %i", i);
 				if (mModels[i]->isLoaded() && mModels[i]->hasAnimations()) {
-					if (ImGui::Button("Start animation")) {
+					std::string startButtonId = "Start animation#" + std::to_string(i);
+					std::string stopButtonId = "Stop animation#" + std::to_string(i);
+					if (ImGui::Button(startButtonId.c_str())) {
 						mModels[i]->setAnimation(0, true);
+					} ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+					if (ImGui::Button(stopButtonId.c_str())) {
+						mModels[i]->stopAnimation();
 					}
 				}
 			}
