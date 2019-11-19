@@ -4,16 +4,41 @@
 
 namespace zr
 {
+	struct ProfileResult
+	{
+		ProfileResult() :
+			Name(""),
+			Time(zr::Time::Zero())
+		{
+
+		}
+
+		ProfileResult(const char* name, const zr::Time& time) :
+			Name(name),
+			Time(time)
+		{
+
+		}
+
+		const char* Name;
+		zr::Time Time;
+	};
+
+	template <typename Function>
 	class Timer
 	{
 	public:
-		Timer(const std::string& identifier);
+		Timer(const char* identifier, Function&& func);
 		~Timer();
 
 		Time Timer::restart();
 
 	private:
 		Time mStartTime;
-		std::string mIdentifier;
+		Function mFunc;
+		const char* mIdentifier;
 	};
 }
+
+#include "Timer.inl"
+

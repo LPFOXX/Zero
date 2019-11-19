@@ -4,17 +4,14 @@
 
 namespace zr
 {
-	template <typename T>
-	using EventFunction = std::function<bool(T&)>;
-	
 	class EventDispatcher
 	{
 	public:
 		inline EventDispatcher(Event& event);
 		inline virtual ~EventDispatcher();
 
-		template <typename T>
-		inline bool dispatch(EventFunction<T> func);
+		template <typename T, typename F>
+		inline bool dispatch(const F& func);
 
 	private:
 		Event& mEvent;

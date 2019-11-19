@@ -5,7 +5,7 @@
 
 namespace zr
 {
-	std::unique_ptr<RendererAPI> RenderCommand::sRendererAPI = std::unique_ptr<RendererAPI>(new OpenGLRendererAPI);
+	Scope<RendererAPI> RenderCommand::sRendererAPI = CreateScope<OpenGLRendererAPI>();
 
 	RenderCommand::RenderCommand()
 	{

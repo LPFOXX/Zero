@@ -19,7 +19,7 @@ namespace zr
 		mCameraRotationSpeed(45.f),
 		mCameraTranslationSpeed(5.f)
 	{
-		mCamera = std::shared_ptr<OrthographicCamera>(new OrthographicCamera(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel));
+		mCamera = CreateRef<OrthographicCamera>(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
 	}
 
 	OrthographicCameraController::~OrthographicCameraController()

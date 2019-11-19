@@ -84,8 +84,8 @@ namespace zr
 
 	void ImGuiLayer::OnImGuiRender()
 	{
-		static bool show = true;
-		ImGui::ShowDemoWindow(&show);
+		static bool isOpen = true;
+		ZR_IMGUI_DRAW("Console", &isOpen);
 	}
 
 	void ImGuiLayer::onEvent(Event& e)

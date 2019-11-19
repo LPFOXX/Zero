@@ -8,15 +8,18 @@ namespace zr
 	{
 	public:
 		OpenGLShader();
-		OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-		OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
+		OpenGLShader(const std::string& filePath);
+		OpenGLShader(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		OpenGLShader(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
 		virtual ~OpenGLShader();
 
 		// Inherited via Shader
-		virtual bool loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) override;
-		virtual bool loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) override;
-		virtual bool loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader) override;
-		virtual bool loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader) override;
+		virtual const std::string& getName() const;
+		virtual bool loadFromFile(const std::string& filePath) override;
+		virtual bool loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath) override;
+		virtual bool loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) override;
+		virtual bool loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader) override;
+		virtual bool loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader) override;
 		virtual void bind() const override;
 		virtual void unbind() const override;
 		virtual void setUniform(const char* uniformName, float value) const override;
@@ -41,6 +44,9 @@ namespace zr
 		virtual void setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const override;
 
 	private:
+		std::string readFile(const std::string& filePath);
+		std::unordered_map<unsigned char, std::string> preProcess(const std::string& source);
+
 		/**
 		 * @brief Checks for compilation errors after a shader program is loaded.
 		 *
@@ -88,6 +94,7 @@ namespace zr
 		GLuint mFragmentShaderId;	/**< The handler for the fragment shader of this shader program.*/
 		GLuint mGeometryShaderId;	/**< The handler for the geometry shader of this shader program.*/
 		unsigned mProgramId;		/**< The handler for this shader program.*/
+		std::string mName;
 
 		mutable std::unordered_map<std::string, int> mUniformLocationCache;
 	};

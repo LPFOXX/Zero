@@ -7,6 +7,8 @@
 
 namespace zr
 {
+	unsigned char OpenGLRendererAPI::sState = 0X0;
+
 	OpenGLRendererAPI::OpenGLRendererAPI() :
 		RendererAPI()
 	{
@@ -18,10 +20,11 @@ namespace zr
 
 	void OpenGLRendererAPI::init()
 	{
-		enableBlend(true);
+		setBlendState(true);
+		setDepthTestState(true);
 	}
 
-	void OpenGLRendererAPI::drawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+	void OpenGLRendererAPI::drawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
 	}
@@ -64,31 +67,41 @@ namespace zr
 
 	bool OpenGLRendererAPI::getDepthTestState()
 	{
-		unsigned char wasDepthEnabled;
-		GL_ERR_CHECK(wasDepthEnabled = glIsEnabled(GL_DEPTH_TEST));
-		return (wasDepthEnabled == GL_TRUE ? true : false);
+		return OpenGLRendererAPI::sState & StateBits::DepthBit;
 	}
 
-	void OpenGLRendererAPI::setDepthTestState(bool state)
+	void OpenGLRendererAPI::setDepthTestState(bool depthEnabled)
 	{
-		if (state) {
+		if (depthEnabled && !(OpenGLRendererAPI::sState & StateBits::DepthBit)) {
 			GL_ERR_CHECK(glEnable(GL_DEPTH_TEST));
 			glDepthFunc(GL_LEQUAL);
+			OpenGLRendererAPI::sState |= StateBits::DepthBit;
 		}
 		else {
-			GL_ERR_CHECK(glDisable(GL_DEPTH_TEST));
+			if (OpenGLRendererAPI::sState & StateBits::DepthBit) {
+				GL_ERR_CHECK(glDisable(GL_DEPTH_TEST));
+				OpenGLRendererAPI::sState &= ~StateBits::DepthBit;
+			}
 		}
 	}
 
-	void OpenGLRendererAPI::enableBlend(bool blendEnabled)
+	void OpenGLRendererAPI::setBlendState(bool blendEnabled)
 	{
-		GL_ERR_CHECK(glEnable(GL_BLEND));
-		GL_ERR_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		if (blendEnabled && !(OpenGLRendererAPI::sState & StateBits::BlendBit)) {
+			GL_ERR_CHECK(glEnable(GL_BLEND));
+			GL_ERR_CHECK(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+			OpenGLRendererAPI::sState |= StateBits::BlendBit;
+		}
+		else {
+			if (OpenGLRendererAPI::sState & StateBits::BlendBit) {
+				GL_ERR_CHECK(glDisable(GL_BLEND));
+				OpenGLRendererAPI::sState &= ~StateBits::BlendBit;
+			}
+		}
 	}
 
-	bool OpenGLRendererAPI::isBlendEnabled()
+	bool OpenGLRendererAPI::getBlendState()
 	{
-		// TODO:
-		return false;
+		return OpenGLRendererAPI::sState & StateBits::BlendBit;
 	}
 }

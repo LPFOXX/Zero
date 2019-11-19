@@ -43,6 +43,7 @@ namespace zr
 		virtual void bind() const override;
 		virtual void unbind() const override;
 		virtual unsigned getCount() const override;
+		virtual void setData(unsigned* data, unsigned count) override;
 
 	private:
 		unsigned mId;

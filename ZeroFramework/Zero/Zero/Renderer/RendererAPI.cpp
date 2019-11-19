@@ -17,7 +17,7 @@ namespace zr
 
 	}
 
-	RendererAPI* RendererAPI::Create()
+	Scope<RendererAPI> RendererAPI::Create()
 	{
 		switch (RendererAPI::sAPI) {
 			case RendererAPI::API::None:
@@ -26,7 +26,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLRendererAPI;
+				return CreateScope<OpenGLRendererAPI>();
 			}
 			case RendererAPI::API::Direct3D:
 			{

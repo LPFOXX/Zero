@@ -315,7 +315,7 @@ namespace zr
 		ZR_CORE_INFO("Fragment shader:\n{0}", fragment.str());
 
 		mShader = Shader::Create();
-		if (!mShader->loadFromStrings(vertex.str(), fragment.str())) {
+		if (!mShader->loadFromStrings("Model3DShader", vertex.str(), fragment.str())) {
 			std::cout << "Can't create model shader object.\n";
 		}
 	}

@@ -58,6 +58,11 @@ namespace zr
 		return "";
 	}
 
+	static bool IsIntegerShaderDataType(ShaderDataType type)
+	{
+		return type == ShaderDataType::Int || type == ShaderDataType::Int2 || type == ShaderDataType::Int3 || type == ShaderDataType::Int4;
+	}
+
 	struct BufferElement
 	{
 		BufferElement() :
@@ -205,6 +210,7 @@ namespace zr
 		virtual void unbind() const = 0;
 
 		virtual unsigned getCount() const = 0;
+		virtual void setData(unsigned* data, unsigned count) = 0;
 	};
 
 	class VertexArray

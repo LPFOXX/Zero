@@ -17,12 +17,13 @@ namespace zr
 		virtual ~Renderer();
 
 		static void Init();
-		static void BeginScene(const std::shared_ptr<Camera>& camera, const std::shared_ptr<Framebuffer>& framebuffer = nullptr);
+		static void Shutdown();
+		static void BeginScene(const Ref<Camera>& camera, const Ref<Framebuffer>& framebuffer = nullptr);
 		static void EndScene();
-		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.f));
-		static void Submit(const std::shared_ptr<CubeMap>& cubeMap, bool ignoreTranslations = false);
-		static void Submit(const std::shared_ptr<Text>& text);
-		static void Submit(const std::shared_ptr<Sprite>& sprite);
+		static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.f));
+		static void Submit(const Ref<CubeMap>& cubeMap, bool ignoreTranslations = false);
+		static void Submit(const Ref<Text>& text);
+		static void Submit(const Ref<Sprite>& sprite);
 
 		inline static RendererAPI::API GetAPI()
 		{
@@ -32,10 +33,9 @@ namespace zr
 		struct SceneData
 		{
 			Camera* Camera;
-			//glm::mat4 ViewProjectionMatrix;
 			std::shared_ptr<Framebuffer> Framebuffer;
 		};
 
-		static std::unique_ptr<SceneData> sSceneData;
+		static Scope<SceneData> sSceneData;
 	};
 }

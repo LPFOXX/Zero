@@ -3,6 +3,7 @@
 #include "Zero/Renderer/CubeMap.h"
 #include "OpenGLShader.h"
 #include "OpenGLVertexArray.h"
+#include "Zero/Core/Core.h"
 #include <glad/glad.h>
 
 namespace zr
@@ -50,7 +51,7 @@ namespace zr
 
 	private:
 		unsigned mTextureId;
-		std::shared_ptr<OpenGLVertexArray> mVertexArray;
-		std::shared_ptr<OpenGLShader> mShader;
+		Ref<VertexArray> mVertexArray;
+		Ref<Shader> mShader;
 	};
 }

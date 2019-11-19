@@ -15,8 +15,7 @@ namespace zr
 	unsigned char* ImageReader::LoadDataFromFile(const std::string& imagePath, int& width, int& height, int& channelCount, bool flipImage)
 	{
 		stbi_set_flip_vertically_on_load(flipImage);
-		// Force 4 channels output by specifying 4 as the last parameter
-		return stbi_load(imagePath.c_str(), &width, &height, &channelCount, 4);
+		return stbi_load(imagePath.c_str(), &width, &height, &channelCount, 0);
 	}
 
 	void ImageReader::CleanData(unsigned char* data)

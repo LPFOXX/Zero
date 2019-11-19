@@ -3,6 +3,8 @@
 #include "RenderCommand.h"
 #include "Text.h"
 
+#include "Renderer2D.h"
+
 #include "../Core/Log.h"
 
 namespace zr
@@ -167,7 +169,7 @@ namespace zr
 
 			Text::sShader->bind();
 			Text::sShader->setUniform("uText", 0);
-			fontTexture->bindOnTextureUnit(0);
+			fontTexture->bindOnTextureSlot(0);
 			Text::sShader->setUniform("uViewProjection", viewProjectionMatrix);
 
 			float textureWidth = static_cast<float>(fontTexture->getWidth());
@@ -258,6 +260,19 @@ namespace zr
 					float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
 					float bryTexCoord = bottomRightY / textureHeight;	// Top right
 
+					std::vector<glm::vec3> positions;
+					positions.emplace_back(xPos + charWidth,	yPos,				0.f);
+					positions.emplace_back(xPos,				yPos,				0.f);
+					positions.emplace_back(xPos,				yPos + charHeight,	0.f);
+					positions.emplace_back(xPos + charWidth,	yPos + charHeight,	0.f);
+
+					std::vector<glm::vec2> textureCoordinates;
+					textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
+					textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
+					textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
+					textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
+
+					Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, fontTexture->getHandle());
 					// Bottom and top coordinates are actually flipped
 					// because of the system coordinates of textures.
 					float vertices[]{
@@ -308,6 +323,20 @@ namespace zr
 				float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
 				float bryTexCoord = bottomRightY / textureHeight;	// Top right
 
+				std::vector<glm::vec3> positions;
+				positions.emplace_back(xPos + charWidth, yPos, 0.f);
+				positions.emplace_back(xPos, yPos, 0.f);
+				positions.emplace_back(xPos, yPos + charHeight, 0.f);
+				positions.emplace_back(xPos + charWidth, yPos + charHeight, 0.f);
+
+				std::vector<glm::vec2> textureCoordinates;
+				textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
+				textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
+				textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
+				textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
+
+				Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, fontTexture->getHandle());
+
 				// Bottom and top coordinates are actually flipped
 					// because of the system coordinates of textures.
 				float vertices[]{
@@ -322,7 +351,7 @@ namespace zr
 				Text::sShader->setUniform("uTextColor", mColor);
 				// Update the buffer
 				Text::sVAO->getVertexBuffers()[0]->setData(vertices, sizeof(vertices));
-				RenderCommand::DrawIndexed(Text::sVAO);
+				//RenderCommand::DrawIndexed(Text::sVAO);
 			}
 
 			// Restore depth testing state
@@ -414,7 +443,7 @@ namespace zr
 			Text::sVAO->setIndexBuffer(ebo);
 
 			Text::sShader = Shader::Create();
-			if (!Text::sShader->loadFromStrings(Text::sVertexShader, Text::sFragmentShader)) {
+			if (!Text::sShader->loadFromStrings("TextShader", Text::sVertexShader, Text::sFragmentShader)) {
 				ZR_CORE_ERROR("Can't create Text shader.");
 			}
 

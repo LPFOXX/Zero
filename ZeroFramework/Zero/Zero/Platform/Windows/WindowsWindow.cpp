@@ -5,10 +5,11 @@
 #include "WindowsWindow.h"
 #include "Zero/Core/Events.h"
 #include "Zero/Platform/OpenGL/OpenGLContext.h"
+#include "Zero/Core/Log.h"
 
 namespace zr
 {
-	bool WindowsWindow::sGLFWInitialized = false;
+	unsigned WindowsWindow::sGLFWWindowCount = 0;
 
 	static void errorCallback(int error, const char* description)
 	{
@@ -22,15 +23,16 @@ namespace zr
 		mData.Width = wc.Width;
 		mData.Height = wc.Height;
 
-		if (!WindowsWindow::sGLFWInitialized) {
+		ZR_CORE_INFO("Creating window {0} ({1}, {2})", wc.Title, wc.Width, wc.Height);
+
+		if (WindowsWindow::sGLFWWindowCount == 0) {
+			ZR_CORE_INFO("Initializing GFLW");
 			if (!glfwInit()) {
 				throw std::runtime_error("Can't initialize an OpenGL context.");
 			}
-
-			WindowsWindow::sGLFWInitialized = true;
+			glfwSetErrorCallback(errorCallback);
 		}
 
-		glfwSetErrorCallback(errorCallback);
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -50,7 +52,9 @@ namespace zr
 			throw std::runtime_error("Window can't be initialized.");
 		}
 
-		mContext.reset(new OpenGLContext(mWindowHandle));
+		++WindowsWindow::sGLFWWindowCount;
+		// FIXME
+		mContext = GraphicsContext::Create(mWindowHandle);
 		mContext->init();
 
 		setVSync(true);
@@ -167,15 +171,20 @@ namespace zr
 		});
 	}
 
-	Window* Window::Create(const WindowConfig& wc)
+	Scope<Window> Window::Create(const WindowConfig& wc)
 	{
-		return new WindowsWindow(wc);
+		return CreateScope<WindowsWindow>(wc);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
 		glfwDestroyWindow(mWindowHandle);
-		glfwTerminate();
+		--WindowsWindow::sGLFWWindowCount;
+
+		if (WindowsWindow::sGLFWWindowCount == 0) {
+			ZR_CORE_INFO("Terminating GLFW");
+			glfwTerminate();
+		}
 	}
 
 	void WindowsWindow::onUpdate()

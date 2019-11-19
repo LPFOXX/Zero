@@ -2,6 +2,8 @@
 
 #include <Zero/Zero.h>
 
+#define PROFILE_SCOPE(name) zr::Timer<std::function<void(const zr::ProfileResult&)>> profileTimer##__LINE__(name, [&](const zr::ProfileResult& result) { mProfileResults.push_back(result);})
+
 namespace lp
 {
 	enum class Direction
@@ -408,8 +410,6 @@ namespace lp
 		bool mIsGameOver = false;
 	};
 
-
-
 	class HUDLayer : public zr::Layer, public zr::ViewportDependable, public zr::ViewportResizeListener
 	{
 	public:
@@ -427,8 +427,11 @@ namespace lp
 		std::shared_ptr<zr::OrthographicCameraController> mCameraController;
 		std::shared_ptr<zr::Font> mFont;
 		std::shared_ptr<zr::Text> mText;
+		zr::Ref<zr::Texture2D> mCheckerBoardTexture;
+		zr::Ref<zr::Texture2D> mLogoTexture;
+		zr::Ref<zr::Texture2D> mOceanTexture;
 
-		std::shared_ptr<zr::Sprite> mSprite;
+		std::vector<zr::ProfileResult> mProfileResults;
 
 
 		// Game things

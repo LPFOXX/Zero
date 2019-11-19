@@ -51,17 +51,15 @@ namespace zr
 			5, 1, 6
 		};
 
-		mVertexArray.reset(new OpenGLVertexArray);
+		mVertexArray = VertexArray::Create();
 
-		std::shared_ptr<OpenGLVertexBuffer> vertexBuffer;
-		vertexBuffer.reset(new OpenGLVertexBuffer(skyboxVertices, sizeof(skyboxVertices), DrawMode::Static));
+		Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(skyboxVertices, sizeof(skyboxVertices), DrawMode::Static);
 		vertexBuffer->setLayout({
 			{ShaderDataType::Float3, "aPosition"}
 			});
 		mVertexArray->addVertexBuffer(vertexBuffer);
 
-		std::shared_ptr<OpenGLIndexBuffer> indexBuffer;
-		indexBuffer.reset(new OpenGLIndexBuffer(indices, 6 * 6, DrawMode::Static));
+		Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, 6 * 6, DrawMode::Static);
 		mVertexArray->setIndexBuffer(indexBuffer);
 
 		std::string vertexShader = R"(
@@ -98,8 +96,8 @@ namespace zr
 			}
 		)";
 
-		mShader.reset(new OpenGLShader());
-		if (!mShader->loadFromStrings(vertexShader, fragmentShader)) {
+		mShader = Shader::Create();
+		if (!mShader->loadFromStrings("OpenGLCubeMapShader", vertexShader, fragmentShader)) {
 			ZR_CORE_ERROR("Failed to load cubemap shader.");
 		}
 	}

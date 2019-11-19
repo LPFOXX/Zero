@@ -1,5 +1,7 @@
 #pragma once
+
 #include "Events/Event.h"
+#include "../Core/Core.h" 
 
 namespace zr
 {
@@ -23,7 +25,7 @@ namespace zr
 		public:
 			using EventCallback = std::function<void(Event&)>;
 			
-			static Window* Create(const WindowConfig& wc = WindowConfig());
+			static Scope<Window> Create(const WindowConfig& wc = WindowConfig());
 			virtual ~Window() {};
 			
 			virtual void onUpdate() = 0;

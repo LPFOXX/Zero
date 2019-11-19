@@ -76,11 +76,11 @@ namespace zr
 
 		mQuadVAO->addVertexBuffer(VBO);
 
-		std::shared_ptr<IndexBuffer> EBO = IndexBuffer::Create(quadIndices, 6U, DrawMode::Static);
+		Ref<IndexBuffer> EBO = IndexBuffer::Create(quadIndices, 6U, DrawMode::Static);
 		mQuadVAO->setIndexBuffer(EBO);
 
 		mScreenShader = Shader::Create();
-		if (!mScreenShader->loadFromStrings(sVertexShader, sFragmentShader)) {
+		if (!mScreenShader->loadFromStrings("OpenGLFramebufferScreenShader", sVertexShader, sFragmentShader)) {
 			std::cout << "Error creating Shader\n";
 		}
 	}

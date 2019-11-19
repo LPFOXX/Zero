@@ -1,11 +1,12 @@
 #include <zr_pch.h>
 
+#include "Zero/Core/Core.h"
 #include "Zero/Core/Application.h"
 #include "WindowsInput.h"
 
 namespace zr
 {
-	std::unique_ptr<Input> Input::sInstance = std::unique_ptr<Input>(new WindowsInput);
+	Scope<Input> Input::sInstance = CreateScope<WindowsInput>();
 
 	WindowsInput::WindowsInput() :
 		Input()

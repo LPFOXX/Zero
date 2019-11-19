@@ -41,6 +41,15 @@ namespace zr
 		return size;
 	}
 
+	void OpenGLTexture2D::ActivateTextureSlot(unsigned textureSlot, unsigned textureHandle)
+	{
+		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureSlot));
+		if (OpenGLTexture2D::sCurrentlyBoundTexture != textureHandle) {
+			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, textureHandle));
+			OpenGLTexture2D::sCurrentlyBoundTexture = textureHandle;
+		}
+	}
+
 	void OpenGLTexture2D::bind() const
 	{
 		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
@@ -64,7 +73,7 @@ namespace zr
 		unsigned char* data = ImageReader::LoadDataFromFile(filePath, width, height, nrChannels, flipVertically);
 
 		bool returnResult = false;
-		if (data && loadFromMemory(width, height, data)) {
+		if (data && loadFromMemory(width, height, data, nrChannels)) {
 			mFilePath = filePath;
 			mTextureType = textureType;
 			returnResult = true;
@@ -74,23 +83,33 @@ namespace zr
 		return returnResult;
 	}
 
-	bool OpenGLTexture2D::loadFromMemory(float width, float height, const unsigned char* data)
+	bool OpenGLTexture2D::loadFromMemory(unsigned width, unsigned height, const unsigned char* data, unsigned channelCount)
 	{
 		if (data) {
+			unsigned internalFormat = 0, dataFormat = 0;
+			if (channelCount == 4U) {
+				internalFormat = mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+				dataFormat = GL_RGBA;
+			}
+			else if (channelCount == 3U) {
+				internalFormat = mIsSRGBCapable ? GL_SRGB8 : GL_RGB8;
+				dataFormat = GL_RGB;
+			}
+
+			if (!(internalFormat || dataFormat)) return false;
+
 			GL_ERR_CHECK(glGenTextures(1, &mTextureId));
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 			
 			OpenGLTexture2D::TextureSaver saver;
 
-			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, mIsSRGBCapable ? GL_SRGB8_ALPHA8 : GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+			GL_ERR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data));
 
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mIsSmooth ? GL_LINEAR : GL_NEAREST));
 
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
-
-			//GL_ERR_CHECK(glFlush());
 
 			// Update texture width and height attributes
 			mSize.x = width;
@@ -104,7 +123,7 @@ namespace zr
 
 	bool OpenGLTexture2D::loadFromImage(const Image& image, Texture2D::Type textureType)
 	{
-		if (loadFromMemory((float)image.getWidth(), (float)image.getHeight(), image.getData())) {
+		if (loadFromMemory(image.getWidth(), image.getHeight(), image.getData())) {
 			mTextureType = textureType;
 			mFilePath = image.getPath();
 			return true;
@@ -112,9 +131,9 @@ namespace zr
 		return false;
 	}
 
-	void OpenGLTexture2D::bindOnTextureUnit(unsigned textureUnit)
+	void OpenGLTexture2D::bindOnTextureSlot(unsigned textureSlot)
 	{
-		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureUnit));
+		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0 + textureSlot));
 		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;

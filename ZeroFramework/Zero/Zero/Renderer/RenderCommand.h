@@ -40,14 +40,14 @@ namespace zr
 			RenderCommand::sRendererAPI->setCullingFacesState(enabled, facesToCull);
 		}
 
-		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
 		{
 			RenderCommand::sRendererAPI->drawIndexed(vertexArray);
 		}
 
 		inline static void EnableBlend(bool blendEnabled)
 		{
-			RenderCommand::sRendererAPI->enableBlend(blendEnabled);
+			RenderCommand::sRendererAPI->setBlendState(blendEnabled);
 		}
 
 		inline static bool GetDepthTestState()
@@ -56,6 +56,6 @@ namespace zr
 		}
 
 	private:
-		static std::unique_ptr<RendererAPI> sRendererAPI;
+		static Scope<RendererAPI> sRendererAPI;
 	};
 }

@@ -6,17 +6,44 @@
 
 namespace zr
 {
+	static unsigned char ShaderTypeFromString(const std::string& type)
+	{
+		if (type == "vertex")
+			return ShaderType::VertexShader;
+		if (type == "fragment" || type == "pixel")
+			return ShaderType::FragmentShader;
+		if (type == "geometry" || type == "geom")
+			return ShaderType::GeometryShader;
+
+		return 0;
+	}
+
 	OpenGLShader::OpenGLShader() :
 		Shader(),
 		mVertexShaderId(0U),
 		mFragmentShaderId(0U),
 		mGeometryShaderId(0U),
-		mProgramId(0U)
+		mProgramId(0U),
+		mName()
 	{
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) :
-		Shader()
+	OpenGLShader::OpenGLShader(const std::string& filePath) :
+		Shader(),
+		mVertexShaderId(0U),
+		mFragmentShaderId(0U),
+		mGeometryShaderId(0U),
+		mProgramId(0U),
+		mName()
+	{
+		if (!loadFromFile(filePath)) {
+			throw std::runtime_error("Can't load shader from file: " + filePath);
+		}
+	}
+
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath) :
+		Shader(),
+		mName(name)
 	{
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			throw std::runtime_error("Can't load shader from file: ");
@@ -27,8 +54,9 @@ namespace zr
 		}
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) :
-		Shader()
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) :
+		Shader(),
+		mName(name)
 	{
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			throw std::runtime_error("Can't load shader from file: " + vertexShaderPath + " OR " + fragmentShaderPath);
@@ -51,7 +79,35 @@ namespace zr
 		}
 	}
 
-	bool OpenGLShader::loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	const std::string& OpenGLShader::getName() const
+	{
+		return mName;
+	}
+
+	bool OpenGLShader::loadFromFile(const std::string& filePath)
+	{
+		std::string source = readFile(filePath);
+		if (source.empty()) return false;
+
+		auto& shaderSources = preProcess(source);
+
+		// Extract name from filepath
+		auto lastSlash = filePath.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = filePath.rfind('.');
+		auto count = lastDot == std::string::npos ? filePath.size() - lastSlash : lastDot - lastSlash;
+		auto& shaderName = filePath.substr(lastSlash, count);
+
+		bool hasGeometryShader = shaderSources.find(ShaderType::GeometryShader) != shaderSources.end();
+		bool returnResult = false;
+		if (hasGeometryShader) {
+			return loadFromStrings(shaderName, shaderSources[ShaderType::VertexShader], shaderSources[ShaderType::FragmentShader], shaderSources[ShaderType::GeometryShader]);
+		}
+		
+		return loadFromStrings(shaderName, shaderSources[ShaderType::VertexShader], shaderSources[ShaderType::FragmentShader]);
+	}
+
+	bool OpenGLShader::loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			return false;
@@ -60,10 +116,11 @@ namespace zr
 		if (!createAndLinkProgram(VertexShader | FragmentShader)) {
 			return false;
 		}
+		mName = name;
 		return true;
 	}
 
-	bool OpenGLShader::loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
+	bool OpenGLShader::loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
 	{
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			return false;
@@ -76,11 +133,11 @@ namespace zr
 		if (!createAndLinkProgram(VertexShader | FragmentShader | GeometryShader)) {
 			return false;
 		}
-
+		mName = name;
 		return true;
 	}
 
-	bool OpenGLShader::loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader)
+	bool OpenGLShader::loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader)
 	{
 		if (vertexShader.size() != 0 && fragmentShader.size() != 0) {
 			const char* vertexShaderSource = vertexShader.c_str();
@@ -116,10 +173,11 @@ namespace zr
 				return false;
 			}
 		}
+		mName = name;
 		return true;
 	}
 
-	bool OpenGLShader::loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader)
+	bool OpenGLShader::loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader)
 	{
 		if (vertexShader.size() != 0 && fragmentShader.size() != 0 && geometryShader.size() != 0) {
 			const char* vertexShaderSource = vertexShader.c_str();
@@ -173,6 +231,7 @@ namespace zr
 				return false;
 			}
 		}
+		mName = name;
 		return true;
 	}
 
@@ -338,9 +397,9 @@ namespace zr
 		setUniform((name + ".Ambient").c_str(), value.Ambient);
 		setUniform((name + ".Diffuse").c_str(), value.Diffuse);
 		setUniform((name + ".Specular").c_str(), value.Specular);
-		
+
 		if (value.Type == Light::LightType::Directional) {
-			DirectionalLight* light = (DirectionalLight*)&value;
+			DirectionalLight* light = (DirectionalLight*)& value;
 			setUniform((name + ".Direction").c_str(), light->Direction);
 			setUniform((name + ".Type").c_str(), Light::LightType::Directional);
 		}
@@ -352,6 +411,43 @@ namespace zr
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, (GLsizei)value.size(), GL_FALSE, glm::value_ptr(value[0])));
 		}
+	}
+
+	std::string OpenGLShader::readFile(const std::string& filePath)
+	{
+		std::string result;
+		std::ifstream in(filePath, std::ios::in | std::ios::binary);
+		if (in) {
+			in.seekg(0, std::ios::end);
+			size_t size = in.tellg();
+			if (size != -1) {
+				result.resize(in.tellg());
+				in.seekg(0, std::ios::beg);
+				in.read(&result[0], result.size());
+				in.close();
+			}
+		}
+		return result;
+	}
+
+	std::unordered_map<unsigned char, std::string> OpenGLShader::preProcess(const std::string& source)
+	{
+		std::unordered_map<unsigned char, std::string> shaderSources;
+
+		const char* typeToken = "#type";
+		size_t typeTokenLength = strlen(typeToken);
+		size_t pos = source.find(typeToken, 0);
+		while (pos != std::string::npos) {
+			size_t eol = source.find_first_of("\r\n", pos); //End of shader type declaration line
+			size_t begin = pos + typeTokenLength + 1; //Start of shader type name (after "#type " keyword)
+			std::string type = source.substr(begin, eol - begin);
+
+			size_t nextLinePos = source.find_first_not_of("\r\n", eol); //Start of shader code after shader type declaration line
+			pos = source.find(typeToken, nextLinePos); //Start of next shader type declaration line
+			shaderSources[ShaderTypeFromString(type)] = (pos == std::string::npos) ? source.substr(nextLinePos) : source.substr(nextLinePos, pos - nextLinePos);
+		}
+
+		return shaderSources;
 	}
 
 	bool OpenGLShader::checkCompilationError(ShaderType shaderType, GLuint shaderId) const
@@ -491,14 +587,8 @@ namespace zr
 	bool OpenGLShader::createAndLinkProgram(unsigned char whichShaders)
 	{
 		if (whichShaders == 0) {
-			// throw exception
-			#ifdef DEBUG_TO_STDOUT
-			std::cout << "Invalid shader" << std::endl;
-			#endif
-
 			return false;
 		}
-
 
 		GL_ERR_CHECK(mProgramId = glCreateProgram());
 		GL_ERR_CHECK(glAttachShader(mProgramId, mVertexShaderId));
@@ -515,17 +605,10 @@ namespace zr
 		if (!success) {
 			int maxLength;
 			GL_ERR_CHECK(glGetProgramiv(mProgramId, GL_INFO_LOG_LENGTH, &maxLength));
-
 			std::vector<char> info(maxLength);
-
 			GL_ERR_CHECK(glGetProgramInfoLog(mProgramId, 1024, &maxLength, &info[0]));
-			#ifdef DEBUG_TO_STDOUT
-			std::cout << "Program linking failed:\n" << info << std::endl;
-			#endif
-
 			GL_ERR_CHECK(glDeleteProgram(mProgramId));
 			mProgramId = 0U;
-
 
 			GL_ERR_CHECK(glDeleteShader(mVertexShaderId));
 			GL_ERR_CHECK(glDeleteShader(mFragmentShaderId));
@@ -538,17 +621,20 @@ namespace zr
 			return false;
 		}
 
-		// Always detach shaders after a successful link.
+		// Always detach and delete shaders after a successful link.
 		GL_ERR_CHECK(glDetachShader(mProgramId, mVertexShaderId));
+		GL_ERR_CHECK(glDeleteShader(mVertexShaderId));
 		GL_ERR_CHECK(glDetachShader(mProgramId, mFragmentShaderId));
+		GL_ERR_CHECK(glDeleteShader(mFragmentShaderId));
 
 		if (whichShaders & GeometryShader) {
 			GL_ERR_CHECK(glDetachShader(mProgramId, mGeometryShaderId));
+			GL_ERR_CHECK(glDeleteShader(mGeometryShaderId));
 		}
 
 		return true;
 	}
-	
+
 	int OpenGLShader::getUniformLocation(const char* uniformName) const
 	{
 		if (mUniformLocationCache.find(uniformName) != mUniformLocationCache.end()) {

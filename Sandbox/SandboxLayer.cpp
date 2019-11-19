@@ -21,7 +21,7 @@ namespace lp
 
 		mOrthographicCameraController = std::make_shared<zr::OrthographicCameraController>(1280.f / 600.f, true);
 		mPerspectiveCameraController = std::make_shared<zr::PerspectiveCameraController>(1280.f / 600.f, true);
-		mFPSCamera.reset(new zr::FPSCamera({ 0.f, 0.f, 3.f }, { 0.f, 0.f, -1.f }, { 0.f, 1.f, 0.f }, 1280.f, 600.f));
+		mFPSCamera = std::make_shared<zr::FPSCamera>(glm::vec3(0.f, 0.f, 3.f), glm::vec3(0.f, 0.f, -1.f), glm::vec3(0.f, 1.f, 0.f), 1280.f, 600.f);
 		mFPSCamera->invertMouseMovement(!mIsMouseCaptured);
 
 		unsigned componentsToLoad =
@@ -193,12 +193,12 @@ namespace lp
 		)";
 
 		mShader = zr::Shader::Create();
-		if (!mShader->loadFromStrings(vertexSrc, fragmentSrc)) {
+		if (!mShader->loadFromStrings("SandboxLayerShader", vertexSrc, fragmentSrc)) {
 			ZR_CORE_ERROR("Error creating Shader object!");
 		}
 
 		mBlueShader = zr::Shader::Create();
-		if (!mBlueShader->loadFromStrings(blueShaderVertexSrc, blueShaderFragmentSrc)) {
+		if (!mBlueShader->loadFromStrings("SandboxLayerBlueShader", blueShaderVertexSrc, blueShaderFragmentSrc)) {
 			ZR_CORE_ERROR("Error creating blue Shader object!");
 		}
 	}
@@ -327,9 +327,6 @@ namespace lp
 			}
 			ImGui::End();
 		}
-
-		static bool isOpen = true;
-		ZR_IMGUI_DRAW("ExampleConsole", &isOpen);
 	}
 
 	void SandboxLayer::onEvent(zr::Event& e)

@@ -6,7 +6,7 @@
 
 namespace zr
 {
-	std::unique_ptr<Renderer::SceneData> Renderer::sSceneData(new Renderer::SceneData);
+	Scope<Renderer::SceneData> Renderer::sSceneData = CreateScope<Renderer::SceneData>();
 
 	Renderer::Renderer()
 	{
@@ -21,8 +21,13 @@ namespace zr
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}
+	
+	void Renderer::Shutdown()
+	{
+		Renderer2D::Shutdown();
+	}
 
-	void Renderer::BeginScene(const std::shared_ptr<Camera>& camera, const std::shared_ptr<zr::Framebuffer>& framebuffer)
+	void Renderer::BeginScene(const Ref<Camera>& camera, const Ref<zr::Framebuffer>& framebuffer)
 	{
 		Renderer::sSceneData->Camera = &(*camera);
 		Renderer::sSceneData->Framebuffer = framebuffer;
@@ -39,12 +44,12 @@ namespace zr
 	{
 		if (Renderer::sSceneData->Framebuffer != nullptr) {
 			Framebuffer::BindDefault();
-			Texture2D::ActivateTextureUnit(0, 0);
+			Texture2D::ActivateTextureSlot(0, 0);
 			Renderer::sSceneData->Framebuffer->draw();
 		}
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
 		shader->setUniform("uViewProjection", sSceneData->Camera->getViewProjectionMatrix());
@@ -54,7 +59,7 @@ namespace zr
 		RenderCommand::DrawIndexed(vertexArray);
 	}
 
-	void Renderer::Submit(const std::shared_ptr<CubeMap>& cubeMap, bool ignoreTranslations)
+	void Renderer::Submit(const Ref<CubeMap>& cubeMap, bool ignoreTranslations)
 	{
 		if (ignoreTranslations) {
 			const glm::mat4& projection = Renderer::sSceneData->Camera->getProjectionMatrix();
@@ -66,12 +71,12 @@ namespace zr
 		cubeMap->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Text>& text)
+	void Renderer::Submit(const Ref<Text>& text)
 	{
 		text->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}
 
-	void Renderer::Submit(const std::shared_ptr<Sprite>& sprite)
+	void Renderer::Submit(const Ref<Sprite>& sprite)
 	{
 		sprite->render(Renderer::sSceneData->Camera->getViewProjectionMatrix());
 	}

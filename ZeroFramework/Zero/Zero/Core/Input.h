@@ -11,11 +11,14 @@ namespace zr
 		{
 
 		}
-
+	
 		virtual ~Input()
 		{
 
 		}
+
+		Input(const Input&) = delete;
+		Input& operator=(const Input&) = delete;
 
 		inline static bool isKeyPressed(Keyboard key)
 		{
@@ -50,6 +53,6 @@ namespace zr
 		virtual float getMouseYImpl() = 0;
 
 	private:
-		static std::unique_ptr<Input> sInstance;
+		static Scope<Input> sInstance;
 	};
 }

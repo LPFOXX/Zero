@@ -12,19 +12,19 @@ namespace zr
 	public:
 		static void Init();
 
-		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger()
+		inline static Ref<spdlog::logger>& GetCoreLogger()
 		{
 			return sCoreLogger;
 		}
 
-		inline static std::shared_ptr<spdlog::logger>& GetClientLogger()
+		inline static Ref<spdlog::logger>& GetClientLogger()
 		{
 			return sClientLogger;
 		}
 
 	private:
-		static std::shared_ptr<spdlog::logger> sCoreLogger;
-		static std::shared_ptr<spdlog::logger> sClientLogger;
+		static Ref<spdlog::logger> sCoreLogger;
+		static Ref<spdlog::logger> sClientLogger;
 	};
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Zero/Core/Core.h>
 #include <Zero/Core/Window.h>
 #include <Zero/Renderer/GraphicsContext.h>
 
@@ -24,7 +25,7 @@ namespace zr
 		virtual void captureMouseCursor(bool capture = true) override;
 
 	private:
-		static bool sGLFWInitialized;
+		static unsigned sGLFWWindowCount;
 
 	private:
 		struct WindowData
@@ -47,6 +48,6 @@ namespace zr
 		std::string mTitle;
 
 		GLFWwindow* mWindowHandle;
-		std::unique_ptr<GraphicsContext> mContext;
+		Scope<GraphicsContext> mContext;
 	};
 }

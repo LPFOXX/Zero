@@ -21,7 +21,7 @@ namespace zr
 	}
 
 	Texture2D::Texture2D() :
-		mSize(0.f, 0.f),
+		mSize(0, 0),
 		mTextureType(Type::None),
 		mFilePath(""),
 		mIsSRGBCapable(false),
@@ -114,11 +114,7 @@ namespace zr
 	{
 	}
 
-	void Texture2D::ActivateTextureUnit(unsigned textureUnit, const Texture2D& bindTexture)
-	{
-	}
-
-	void Texture2D::ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture)
+	void Texture2D::ActivateTextureSlot(unsigned textureSlot, const Texture2D& texture)
 	{
 		switch (RendererAPI::GetAPI()) {
 			case RendererAPI::API::None:
@@ -131,7 +127,32 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				OpenGLTexture2D::ActivateTextureUnit(textureUnit, bindTexture);
+				OpenGLTexture2D::ActivateTextureSlot(textureSlot, texture.getHandle());
+				break;
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				break;
+			}
+			default:
+			break;
+		}
+	}
+
+	void Texture2D::ActivateTextureSlot(unsigned textureSlot, unsigned textureHandle)
+	{
+		switch (RendererAPI::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				break;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				break;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				OpenGLTexture2D::ActivateTextureSlot(textureSlot, textureHandle);
 				break;
 			}
 			case RendererAPI::API::Vulkan:

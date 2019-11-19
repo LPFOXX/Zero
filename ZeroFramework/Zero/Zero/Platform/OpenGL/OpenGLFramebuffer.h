@@ -3,6 +3,7 @@
 #include <Zero/Renderer/Framebuffer.h>
 #include "OpenGLBuffer.h"
 #include "OpenGLShader.h"
+#include "Zero/Core/Core.h"
 
 namespace zr
 {

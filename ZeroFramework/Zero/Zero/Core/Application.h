@@ -5,6 +5,7 @@
 #include "Window.h"
 #include "LayerStack.h"
 #include "Timer.h"
+#include "Core.h"
 
 namespace zr
 {
@@ -49,14 +50,12 @@ namespace zr
 
 	private:
 		static Application* sInstance;
-		static std::unique_ptr<Clock> sClock;
+		static Scope<Clock> sClock;
 
 	private:
-		std::unique_ptr<Window> mWindow;
+		Scope<Window> mWindow;
 		LayerStack mLayerStack;
 		ImGuiLayer* mImGuiLayer;
-
-
 
 		bool mRunning = true;
 		bool mIsMinimized = false;

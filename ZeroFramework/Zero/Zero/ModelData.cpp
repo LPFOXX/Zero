@@ -14,7 +14,7 @@ namespace zr
 {
 	bool ModelData::loadFromFile(Assimp::Importer& importer, const std::string& filePath, unsigned flags, unsigned& componentsToLoad)
 	{
-		Timer t("ModelData::loadFromFile");
+		Timer<std::function<void(const ProfileResult&)>> t("ModelData::loadFromFile", [] (const ProfileResult& result){});
 		importer.SetPropertyBool(AI_CONFIG_GLOB_MEASURE_TIME, true);
 		const aiScene* scene = importer.ReadFile(filePath.c_str(), flags);
 		if (!scene) {

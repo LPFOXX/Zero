@@ -74,7 +74,7 @@ namespace zr
 
 		if (loadDefaultShader) {
 			mShader = Shader::Create();
-			if (!mShader->loadFromStrings(Sprite::sVertexShader, Sprite::sFragmentShader)) {
+			if (!mShader->loadFromStrings("SpriteShader", Sprite::sVertexShader, Sprite::sFragmentShader)) {
 				ZR_CORE_ERROR("[SPRITE] Can't create sprite shader.");
 			}
 		}
@@ -124,7 +124,7 @@ namespace zr
 		mShader->setUniform("uViewProjectionMatrix", viewProjectionMatrix);
 		//mShader->setUniform("uSpritePosition", mActualPosition);
 		if (mDrawingTexture) {
-			mTexture->bindOnTextureUnit(0U);
+			mTexture->bindOnTextureSlot(0U);
 			mShader->setUniform("uSpriteTexture", 0);
 		}
 		else {

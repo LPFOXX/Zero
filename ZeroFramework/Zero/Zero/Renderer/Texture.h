@@ -110,7 +110,7 @@ namespace zr
 		 * @param textureUnit	The texture unit.
 		 * @param bindTexture	The texture to bind to the texture unit.
 		 */
-		static void ActivateTextureUnit(unsigned textureUnit, const Texture2D& bindTexture);
+		static void ActivateTextureSlot(unsigned textureSlot, const Texture2D& texture);
 
 		/**
 		 * @brief Activates the texture unit.
@@ -121,14 +121,14 @@ namespace zr
 		 * @param textureUnit	The texture unit.
 		 * @param bindTexture	The texture to bind to the texture unit.
 		 */
-		static void ActivateTextureUnit(unsigned textureUnit, unsigned bindTexture);
+		static void ActivateTextureSlot(unsigned textureSlot, unsigned textureHandle);
 
 		/**
 		 * @brief Bind on texture unit.
 		 *
 		 * @param textureUnit	The texture unit to bind this texture object to.
 		 */
-		virtual void bindOnTextureUnit(unsigned textureUnit) = 0;
+		virtual void bindOnTextureSlot(unsigned textureSlot) = 0;
 
 		/**
 		 * @brief Loads from file
@@ -161,7 +161,7 @@ namespace zr
 		 *
 		 * @returns true when loaded successfully, false otherwise.
 		 */
-		virtual bool loadFromMemory(float width, float height, const unsigned char* data) = 0;
+		virtual bool loadFromMemory(unsigned width, unsigned height, const unsigned char* data, unsigned channelCount = 4U) = 0;
 
 		/**
 		 * @brief Update the texture data.
@@ -274,7 +274,7 @@ namespace zr
 		static Ref<Texture2D> Create(const std::string& filePath, Type type);
 
 	protected:
-		glm::vec2 mSize;			/**< The texture size. */
+		glm::ivec2 mSize;			/**< The texture size. */
 		Type mTextureType;			/**< The type of the texture. */
 		std::string mFilePath;		/**< The path of the texture file. Used to prevent loading it more than once when it is an ASSIMP material texture. */
 		bool mIsSRGBCapable;		/**< Whether this texture is sRGB capable or not. */

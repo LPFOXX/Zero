@@ -29,7 +29,7 @@ namespace zr
 	void LayerStack::popLayer(Layer* layer)
 	{
 		auto found = std::find(mLayers.begin(), mLayers.end(), layer);
-		if (found != mLayers.end()) {
+		if (found != mLayers.begin() + mLastLayerIndex) {
 			layer->onDetach();
 			mLayers.erase(found);
 			mLastLayerIndex--;

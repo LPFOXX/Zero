@@ -13,11 +13,11 @@ namespace zr
 
 	}
 
-	template<typename T>
-	inline bool EventDispatcher::dispatch(EventFunction<T> func)
+	template<typename T, typename F>
+	inline bool EventDispatcher::dispatch(const F& func)
 	{
 		if (mEvent.getType() == T::GetStaticType()) {
-			mEvent.setHandled(func(*(T*)&mEvent));
+			mEvent.setHandled(func(static_cast<T&>(mEvent)));
 			return true;
 		}
 		return false;

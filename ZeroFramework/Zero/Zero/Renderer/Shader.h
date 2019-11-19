@@ -28,7 +28,27 @@ namespace zr
 		 */
 		Shader();
 
+		/**
+		 * @brief Default destructor.
+		 *
+		 * Deletes the shader program.
+		 */
+		virtual ~Shader();
+
+		virtual const std::string& getName() const = 0;
+
 		static Ref<Shader> Create();
+
+		/**
+		 * @brief Constructor from files (vertex, fragment and geometry shaders).
+		 *
+		 * @exception std::runtime_error	When the shader program files can't be loaded from disk.
+		 *
+		 * @param filePath  	The file containing all shaders at once.
+		 *
+		 * ### todo Change the std::runtime_error to a custom error class.
+		 */
+		static Ref<Shader> Create(const std::string& filePath);
 
 		/**
 		 * @brief Constructor from file (vertex and fragment shaders).
@@ -40,7 +60,7 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Ref<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		static Ref<Shader> Create(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 
 		/**
 		 * @brief Constructor from files (vertex, fragment and geometry shaders).
@@ -53,14 +73,16 @@ namespace zr
 		 *
 		 * ### todo Change the std::runtime_error to a custom error class.
 		 */
-		static Ref<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
+		static Ref<Shader> Create(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
 
 		/**
-		 * @brief Default destructor.
+		 * @brief Loads and creates the shader program from files (vertex and fragment shaders).
 		 *
-		 * Deletes the shader program.
+		 * @param filePath  	The path of the shader file.
+		 *
+		 * @returns true when successfully loaded, false otherwise.
 		 */
-		virtual ~Shader();
+		virtual bool loadFromFile(const std::string& filePath) = 0;
 
 		/**
 		 * @brief Loads and creates the shader program from files (vertex and fragment shaders).
@@ -70,7 +92,7 @@ namespace zr
 		 *
 		 * @returns true when successfully loaded, false otherwise.
 		 */
-		virtual bool loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath) = 0;
+		virtual bool loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath) = 0;
 
 		/**
 		 * @brief Loads and creates the shader program from files (vertex, fragment and geometry shaders).
@@ -81,7 +103,7 @@ namespace zr
 		 *
 		 * @returns true when successfully loaded, false otherwise.
 		 */
-		virtual bool loadFromFiles(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) = 0;
+		virtual bool loadFromFiles(const std::string& name, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath) = 0;
 
 		/**
 		 * @brief Loads and generates the shader program from strings (vertex and fragment shaders).
@@ -91,7 +113,7 @@ namespace zr
 		 *
 		 * @returns true when loaded successfully, false otherwise.
 		 */
-		virtual bool loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader) = 0;
+		virtual bool loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader) = 0;
 
 		/**
 		 * @brief Loads and generates the shader program from strings (vertex, fragment and geometry
@@ -103,7 +125,7 @@ namespace zr
 		 *
 		 * @returns true when loaded successfully, false otherwise.
 		 */
-		virtual bool loadFromStrings(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader) = 0;
+		virtual bool loadFromStrings(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader) = 0;
 
 		/**
 		 * @brief Uses this program to perform operations in the OpenGL state machine.
@@ -319,6 +341,24 @@ namespace zr
 		virtual void setUniform(const char* uniformName, const Light& value) const = 0;
 
 		virtual void setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const = 0;
+	};
+
+	class ShaderLibrary
+	{
+	public:
+		ShaderLibrary();
+		virtual ~ShaderLibrary();
+
+		void add(const std::string& shaderName, const Ref<Shader>& shader);
+		void add(const Ref<Shader>& shader);
+		Ref<Shader> load(const std::string& filePath);
+		Ref<Shader> load(const std::string& shaderName, const std::string& filePath);
+
+		Ref<Shader> get(const std::string& shaderName);
+		bool exists(const std::string& shaderName) const;
+
+	private:
+		std::unordered_map<std::string, Ref<Shader>> mShaders;
 	};
 }
 

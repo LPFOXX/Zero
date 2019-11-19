@@ -14,11 +14,12 @@ namespace zr
 		virtual ~OpenGLTexture2D();
 
 		static int GetMaximumSize();
+		static void ActivateTextureSlot(unsigned textureSlot, unsigned textureHandle);
 
 		// Inherited via Texture2D
 		virtual void bind() const override;
 		virtual void unbind() const override;
-		virtual void bindOnTextureUnit(unsigned textureUnit) override;
+		virtual void bindOnTextureSlot(unsigned textureSlot) override;
 		virtual bool update(const unsigned char* data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) override;
 		virtual bool update(const Image& data, unsigned xPos = 0, unsigned yPos = 0) override;
 		virtual bool update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos = 0, unsigned yPos = 0) override;
@@ -29,7 +30,7 @@ namespace zr
 		virtual bool loadToImage(Image& image) const override;
 		virtual unsigned getHandle() const override;
 		virtual bool loadFromFile(const std::string& filePath, bool flipVertically = false, Texture2D::Type textureType = Texture2D::Type::None) override;
-		virtual bool loadFromMemory(float width, float height, const unsigned char* data) override;
+		virtual bool loadFromMemory(unsigned width, unsigned height, const unsigned char* data, unsigned channelCount = 4U) override;
 		virtual bool loadFromImage(const Image& image, Texture2D::Type textureType = Texture2D::Type::None) override;
 
 	private:

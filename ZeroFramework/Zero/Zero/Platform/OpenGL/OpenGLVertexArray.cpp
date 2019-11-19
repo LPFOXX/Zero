@@ -44,7 +44,7 @@ namespace zr
 		}
 	}
 
-	void OpenGLVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
 		GL_ERR_CHECK(glBindVertexArray(mId));
 		vertexBuffer->bind();
@@ -53,18 +53,13 @@ namespace zr
 		const auto& layout = vertexBuffer->getLayout();
 		for (const auto& element : layout) {
 			GL_ERR_CHECK(glEnableVertexAttribArray(index));
-			if (
-				element.Type == ShaderDataType::Int ||
-				element.Type == ShaderDataType::Int2 ||
-				element.Type == ShaderDataType::Int3 ||
-				element.Type == ShaderDataType::Int4
-				) {
+			if (IsIntegerShaderDataType(element.Type)) {
 				GL_ERR_CHECK(glVertexAttribIPointer(
 					index,
 					element.getComponentCount(),
 					ShaderDataTypeToOpenGLBaseType(element.Type),
 					layout.getStride(),
-					(const void*) element.Offset));
+					(const void*)(intptr_t) element.Offset));
 			}
 			else {
 				GL_ERR_CHECK(glVertexAttribPointer(
@@ -90,7 +85,7 @@ namespace zr
 		mVertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
+	void OpenGLVertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
 		GL_ERR_CHECK(glBindVertexArray(mId));
 		indexBuffer->bind();
@@ -112,12 +107,12 @@ namespace zr
 		GL_ERR_CHECK(glBindVertexArray(0));
 	}
 
-	const std::vector<std::shared_ptr<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const
+	const std::vector<Ref<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const
 	{
 		return mVertexBuffers;
 	}
 
-	const std::shared_ptr<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const
+	const Ref<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const
 	{
 		return mIndexBuffer;
 	}

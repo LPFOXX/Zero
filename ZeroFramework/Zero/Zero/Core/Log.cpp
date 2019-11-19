@@ -6,8 +6,8 @@
 
 namespace zr
 {
-	std::shared_ptr<spdlog::logger> Log::sCoreLogger;
-	std::shared_ptr<spdlog::logger> Log::sClientLogger;
+	Ref<spdlog::logger> Log::sCoreLogger;
+	Ref<spdlog::logger> Log::sClientLogger;
 
 	void Log::Init()
 	{

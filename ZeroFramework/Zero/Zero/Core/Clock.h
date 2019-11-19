@@ -70,15 +70,32 @@ namespace zr
 			return *this;
 		}
 
-		Time& operator-(const Time& rhs)
+		Time operator-(const Time& rhs) const 
 		{
-			mTimeInMicroseconds -= rhs.mTimeInMicroseconds;
+			Time time;
+			time.mTimeInMicroseconds = mTimeInMicroseconds - rhs.mTimeInMicroseconds;
+			return time;
+		}
+
+		Time& operator=(const Time& rhs)
+		{
+			mTimeInMicroseconds = rhs.mTimeInMicroseconds;
 			return *this;
 		}
 
-		bool operator>=(Time& rhs)
+		bool operator>=(const Time& rhs) const
 		{
 			return mTimeInMicroseconds >= rhs.mTimeInMicroseconds;
+		}
+
+		bool operator<(const Time& rhs) const
+		{
+			return mTimeInMicroseconds < rhs.mTimeInMicroseconds;
+		}
+
+		bool operator==(const Time& rhs) const
+		{
+			return mTimeInMicroseconds == rhs.mTimeInMicroseconds;
 		}
 
 	public:
@@ -134,10 +151,11 @@ namespace zr
 			return (Time::Now() - mLastRestartPoint);
 		};
 
-		inline Time restart()
+		Time restart()
 		{
-			Time elapsedTime = (Time::Now() - mLastRestartPoint);
-			mLastRestartPoint = Time::Now();
+			Time& now = Time::Now();
+			Time elapsedTime = now - mLastRestartPoint;
+			mLastRestartPoint = now;
 			return elapsedTime;
 		}
 

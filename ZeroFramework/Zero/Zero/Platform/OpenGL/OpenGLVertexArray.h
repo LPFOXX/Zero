@@ -9,21 +9,21 @@ namespace zr
 		virtual ~OpenGLVertexArray();
 
 		// Inherited via VertexArray
-		virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) override;
-		virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) override;
+		virtual void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) override;
+		virtual void setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) override;
 		virtual void setLayout(const BufferLayout&) override;
 		virtual void bind() override;
 		virtual void unbind() override;
 
-		virtual const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const override;
-		virtual const std::shared_ptr<IndexBuffer>& getIndexBuffer() const override;
+		virtual const std::vector<Ref<VertexBuffer>>& getVertexBuffers() const override;
+		virtual const Ref<IndexBuffer>& getIndexBuffer() const override;
 
 		virtual std::string getShaderLayouts() const override;
 		virtual unsigned computeNextIndexLocation() const;
 
 	private:
 		unsigned mId;
-		std::vector<std::shared_ptr<VertexBuffer>> mVertexBuffers;
-		std::shared_ptr<IndexBuffer> mIndexBuffer;
+		std::vector<Ref<VertexBuffer>> mVertexBuffers;
+		Ref<IndexBuffer> mIndexBuffer;
 	};
 }

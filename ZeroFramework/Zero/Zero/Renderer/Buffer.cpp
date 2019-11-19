@@ -25,7 +25,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return std::make_shared<OpenGLVertexBuffer>(vertices, size, drawMode);
+				return CreateRef<OpenGLVertexBuffer>(vertices, size, drawMode);
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -58,7 +58,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return std::make_shared<OpenGLIndexBuffer>(data, count, drawMode);
+				return CreateRef<OpenGLIndexBuffer>(data, count, drawMode);
 			}
 			case RendererAPI::API::Direct3D:
 			{
@@ -91,7 +91,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return std::make_shared<OpenGLVertexArray>(createAndBind);
+				return CreateRef<OpenGLVertexArray>(createAndBind);
 			}
 			case RendererAPI::API::Direct3D:
 			{
