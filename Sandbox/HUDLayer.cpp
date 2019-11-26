@@ -50,11 +50,11 @@ namespace lp
 
 		mText.reset(new zr::Text);
 		mText->setFont(mFont);
-		mText->setFontSize(48U);
+		mText->setFontSize(12U);
 		mText->setFillColor({ 1.f, 1.f, 0.f, 1.f });
 		mText->setOutlineColor({ 1.f, 1.f, 1.f, 1.f });
 		mText->setPosition(0U, 600U);
-		mText->setOutlineThickness(2U);
+		mText->setOutlineThickness(1U);
 		mText->setString("Lidneu$");
 
 		mCameraController.reset(new zr::OrthographicCameraController(1280.f / 600.f, true));

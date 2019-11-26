@@ -70,4 +70,24 @@ namespace zr
 	{
 		return mLayers.rend();
 	}
+
+	std::vector<Layer*>::const_iterator LayerStack::begin() const
+	{
+		return mLayers.cbegin();
+	}
+
+	std::vector<Layer*>::const_iterator LayerStack::end() const
+	{
+		return mLayers.cend();
+	}
+
+	std::vector<Layer*>::const_reverse_iterator LayerStack::rbegin() const
+	{
+		return mLayers.crbegin();
+	}
+
+	std::vector<Layer*>::const_reverse_iterator LayerStack::rend() const
+	{
+		return mLayers.crend();
+	}
 }
