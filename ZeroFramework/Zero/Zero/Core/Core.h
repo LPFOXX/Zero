@@ -66,7 +66,7 @@ namespace zr
 	* @return a values within the interval [min-max].
 	*/
 	template <typename T, typename U>
-	T clamp(T min, T max, U value)
+	constexpr T clamp(T min, T max, U value)
 	{
 		if (static_cast<T>(value) >= max) {
 			return max;

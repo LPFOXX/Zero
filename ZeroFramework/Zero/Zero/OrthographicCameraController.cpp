@@ -17,7 +17,10 @@ namespace zr
 		mCameraPosition(0.f, 0.f, 0.f),
 		mCameraRotation(0.f),
 		mCameraRotationSpeed(45.f),
-		mCameraTranslationSpeed(5.f)
+		mCameraTranslationSpeed(5.f),
+		mZoomRate(.25f),
+		mMaxZoomLevel(.25f),
+		mMinZoomLevel(20000.f)
 	{
 		mCamera = CreateRef<OrthographicCamera>(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
 	}
@@ -57,7 +60,6 @@ namespace zr
 		}
 
 		mCamera->setPosition(mCameraPosition);
-		readjustCameraTranslationSpeed();
 	}
 
 	void OrthographicCameraController::onEvent(Event& e)
@@ -84,21 +86,29 @@ namespace zr
 
 	bool OrthographicCameraController::onMouseScrolled(MouseScrollEvent& e)
 	{
-		mZoomLevel -= e.getYOffset();
-		mZoomLevel = std::max(mZoomLevel, .25f);
-		mCamera->setProjection(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
+		float zoomLevel = mZoomLevel - e.getYOffset() * mZoomRate;
+		zoomLevel = zr::clamp(mMaxZoomLevel, mMinZoomLevel, zoomLevel);
+		readjustCameraTranslationSpeed(zoomLevel);
+		updateProjectionMatrix();
 		return false;
 	}
 
 	bool OrthographicCameraController::onWindowResized(WindowResizeEvent& e)
 	{
 		mAspectRatio = (float)e.getWidth() / (float)e.getHeight();
-		mCamera->setProjection(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
+		updateProjectionMatrix();
 		return false;
 	}
 
-	void OrthographicCameraController::readjustCameraTranslationSpeed()
+	void OrthographicCameraController::readjustCameraTranslationSpeed(float zoomLevel)
 	{
-		mCameraTranslationSpeed = std::exp(1.f / mZoomLevel);
+		float diff = zoomLevel / mZoomLevel;
+		mCameraTranslationSpeed *= diff;
+		mZoomLevel = zoomLevel;
+	}
+
+	void OrthographicCameraController::updateProjectionMatrix()
+	{
+		mCamera->setProjection(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
 	}
 }

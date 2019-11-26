@@ -73,9 +73,9 @@ namespace zr
 			return;
 		}
 
-		unsigned indexCount = mVertices.size();
-		for (auto& index : verticesIndices) {
-			mIndices.push_back(indexCount + index);
+		std::size_t indexCount = mVertices.size();
+		for (unsigned index : verticesIndices) {
+			mIndices.push_back(unsigned(index + indexCount));
 		}
 
 		for (auto& vertex : vertices) {
@@ -107,7 +107,7 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::flush()
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		mVAO->bind();
 		const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
 		vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(VertexType));

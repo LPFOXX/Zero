@@ -11,22 +11,14 @@ namespace lp
 	SandboxApplication::SandboxApplication() :
 		zr::Application()
 	{
-		zr::Profiller::Get().beginSession("Application Startup", "application_startup.json");
-		{
-			PROFILER_SCOPE("Application Startup");
-			//pushLayer(new SandboxLayer);
-			pushLayer(new HUDLayer);
-		}
-		zr::Profiller::Get().endSession();
+		ZR_PROFILER_FUNCTION();
+		//pushLayer(new SandboxLayer);
+		pushLayer(new HUDLayer);
 	}
 
 	SandboxApplication::~SandboxApplication()
 	{
-		zr::Profiller::Get().beginSession("Application Shutdown", "application_shutdown.json");
-		{
-			PROFILER_SCOPE("Application Shutdown");
-		}
-		zr::Profiller::Get().endSession();
+		ZR_PROFILER_FUNCTION();
 	}
 }
 

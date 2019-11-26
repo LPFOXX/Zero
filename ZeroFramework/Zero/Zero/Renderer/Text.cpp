@@ -9,55 +9,16 @@
 
 namespace zr
 {
-	std::string Text::sVertexShader = R"(
-		#version 330 core
-
-		layout (location = 0) in vec2 aVertexPos;
-		layout (location = 1) in vec2 aVertexTexCoord;
-
-		out vec2 TexCoords;
-		uniform mat4 uViewProjection;
-
-		void main()
-		{
-			gl_Position = uViewProjection * vec4(aVertexPos, 0.0, 1.0);
-			TexCoords = aVertexTexCoord;
-		}
-	)";
-
-	std::string Text::sFragmentShader = R"(
-		#version 330 core
-
-		in vec2 TexCoords;
-		out vec4 Color;
-
-		uniform sampler2D uText;
-		uniform vec4 uTextColor;
-
-		void main()
-		{
-			Color = uTextColor * vec4(1.0, 1.0, 1.0, texture(uText, TexCoords).a);
-		}
-	)";
-
-	bool Text::sIsInitialized = false;
-	std::shared_ptr<VertexArray> Text::sVAO = nullptr;
-	std::shared_ptr<Shader> Text::sShader = nullptr;
-
-	unsigned Text::sReferenceCount = 0U;
-
 	Text::Text() :
 		Movable(),
 		mFont(nullptr),
 		mFontSize(30U),
 		mOutlineThickness(0U),
 		mString(),
-		mColor(255.f, 255.f, 255.f, 255.f),
+		mColor(1.f, 1.f, 1.f, 1.f),
+		mOutlineColor(0.f, 0.f, 0.f, 1.f),
 		mQuadSize(0U, 0U)
 	{
-		//updateProjectionMatrix();
-		initializeStaticObjects();
-		Text::sReferenceCount++;
 	}
 
 	Text::Text(const std::string& string, const std::shared_ptr<Font>& font, unsigned fontSize, unsigned outlineThickness) :
@@ -66,29 +27,17 @@ namespace zr
 		mFontSize(fontSize),
 		mOutlineThickness(outlineThickness),
 		mString(string),
-		mColor({ 255.f, 255.f, 255.f, 255.f }),
+		mColor(1.f, 1.f, 1.f, 1.f),
+		mOutlineColor(0.f, 0.f, 0.f, 1.f),
 		mQuadSize(0U, 0U)
 	{
 		if (mFont != nullptr && !string.empty()) {
 			dryRun();
 		}
-
-		//updateProjectionMatrix();
-		initializeStaticObjects();
-		Text::sReferenceCount++;
 	}
 
 	Text::~Text()
 	{
-		if (Text::sReferenceCount == 1U) {
-			Text::sReferenceCount = 0U;
-			Text::sVAO.reset();
-			Text::sShader.reset();
-			Text::sIsInitialized = false;
-			return;
-		}
-
-		Text::sReferenceCount--;
 	}
 
 	void Text::setFont(const std::shared_ptr<Font>& font)
@@ -129,14 +78,10 @@ namespace zr
 
 	void Text::setFillColor(const glm::vec4& color)
 	{
-		if (color.r < 0.f || color.g < 0.f || color.b < 0.f) {
-			return;
-		}
-
-		mColor.r = color.r >= 1.f ? 1.f : color.r;
-		mColor.g = color.g >= 1.f ? 1.f : color.g;
-		mColor.b = color.b >= 1.f ? 1.f : color.b;
-		mColor.a = color.a >= 1.f ? 1.f : color.a;
+		mColor.r = clamp(0.f, 1.f, color.r);
+		mColor.g = clamp(0.f, 1.f, color.g);
+		mColor.b = clamp(0.f, 1.f, color.b);
+		mColor.a = clamp(0.f, 1.f, color.a);
 	}
 
 	void Text::setOutlineThickness(unsigned outlineThickness)
@@ -149,7 +94,10 @@ namespace zr
 
 	void Text::setOutlineColor(const glm::vec4& color)
 	{
-		mOutlineColor = color;
+		mOutlineColor.r = clamp(0.f, 1.f, color.r);
+		mOutlineColor.g = clamp(0.f, 1.f, color.g);
+		mOutlineColor.b = clamp(0.f, 1.f, color.b);
+		mOutlineColor.a = clamp(0.f, 1.f, color.a);
 	}
 
 	const glm::vec2& Text::getSize() const
@@ -161,16 +109,6 @@ namespace zr
 	{
 		if (!mString.empty()) {
 			const Ref<Texture2D>& fontTexture = mFont->getTexture(mFontSize);
-			// Bind the buffer
-			Text::sVAO->bind();
-
-			// Activate blend mode
-			RenderCommand::EnableBlend(true);
-
-			Text::sShader->bind();
-			Text::sShader->setUniform("uText", 0);
-			fontTexture->bindOnTextureSlot(0);
-			Text::sShader->setUniform("uViewProjection", viewProjectionMatrix);
 
 			float textureWidth = static_cast<float>(fontTexture->getWidth());
 			float textureHeight = static_cast<float>(fontTexture->getHeight());
@@ -181,19 +119,6 @@ namespace zr
 
 			float fillXPosition = outlineXPosition + mOutlineThickness;
 			float fillYPosition = mViewportHeight - (mPosition.y + mMaxVerticalBearing + mOutlineThickness);
-
-			// Save depth mask state
-			// Disable test mask
-			// Draw
-			// Reset depth mask state
-			bool isDoingDepthTest = RenderCommand::GetDepthTestState();
-			RenderCommand::EnableDepthTest(false);
-
-
-			mOutlineVertices.clear();
-			mOutlineVertices.reserve(16 * mString.size());
-			mFillVertices.clear();
-			mFillVertices.reserve(16 * mString.size());
 
 			for (char c : mString) {
 				if (c == ' ') {
@@ -231,132 +156,19 @@ namespace zr
 				lastChar = c;
 
 				if (mOutlineThickness != 0U) {
-					const Font::Character& outline = mFont->getCharacter(c, mFontSize, mOutlineThickness);
-
-					float charWidth = outline.Size.x;
-					float charHeight = outline.Size.y;
-
-					float xPos = outlineXPosition + outline.Bearing.x + kerning;
-					float yPos = outlineYPosition - charHeight + outline.Bearing.y;
-
+					// Draw fill character vertices
+					const Font::Character& outlineCharacter = mFont->getCharacter(c, mFontSize, mOutlineThickness);
+					drawCharacter(outlineCharacter, outlineXPosition, outlineYPosition, kerning, textureWidth, textureHeight, fontTexture->getHandle(), mOutlineColor);
 					// Advances to the next character position
-					outlineXPosition += outline.Advance;
-
-					float topLeftX = outline.CharacterRectOrigin.x;		// Top left x
-					float topLeftY = outline.CharacterRectOrigin.y;		// Top left y
-					float topRightX = topLeftX + charWidth;				// Top right x
-					float topRightY = topLeftY;							// Top right y
-					float bottomLeftX = topLeftX;						// Bottom left x
-					float bottomLeftY = topLeftY + charHeight;			// Bottom left y
-					float bottomRightX = topLeftX + charWidth;			// Bottom right x
-					float bottomRightY = topLeftY + charHeight;			// Bottom right y
-
-					float tlxTexCoord = topLeftX / textureWidth;		// Top left x
-					float tlyTexCoord = topLeftY / textureHeight;		// Top left y
-					float trxTexCoord = topRightX / textureWidth;		// Top right x
-					float tryTexCoord = topRightY / textureHeight;		// Top right y
-					float blxTexCoord = bottomLeftX / textureWidth;		// Bottom left x
-					float blyTexCoord = bottomLeftY / textureHeight;	// Bottom left y
-					float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
-					float bryTexCoord = bottomRightY / textureHeight;	// Top right
-
-					std::vector<glm::vec3> positions;
-					positions.emplace_back(xPos + charWidth,	yPos,				0.f);
-					positions.emplace_back(xPos,				yPos,				0.f);
-					positions.emplace_back(xPos,				yPos + charHeight,	0.f);
-					positions.emplace_back(xPos + charWidth,	yPos + charHeight,	0.f);
-
-					std::vector<glm::vec2> textureCoordinates;
-					textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
-					textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
-					textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
-					textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
-
-					Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, fontTexture->getHandle());
-					// Bottom and top coordinates are actually flipped
-					// because of the system coordinates of textures.
-					float vertices[]{
-						xPos + charWidth,	yPos,					brxTexCoord, bryTexCoord,	// Bottom right
-						xPos,				yPos,					blxTexCoord, blyTexCoord,	// Bottom left
-						xPos,				yPos + charHeight,		tlxTexCoord, tlyTexCoord,	// Top left
-						xPos + charWidth,	yPos + charHeight,		trxTexCoord, tryTexCoord 	// Top right 
-					};
-
-					mOutlineVertices.insert(mOutlineVertices.end(), vertices, vertices + 16);
-
-					Text::sShader->setUniform("uTextColor", mOutlineColor);
-
-					// Update the buffer
-					//Text::sVBOupdateData(vertices, sizeof(vertices));
-					Text::sVAO->getVertexBuffers()[0]->bind();
-					Text::sVAO->getVertexBuffers()[0]->setData(vertices, sizeof(vertices));
-
-					RenderCommand::DrawIndexed(Text::sVAO);
+					outlineXPosition += outlineCharacter.Advance;
 				}
 
-				// Compute fill vertices
-				const Font::Character& fill = mFont->getCharacter(c, mFontSize);
-
-				float charWidth = fill.Size.x;
-				float charHeight = fill.Size.y;
-
-				float xPos = fillXPosition + fill.Bearing.x + kerning;
-				float yPos = fillYPosition - charHeight + fill.Bearing.y;
-
-				fillXPosition += fill.Advance;
-
-				float topLeftX = fill.CharacterRectOrigin.x;		// Top left x
-				float topLeftY = fill.CharacterRectOrigin.y;		// Top left y
-				float topRightX = topLeftX + charWidth;				// Top right x
-				float topRightY = topLeftY;							// Top right y
-				float bottomLeftX = topLeftX;						// Bottom left x
-				float bottomLeftY = topLeftY + charHeight;			// Bottom left y
-				float bottomRightX = topLeftX + charWidth;			// Bottom right x
-				float bottomRightY = topLeftY + charHeight;			// Bottom right y
-
-				float tlxTexCoord = topLeftX / textureWidth;		// Top left x
-				float tlyTexCoord = topLeftY / textureHeight;		// Top left y
-				float trxTexCoord = topRightX / textureWidth;		// Top right x
-				float tryTexCoord = topRightY / textureHeight;		// Top right y
-				float blxTexCoord = bottomLeftX / textureWidth;		// Bottom left x
-				float blyTexCoord = bottomLeftY / textureHeight;	// Bottom left y
-				float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
-				float bryTexCoord = bottomRightY / textureHeight;	// Top right
-
-				std::vector<glm::vec3> positions;
-				positions.emplace_back(xPos + charWidth, yPos, 0.f);
-				positions.emplace_back(xPos, yPos, 0.f);
-				positions.emplace_back(xPos, yPos + charHeight, 0.f);
-				positions.emplace_back(xPos + charWidth, yPos + charHeight, 0.f);
-
-				std::vector<glm::vec2> textureCoordinates;
-				textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
-				textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
-				textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
-				textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
-
-				Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, fontTexture->getHandle());
-
-				// Bottom and top coordinates are actually flipped
-					// because of the system coordinates of textures.
-				float vertices[]{
-					xPos + charWidth,	yPos,					brxTexCoord, bryTexCoord,	// Bottom right
-					xPos,				yPos,					blxTexCoord, blyTexCoord,	// Bottom left
-					xPos,				yPos + charHeight,		tlxTexCoord, tlyTexCoord,	// Top left
-					xPos + charWidth,	yPos + charHeight,		trxTexCoord, tryTexCoord 	// Top right 
-				};
-
-				mFillVertices.insert(mFillVertices.end(), vertices, vertices + 16);
-
-				Text::sShader->setUniform("uTextColor", mColor);
-				// Update the buffer
-				Text::sVAO->getVertexBuffers()[0]->setData(vertices, sizeof(vertices));
-				//RenderCommand::DrawIndexed(Text::sVAO);
+				// Draw fill character vertices
+				const Font::Character& fillCharacter = mFont->getCharacter(c, mFontSize);
+				drawCharacter(fillCharacter, fillXPosition, fillYPosition, kerning, textureWidth, textureHeight, fontTexture->getHandle(), mColor);
+				// Advances to the next character position
+				fillXPosition += fillCharacter.Advance;
 			}
-
-			// Restore depth testing state
-			RenderCommand::EnableDepthTest(isDoingDepthTest);
-			RenderCommand::EnableBlend(false);
 		}
 		// Empty string: draw nothing
 	}
@@ -413,42 +225,53 @@ namespace zr
 		}
 	}
 
+	void Text::drawCharacter(const Font::Character& character, float characterXPosition, float characterYPosition, float kerning, float textureWidth, float textureHeight, unsigned textureHandle, const glm::vec4& color) const
+	{
+		float charWidth = character.Size.x;
+		float charHeight = character.Size.y;
+
+		float xPos = characterXPosition + character.Bearing.x + kerning;
+		float yPos = characterYPosition - charHeight + character.Bearing.y;
+
+		float topLeftX = character.CharacterRectOrigin.x;		// Top left x
+		float topLeftY = character.CharacterRectOrigin.y;		// Top left y
+		float topRightX = topLeftX + charWidth;				// Top right x
+		float topRightY = topLeftY;							// Top right y
+		float bottomLeftX = topLeftX;						// Bottom left x
+		float bottomLeftY = topLeftY + charHeight;			// Bottom left y
+		float bottomRightX = topLeftX + charWidth;			// Bottom right x
+		float bottomRightY = topLeftY + charHeight;			// Bottom right y
+
+		float tlxTexCoord = topLeftX / textureWidth;		// Top left x
+		float tlyTexCoord = topLeftY / textureHeight;		// Top left y
+		float trxTexCoord = topRightX / textureWidth;		// Top right x
+		float tryTexCoord = topRightY / textureHeight;		// Top right y
+		float blxTexCoord = bottomLeftX / textureWidth;		// Bottom left x
+		float blyTexCoord = bottomLeftY / textureHeight;	// Bottom left y
+		float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
+		float bryTexCoord = bottomRightY / textureHeight;	// Top right
+
+		std::vector<glm::vec3> positions;
+		positions.emplace_back(xPos + charWidth, yPos, 0.f);
+		positions.emplace_back(xPos, yPos, 0.f);
+		positions.emplace_back(xPos, yPos + charHeight, 0.f);
+		positions.emplace_back(xPos + charWidth, yPos + charHeight, 0.f);
+
+		std::vector<glm::vec2> textureCoordinates;
+		textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
+		textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
+		textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
+		textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
+
+		Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, textureHandle, color);
+	}
+
 	void Text::onViewportUpdate(const glm::vec2& viewportSize)
 	{
 		//updateProjectionMatrix();
 		ZR_CORE_INFO("[TEXT] Viewport updated to: {0}, {1}", viewportSize.x, viewportSize.y);
 		mViewportHeight = viewportSize.y;
 		dryRun();
-	}
-
-
-	void Text::initializeStaticObjects()
-	{
-		if (Text::sReferenceCount == 0U && !Text::sIsInitialized) {
-			unsigned indices[]{
-				0, 1, 2,
-				0, 2, 3
-			};
-
-			Text::sVAO = VertexArray::Create();
-			Ref<VertexBuffer> vbo = VertexBuffer::Create(nullptr, 16 * sizeof(float), DrawMode::Dynamic);
-			vbo->setLayout({
-				{ ShaderDataType::Float2, "aVertexPos"},
-				{ ShaderDataType::Float2, "aVertexTexCoord"}
-				});
-
-			Text::sVAO->addVertexBuffer(vbo);
-
-			std::shared_ptr<IndexBuffer> ebo = IndexBuffer::Create(indices, 6U, DrawMode::Static);
-			Text::sVAO->setIndexBuffer(ebo);
-
-			Text::sShader = Shader::Create();
-			if (!Text::sShader->loadFromStrings("TextShader", Text::sVertexShader, Text::sFragmentShader)) {
-				ZR_CORE_ERROR("Can't create Text shader.");
-			}
-
-			Text::sIsInitialized = true;
-		}
 	}
 
 	void Text::onPositionUpdate()

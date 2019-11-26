@@ -9,10 +9,16 @@
 #include "Clock.h"
 
 #ifdef PROFILING
-#define PROFILER_SCOPE(name) zr::Profiller::Timer profilerTimer##__LINE__(name)
-#define PROFILER_FUNCTION() PROFILER_SCOPE(__func__)
+	#define GLUE(a, b) a##b
+	#define ZR_PROFILER_BEGIN_SESSION(name, filepath) zr::Profiller::Get().beginSession(name, filepath)
+	#define ZR_PROFILER_END_SESSION() zr::Profiller::Get().endSession()
+	#define ZR_PROFILER_SCOPE(name) zr::Profiller::Timer GLUE(profilerTimer,__LINE__)(name)
+	#define ZR_PROFILER_FUNCTION() ZR_PROFILER_SCOPE(__func__)
 #else
-#define PROFILE_SCOPE(name)
+	#define ZR_PROFILER_BEGIN_SESSION(name, filepath)
+	#define ZR_PROFILER_END_SESSION()
+	#define ZR_PROFILE_SCOPE(name)
+	#define ZR_PROFILER_FUNCTION()
 #endif
 
 namespace zr
@@ -74,8 +80,8 @@ namespace zr
 
 			virtual ~Timer()
 			{
-				unsigned thisThreadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
-				Profiller::Get().writeProfile({ mName, mStartTime, Time::Now() , thisThreadId });
+				auto thisThreadId = std::hash<std::thread::id>{}(std::this_thread::get_id());
+				Profiller::Get().writeProfile({ mName, mStartTime, Time::Now() , (unsigned)thisThreadId });
 			}
 
 		private:

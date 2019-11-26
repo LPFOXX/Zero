@@ -127,12 +127,6 @@ namespace zr
 
 	private:
 		/**
-		 * @brief Initializes the static objects
-		 */
-		static void initializeStaticObjects();
-
-	private:
-		/**
 		 * @brief Dry run
 		 */
 		void dryRun();
@@ -140,20 +134,11 @@ namespace zr
 		 * @brief Updates the projection matrix
 		 */
 		//void updateProjectionMatrix();
+		void drawCharacter(const Font::Character& character, float characterXPosition, float characterYPosition, float kerning, float textureWidth, float textureHeight, unsigned textureHandle, const glm::vec4& color) const;
 
 	protected:
 		mutable glm::vec2 mQuadSize;			/**< The size of the quad containing the text. */
 		unsigned mOutlineThickness;				/**< The value of the text outline in pixels. */
-
-	private:
-		static unsigned sReferenceCount;		/**< Number of references currently instanciated by this class. */
-		static std::string sVertexShader;		/**< The vertex shader string of the text/quad. */
-		static std::string sFragmentShader;		/**< The fragment shader string of the text/quad. */
-
-		static std::shared_ptr<VertexArray> sVAO;	/**< A handle to the vertex array object. */
-		static std::shared_ptr<Shader> sShader;		/**< A wrapper to a shader program to communicate to the OpenGL state machine. */
-		static bool sIsInitialized;					/**< Whether or not the static objects (VAO, VBO, EBO) are initialized. */
-		static unsigned sMaxCharactersToDraw;		/**< Maximum characteres to draw. */
 
 	private:
 		float mViewportHeight;
@@ -161,9 +146,6 @@ namespace zr
 		unsigned mFontSize;						/**< The size of the font. */
 		std::string mString;					/**< The text to display. */
 		bool mNeedsUpdate = true;
-		
-		std::vector<float> mFillVertices;
-		std::vector<float> mOutlineVertices;
 
 		glm::vec4 mColor;						/**< The color of the text to display. */
 		glm::vec4 mOutlineColor;				/**< The outline color. */

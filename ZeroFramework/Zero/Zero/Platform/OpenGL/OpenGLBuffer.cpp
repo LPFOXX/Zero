@@ -135,5 +135,6 @@ namespace zr
 		// Bind the buffer and updates the data
 		GL_ERR_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mId));
 		GL_ERR_CHECK(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * sizeof(unsigned), data));
+		mCount = count;
 	}
 }

@@ -29,7 +29,8 @@ namespace zr
 	private:
 		bool onMouseScrolled(MouseScrollEvent& e);
 		bool onWindowResized(WindowResizeEvent& e);
-		void readjustCameraTranslationSpeed();
+		void readjustCameraTranslationSpeed(float zoomLevel);
+		void updateProjectionMatrix();
 
 	private:
 		float mAspectRatio;
@@ -41,5 +42,9 @@ namespace zr
 		float mCameraRotation;
 		float mCameraRotationSpeed;
 		float mCameraTranslationSpeed;
+
+		float mZoomRate;
+		float mMaxZoomLevel;
+		float mMinZoomLevel;
 	};
 }

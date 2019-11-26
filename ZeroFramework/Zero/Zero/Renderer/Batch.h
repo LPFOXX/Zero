@@ -96,9 +96,11 @@ namespace zr
 	class ExtendedVertexBatch : public Batch<BatchVertexTypes::ExtendedVertex>
 	{
 	public:
-		ExtendedVertexBatch(unsigned textureId) :
+		ExtendedVertexBatch(unsigned textureId, const glm::vec4& color, const glm::vec2& scalingFactor = glm::vec2(1.f)) :
 			Batch(),
-			mTextureId(textureId)
+			mTextureId(textureId),
+			mColor(color),
+			mScalingFactor(scalingFactor)
 		{
 			mVAO = VertexArray::Create();
 			Ref<VertexBuffer> batchVBO = VertexBuffer::Create(nullptr, kMaxNumVertices * sizeof(BatchVertexTypes::ExtendedVertex), DrawMode::Dynamic);
@@ -118,9 +120,9 @@ namespace zr
 
 		}
 
-		virtual bool hasEnoughRoomFor(unsigned textureId, const std::vector<BatchVertexTypes::ExtendedVertex>& vertices) const
+		virtual bool hasEnoughRoomFor(unsigned textureId, const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const glm::vec4& color) const
 		{
-			if (mTextureId != textureId)
+			if (mTextureId != textureId || mColor != color)
 				return false;
 
 			return Batch::hasEnoughRoomFor(vertices);
@@ -138,11 +140,15 @@ namespace zr
 		virtual void flush(const Ref<Shader>& shader)
 		{
 			Texture2D::ActivateTextureSlot(0, mTextureId);
+			shader->setUniform("uColor", mColor);
+			shader->setUniform("uTextureScalingFactor", mScalingFactor);
 			Batch::flush();
 		}
 
 	private:
 		unsigned mTextureId;
+		glm::vec4 mColor;
+		glm::vec2 mScalingFactor;
 	};
 }
 

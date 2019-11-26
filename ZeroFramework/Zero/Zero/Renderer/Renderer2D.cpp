@@ -65,7 +65,9 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position);
+		if(angle != 0) transform = glm::rotate(transform, glm::radians(angle), { .0f, .0f, 1.f });
+		transform = glm::scale(transform, { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
 			transform * glm::vec4( .5f, -.5f, .0f, 1.f),
@@ -83,9 +85,11 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4 & tintingColor)
 	{
-		#define USES_BATCHES 0
+		#define USES_BATCHES 1
 		#if USES_BATCHES
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position);
+		transform = glm::rotate(transform, glm::radians(angle), { .0f, .0f, 1.f });
+		transform = glm::scale(transform, { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
 			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
@@ -99,7 +103,7 @@ namespace zr
 			{1.f, 1.f},
 			{0.f, 1.f},
 		};
-		Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 2, 3, 0 }, texture->getHandle());
+		Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 2, 3, 0 }, texture->getHandle(), tintingColor, textureScalingFactor);
 		#else
 		sData->TextureShader->bind();
 		sData->TextureShader->setUniform("uTextureScalingFactor", textureScalingFactor);
@@ -116,7 +120,7 @@ namespace zr
 		#endif
 	}
 
-	void Renderer2D::DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<unsigned>& indices, unsigned textureId)
+	void Renderer2D::DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<unsigned>& indices, unsigned textureId, const glm::vec4& color, const glm::vec2& scalingFactor)
 	{
 		if (positions.size() != 4 || textureCoordinates.size() != 4 || indices.size() != 6) {
 			return;
@@ -126,7 +130,7 @@ namespace zr
 		for (unsigned i = 0; i < 4; ++i) {
 			vertices.emplace_back(positions[i], textureCoordinates[i]);
 		}
-		sData->BatchManager->addVertices(vertices, indices, textureId);
+		sData->BatchManager->addVertices(vertices, indices, textureId, color, scalingFactor);
 	}
 
 	void Renderer2D::DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& indices)

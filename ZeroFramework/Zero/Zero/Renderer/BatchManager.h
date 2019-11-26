@@ -11,60 +11,12 @@ namespace zr
 			mColoredVertexBatches(),
 			mExtendedVertexBatches()
 		{
-			std::string batchVertexSrc = R"(
-				#version 330 core
-				layout(location = 0) in vec3 aPosition;
-				layout(location = 1) in vec4 aColor;
-				uniform mat4 uViewProjection;
-				out vec4 vColor;
-				void main()
-				{
-					vColor = aColor;
-					gl_Position = uViewProjection * vec4(aPosition, 1.0);	
-				}
-			)";
-			std::string batchFragmentSrc = R"(
-				#version 330 core
-				out vec4 color;
-				in vec4 vColor;
-
-				void main()
-				{
-					color = vColor;
-				}
-			)";
-			std::string batchTextureVertexSrc = R"(
-				#version 330 core
-				layout(location = 0) in vec3 aPosition;
-				layout(location = 1) in vec2 aTextureCoordinates;
-				uniform mat4 uViewProjection;
-
-				out vec2 vTextureCoordinates;
-
-				void main()
-				{
-					vTextureCoordinates = aTextureCoordinates;
-					gl_Position = uViewProjection * vec4(aPosition, 1.0);	
-				}
-			)";
-			std::string batchTextureFragmentSrc = R"(
-				#version 330 core
-				out vec4 color;
-				uniform vec4 uColor;
-
-				in vec2 vTextureCoordinates;
-				uniform sampler2D uTexture;
-
-				void main()
-				{
-					color = uColor * texture(uTexture, vTextureCoordinates);
-				}
-			)";
-
 			mBatchPositionShader = Shader::Create();
-			mBatchPositionShader->loadFromStrings("BatchManagerPositionShader", batchVertexSrc, batchFragmentSrc);
+			mBatchPositionShader->loadFromFile("resources/shaders/Batch.glsl");
 			mBatchTextureShader = Shader::Create();
-			mBatchTextureShader->loadFromStrings("BatchManagerTextureShader", batchTextureVertexSrc, batchTextureFragmentSrc);
+			mBatchTextureShader->loadFromFile("resources/shaders/BatchTexture.glsl");
+			mBatchTextureShader->bind();
+			mBatchTextureShader->setUniform("uTexture", 0);
 		}
 
 		virtual ~BatchManager()
@@ -100,18 +52,18 @@ namespace zr
 			}
 		}
 
-		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned> verticesIndices, unsigned textureId)
+		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned> verticesIndices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f))
 		{
 			if (mExtendedVertexBatches.empty()) {
 				// No batch at all: create one
-				ExtendedVertexBatch evb(textureId);
+				ExtendedVertexBatch evb(textureId, color, scalingFactor);
 				evb.addQuadVertices(vertices, verticesIndices);
 				mExtendedVertexBatches.push_back(evb);
 			}
 			else {
 				// search for a batch with enough storage room
-				auto& it = std::find_if(mExtendedVertexBatches.begin(), mExtendedVertexBatches.end(), [&textureId, &vertices](const ExtendedVertexBatch& batch) {
-					return batch.hasEnoughRoomFor(textureId, vertices);
+				auto& it = std::find_if(mExtendedVertexBatches.begin(), mExtendedVertexBatches.end(), [&textureId, &vertices, &color](const ExtendedVertexBatch& batch) {
+					return batch.hasEnoughRoomFor(textureId, vertices, color);
 				});
 
 				if (it != mExtendedVertexBatches.end()) {
@@ -121,7 +73,7 @@ namespace zr
 				else {
 					// There is no batch with enough room: create one batch and add these
 					// vertices to it
-					ExtendedVertexBatch evb(textureId);
+					ExtendedVertexBatch evb(textureId, color, scalingFactor);
 					evb.addQuadVertices(vertices, verticesIndices);
 					mExtendedVertexBatches.push_back(evb);
 				}
@@ -138,11 +90,10 @@ namespace zr
 				}
 			}
 
+			// textures
 			if (!mExtendedVertexBatches.empty()) {
 				mBatchTextureShader->bind();
-				mBatchTextureShader->setUniform("uTexture", 0);
-				mBatchPositionShader->setUniform("uViewProjection", viewProjectionMatrix);
-				mBatchPositionShader->setUniform("uColor", { 1.f, 1.f, 1.f, 1.f });
+				mBatchTextureShader->setUniform("uViewProjection", viewProjectionMatrix);
 				for (auto& batch : mExtendedVertexBatches) {
 					batch.flush(mBatchTextureShader);
 				}

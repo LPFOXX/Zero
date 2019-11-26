@@ -22,7 +22,7 @@ namespace zr
 		Application::sInstance = this;
 		mWindow = Window::Create();
 		mWindow->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
-		
+
 		Application::sClock = CreateScope<Clock>();
 
 		Renderer::Init();
@@ -38,7 +38,7 @@ namespace zr
 
 	void Application::onEvent(Event& e)
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		EventDispatcher dispatcher(e);
 		dispatcher.dispatch<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
 		dispatcher.dispatch<WindowResizeEvent>(std::bind(&Application::onWindowResize, this, std::placeholders::_1));
@@ -55,7 +55,7 @@ namespace zr
 
 	void Application::pushLayer(Layer* layer)
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		mLayerStack.pushLayer(layer);
 	}
 
@@ -66,36 +66,18 @@ namespace zr
 
 	void Application::run()
 	{
-		Profiller::Get().beginSession("Application Runtime", "application_runtime.json");
-		{
-			PROFILER_SCOPE("Application Runtime");
-			Clock clock;
-			while (mRunning) {
-				CommandQueue::ExecuteCommands();
-				/*Time elapsedTime = timer.restart();
-				accumulatedTime += elapsedTime;
+		ZR_PROFILER_FUNCTION();
+		Clock clock;
+		while (mRunning) {
+			CommandQueue::ExecuteCommands();
+			/*Time elapsedTime = timer.restart();
+			accumulatedTime += elapsedTime;
 
-				while (accumulatedTime >= frameTime) {
-					accumulatedTime -= frameTime;
+			while (accumulatedTime >= frameTime) {
+				accumulatedTime -= frameTime;
 
-					for (Layer* l : mLayerStack) {
-						l->onUpdate(frameTime);
-					}
-
-					mImGuiLayer->begin();
-					for (Layer* layer : mLayerStack)
-						layer->OnImGuiRender();
-					mImGuiLayer->end();
-
-					mWindow->onUpdate();
-				}*/
-
-				Time& elapsedTime = clock.restart();
-
-				if (!mIsMinimized) {
-					for (Layer* l : mLayerStack) {
-						l->onUpdate(elapsedTime);
-					}
+				for (Layer* l : mLayerStack) {
+					l->onUpdate(frameTime);
 				}
 
 				mImGuiLayer->begin();
@@ -104,14 +86,28 @@ namespace zr
 				mImGuiLayer->end();
 
 				mWindow->onUpdate();
+			}*/
+
+			Time& elapsedTime = clock.restart();
+
+			if (!mIsMinimized) {
+				for (Layer* l : mLayerStack) {
+					l->onUpdate(elapsedTime);
+				}
 			}
+
+			mImGuiLayer->begin();
+			for (Layer* layer : mLayerStack)
+				layer->OnImGuiRender();
+			mImGuiLayer->end();
+
+			mWindow->onUpdate();
 		}
-		Profiller::Get().endSession();
 	}
 
 	void Application::CloseWindow()
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		if (Application::sInstance != nullptr) {
 			Application::sInstance->requestWindowClose();
 		}
@@ -119,7 +115,7 @@ namespace zr
 
 	void Application::CaptureMouseCursor(bool capture)
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		if (Application::sInstance != nullptr) {
 			Application::sInstance->mWindow->captureMouseCursor(capture);
 		}
@@ -127,20 +123,20 @@ namespace zr
 
 	void Application::requestWindowClose()
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		mRunning = false;
 	}
 
 	bool Application::onWindowClose(WindowCloseEvent& event)
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		mRunning = false;
 		return true;
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& event)
 	{
-		PROFILER_FUNCTION();
+		ZR_PROFILER_FUNCTION();
 		mIsMinimized = (event.getHeight() == 0U || event.getWidth() == 0U);
 		RenderCommand::SetViewportSize(event.getWidth(), event.getHeight());
 		return false;
