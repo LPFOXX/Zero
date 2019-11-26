@@ -12,16 +12,19 @@ namespace zr
 		mVertices(),
 		mIndices()
 	{
+		ZR_PROFILER_FUNCTION();
 	}
 
 	template <typename VertexType>
 	inline Batch<VertexType>::~Batch()
 	{
+		ZR_PROFILER_FUNCTION();
 	}
 
 	template <typename VertexType>
 	inline void Batch<VertexType>::addQuadVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces)
 	{
+		ZR_PROFILER_FUNCTION();
 		if (positions.size() != 4 || textureCoordinates.size() != 4 || vertexIndeces.size() != 6) {
 			return;
 		}
@@ -63,6 +66,7 @@ namespace zr
 	template<typename VertexType>
 	inline void Batch<VertexType>::addQuadVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices)
 	{
+		ZR_PROFILER_FUNCTION();
 		if (vertices.size() != 4 || verticesIndices.size() != 6) {
 			ZR_CORE_ERROR("Quad has 4 vertices and 6 indices. Data received has {0} vertices and {1} indices.", vertices.size(), verticesIndices.size());
 			return;
@@ -86,6 +90,7 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::addVertex(const glm::vec3& position, const glm::vec2& textureCoordinates, const glm::vec4& color, unsigned vertexIndex)
 	{
+		ZR_PROFILER_FUNCTION();
 		/*	mPositions.push_back(position);
 			mTextureCoordinates.push_back(textureCoordinates);
 			mColors.push_back(color);*/
@@ -95,12 +100,14 @@ namespace zr
 	template <typename VertexType>
 	inline bool Batch<VertexType>::hasEnoughRoomFor(const std::vector<VertexType>& vertices) const
 	{
+		ZR_PROFILER_FUNCTION();
 		return (mVertices.size() + vertices.size() <= kMaxNumVertices);
 	}
 
 	template <typename VertexType>
 	inline bool Batch<VertexType>::hasEnoughRoomFor(unsigned verticesCount) const
 	{
+		ZR_PROFILER_FUNCTION();
 		return (mVertices.size() + verticesCount <= kMaxNumVertices);
 	}
 

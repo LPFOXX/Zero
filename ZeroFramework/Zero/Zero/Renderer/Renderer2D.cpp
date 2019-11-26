@@ -7,6 +7,7 @@ namespace zr
 {
 	void Renderer2D::Init()
 	{
+		ZR_PROFILER_FUNCTION();
 		sData = new Renderer2DStorage;
 		sData->BatchManager = std::make_shared<BatchManager>();
 
@@ -43,11 +44,13 @@ namespace zr
 
 	void Renderer2D::Shutdown()
 	{
+		ZR_PROFILER_FUNCTION();
 		delete sData;
 	}
 
 	void Renderer2D::BeginScene(const Ref<OrthographicCamera>& camera)
 	{
+		ZR_PROFILER_FUNCTION();
 		sData->ViewProjectionMatrix = camera->getViewProjectionMatrix();
 		sData->TextureShader->bind();
 		sData->TextureShader->setUniform("uViewProjection", sData->ViewProjectionMatrix);
@@ -55,6 +58,7 @@ namespace zr
 
 	void Renderer2D::EndScene()
 	{
+		ZR_PROFILER_FUNCTION();
 		sData->BatchManager->flush(sData->ViewProjectionMatrix);
 	}
 
@@ -65,6 +69,7 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
+		ZR_PROFILER_FUNCTION();
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position);
 		if(angle != 0) transform = glm::rotate(transform, glm::radians(angle), { .0f, .0f, 1.f });
 		transform = glm::scale(transform, { size.x, size.y, 1.f });
@@ -85,6 +90,7 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4 & tintingColor)
 	{
+		ZR_PROFILER_FUNCTION();
 		#define USES_BATCHES 1
 		#if USES_BATCHES
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position);
@@ -122,6 +128,7 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<unsigned>& indices, unsigned textureId, const glm::vec4& color, const glm::vec2& scalingFactor)
 	{
+		ZR_PROFILER_FUNCTION();
 		if (positions.size() != 4 || textureCoordinates.size() != 4 || indices.size() != 6) {
 			return;
 		}
@@ -135,6 +142,7 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& indices)
 	{
+		ZR_PROFILER_FUNCTION();
 		if (positions.size() != 4 || indices.size() != 6) {
 			return;
 		}

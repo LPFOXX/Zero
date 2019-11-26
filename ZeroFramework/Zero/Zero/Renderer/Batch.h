@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Core/Core.h"
+#include "../Core/Profiller.h"
 #include "Buffer.h"
 #include "Texture.h"
 
@@ -75,6 +76,7 @@ namespace zr
 		ColoredVertexBatch() :
 			Batch()
 		{
+			ZR_PROFILER_FUNCTION();
 			mVAO = VertexArray::Create();
 			Ref<VertexBuffer> batchVBO = VertexBuffer::Create(nullptr, kMaxNumVertices * sizeof(BatchVertexTypes::ColoredVertex), DrawMode::Dynamic);
 			batchVBO->setLayout({
@@ -89,7 +91,7 @@ namespace zr
 
 		virtual ~ColoredVertexBatch()
 		{
-
+			ZR_PROFILER_FUNCTION();
 		}
 	};
 
@@ -102,6 +104,7 @@ namespace zr
 			mColor(color),
 			mScalingFactor(scalingFactor)
 		{
+			ZR_PROFILER_FUNCTION();
 			mVAO = VertexArray::Create();
 			Ref<VertexBuffer> batchVBO = VertexBuffer::Create(nullptr, kMaxNumVertices * sizeof(BatchVertexTypes::ExtendedVertex), DrawMode::Dynamic);
 			batchVBO->setLayout({
@@ -117,20 +120,22 @@ namespace zr
 
 		virtual ~ExtendedVertexBatch()
 		{
-
+			ZR_PROFILER_FUNCTION();
 		}
 
 		virtual bool hasEnoughRoomFor(unsigned textureId, const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const glm::vec4& color) const
 		{
+			ZR_PROFILER_FUNCTION();
 			if (mTextureId != textureId || mColor != color)
 				return false;
 
 			return Batch::hasEnoughRoomFor(vertices);
 		}
 
-		virtual bool hasEnoughRoomFor(unsigned textureId, unsigned verticesCount) const
+		virtual bool hasEnoughRoomFor(unsigned textureId, unsigned verticesCount, const glm::vec4& color) const
 		{
-			if (textureId != mTextureId) {
+			ZR_PROFILER_FUNCTION();
+			if (textureId != mTextureId || mColor != color) {
 				return false;
 			}
 
@@ -139,6 +144,7 @@ namespace zr
 
 		virtual void flush(const Ref<Shader>& shader)
 		{
+			ZR_PROFILER_FUNCTION();
 			Texture2D::ActivateTextureSlot(0, mTextureId);
 			shader->setUniform("uColor", mColor);
 			shader->setUniform("uTextureScalingFactor", mScalingFactor);

@@ -11,6 +11,7 @@ namespace zr
 			mColoredVertexBatches(),
 			mExtendedVertexBatches()
 		{
+			ZR_PROFILER_FUNCTION();
 			mBatchPositionShader = Shader::Create();
 			mBatchPositionShader->loadFromFile("resources/shaders/Batch.glsl");
 			mBatchTextureShader = Shader::Create();
@@ -21,11 +22,12 @@ namespace zr
 
 		virtual ~BatchManager()
 		{
-
+			ZR_PROFILER_FUNCTION();
 		}
 
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned> verticesIndices)
 		{
+			ZR_PROFILER_FUNCTION();
 			if (mColoredVertexBatches.empty()) {
 				// No batch at all: create one
 				ColoredVertexBatch cvb;
@@ -54,6 +56,7 @@ namespace zr
 
 		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned> verticesIndices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f))
 		{
+			ZR_PROFILER_FUNCTION();
 			if (mExtendedVertexBatches.empty()) {
 				// No batch at all: create one
 				ExtendedVertexBatch evb(textureId, color, scalingFactor);
@@ -82,6 +85,7 @@ namespace zr
 
 		void flush(const glm::mat4& viewProjectionMatrix)
 		{
+			ZR_PROFILER_FUNCTION();
 			if (!mColoredVertexBatches.empty()) {
 				mBatchPositionShader->bind();
 				mBatchPositionShader->setUniform("uViewProjection", viewProjectionMatrix);

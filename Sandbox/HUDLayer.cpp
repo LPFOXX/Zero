@@ -105,12 +105,6 @@ namespace lp
 				const zr::Time& time = zr::Application::GetTime();
 
 				{
-					//int size = 25;
-					/*ImGui::Begin("Settings");
-					{
-						ImGui::End();
-					}*/
-
 					ZR_PROFILER_SCOPE("A bunch of quads");
 					PROFILE_SCOPE("A bunch of quads");
 					for (unsigned i = 0; i < size; ++i) {
@@ -169,6 +163,7 @@ namespace lp
 
 	void HUDLayer::OnImGuiRender()
 	{
+		ZR_PROFILER_FUNCTION();
 		ImGui::Begin("Settings");
 		{
 			static glm::vec2 fpsTextPosition(mText->getPosition());
