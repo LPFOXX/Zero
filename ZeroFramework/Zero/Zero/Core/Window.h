@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../Core/Core.h"
 #include "Events/Event.h"
-#include "../Core/Core.h" 
+#include "../Image.h"
 
 namespace zr
 {
@@ -36,6 +37,9 @@ namespace zr
 			virtual void setEventCallback(const EventCallback& callback) = 0;
 			virtual void setVSync(bool enabled) = 0;
 			virtual bool isVSync() = 0;
+
+			virtual void setIcon(const std::string& filePath) const = 0;
+			virtual void setIcon(const Image& image) const = 0;
 
 			virtual void captureMouseCursor(bool capture = true) = 0;
 	};

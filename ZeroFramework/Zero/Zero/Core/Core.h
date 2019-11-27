@@ -52,7 +52,7 @@
 #define ZR_ENABLE_ASSERTS
 #endif
 
-#define PROFILING
+// #define ZR_PROFILING
 
 namespace zr
 {

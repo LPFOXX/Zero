@@ -26,7 +26,7 @@ namespace zr
 		* @return The data loaded from the file. If it is NULL then image loading failed.
 		*
 		*/
-		static unsigned char* LoadDataFromFile(const std::string& imagePath, int& width, int& height, int& channelCount, bool flipImage);
+		static unsigned char* LoadDataFromFile(const std::string& imagePath, int& width, int& height, int& channelCount, bool flipImage, bool force4Channels = false);
 
 		/**
 		* @brief Cleans the data loaded previously.

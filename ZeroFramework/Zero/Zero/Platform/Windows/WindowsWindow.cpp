@@ -7,6 +7,8 @@
 #include "Zero/Platform/OpenGL/OpenGLContext.h"
 #include "Zero/Core/Log.h"
 
+#include "../../ImageReader.h"
+
 namespace zr
 {
 	unsigned WindowsWindow::sGLFWWindowCount = 0;
@@ -227,6 +229,22 @@ namespace zr
 	bool WindowsWindow::isVSync()
 	{
 		return mData.VSync;
+	}
+
+	void WindowsWindow::setIcon(const std::string& filePath) const
+	{
+		Image image;
+		image.loadFromFile(filePath, true, true);
+		setIcon(image);
+	}
+
+	void WindowsWindow::setIcon(const Image& image) const
+	{
+		GLFWimage images[1];
+		images[0].width = image.getWidth();
+		images[0].height = image.getHeight();
+		images[0].pixels = (unsigned char*)image.getData();
+		glfwSetWindowIcon(mWindowHandle, 1, images);
 	}
 
 	void WindowsWindow::captureMouseCursor(bool capture)

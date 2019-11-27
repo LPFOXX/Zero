@@ -8,7 +8,7 @@
 
 #include "Clock.h"
 
-#ifdef PROFILING
+#ifdef ZR_PROFILING
 	#define GLUE(a, b) a##b
 	#define ZR_PROFILER_BEGIN_SESSION(name, filepath) zr::Profiller::Get().beginSession(name, filepath)
 	#define ZR_PROFILER_END_SESSION() zr::Profiller::Get().endSession()
@@ -17,7 +17,7 @@
 #else
 	#define ZR_PROFILER_BEGIN_SESSION(name, filepath)
 	#define ZR_PROFILER_END_SESSION()
-	#define ZR_PROFILE_SCOPE(name)
+	#define ZR_PROFILER_SCOPE(name)
 	#define ZR_PROFILER_FUNCTION()
 #endif
 

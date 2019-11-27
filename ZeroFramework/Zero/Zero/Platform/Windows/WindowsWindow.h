@@ -22,6 +22,9 @@ namespace zr
 		virtual void setVSync(bool enabled) override;
 		virtual bool isVSync() override;
 
+		virtual void setIcon(const std::string& filePath) const;
+		virtual void setIcon(const Image& image) const;
+
 		virtual void captureMouseCursor(bool capture = true) override;
 
 	private:

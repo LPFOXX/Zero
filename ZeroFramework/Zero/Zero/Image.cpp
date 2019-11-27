@@ -86,20 +86,20 @@ namespace zr
 		return false;
 	}
 
-	bool Image::loadFromFile(const std::string& imageFilePath, bool flipImage)
+	bool Image::loadFromFile(const std::string& imageFilePath, bool flipImage, bool force4Channels)
 	{
-		int width, height, nrChannel;
-		unsigned char* data = ImageReader::LoadDataFromFile(imageFilePath, width, height, nrChannel, flipImage);
+		int width = 0, height = 0, nrChannel = 0;
+		unsigned char* data = ImageReader::LoadDataFromFile(imageFilePath, width, height, nrChannel, flipImage, force4Channels);
 
 		if (data) {
 			mFilePath = imageFilePath;
 			mWidth = width;
 			mHeight = height;
-			mChannelCount = 4U;
+			mChannelCount = force4Channels ? 4U : nrChannel;
 
-			// width * height * 4 bytes (one per channel) per pixel
-			mBuffer.resize(static_cast<size_t>(mWidth) * mHeight * 4U);
-			std::memcpy(&mBuffer[0], data, static_cast<size_t>(mWidth) * mHeight * 4U);
+			// width * height * mChannelCount bytes (one byte per channel) per pixel
+			mBuffer.resize(static_cast<size_t>(mWidth) * mHeight * mChannelCount);
+			std::memcpy(&mBuffer[0], data, static_cast<size_t>(mWidth) * mHeight * mChannelCount);
 			ImageReader::CleanData(data);
 			return true;
 		}
@@ -122,6 +122,11 @@ namespace zr
 	}
 
 	const unsigned char* Image::getData() const
+	{
+		return !mBuffer.empty() ? &mBuffer[0] : nullptr;
+	}
+
+	unsigned char* Image::getData()
 	{
 		return !mBuffer.empty() ? &mBuffer[0] : nullptr;
 	}

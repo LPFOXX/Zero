@@ -75,7 +75,7 @@ namespace zr
 		*/
 		bool create(unsigned width, unsigned height, const unsigned char* data, unsigned channelCount = 4);
 
-		bool loadFromFile(const std::string& imageFilePath, bool flipImage = false);
+		bool loadFromFile(const std::string& imageFilePath, bool flipImage = false, bool force4Channels = false);
 
 		/**
 		* @brief Returns the current width of the image.
@@ -105,6 +105,8 @@ namespace zr
 		*/
 		const unsigned char* getData() const;
 
+		unsigned char* getData();
+
 		const std::string& getPath() const;
 
 		/**
@@ -125,9 +127,9 @@ namespace zr
 		bool createFourChannelImage(unsigned width, unsigned height, unsigned channelCount, const unsigned char* data);
 
 	private:
-		unsigned mWidth;
-		unsigned mHeight;
-		unsigned mChannelCount;
+		int mWidth;
+		int mHeight;
+		int mChannelCount;
 		std::vector<unsigned char> mBuffer;
 		std::string mFilePath;
 	};

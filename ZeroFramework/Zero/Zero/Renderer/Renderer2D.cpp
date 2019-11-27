@@ -71,7 +71,7 @@ namespace zr
 	{
 		ZR_PROFILER_FUNCTION();
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position);
-		if(angle != 0) transform = glm::rotate(transform, glm::radians(angle), { .0f, .0f, 1.f });
+		transform = glm::rotate(transform, glm::radians(angle), { .0f, .0f, 1.f });
 		transform = glm::scale(transform, { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
