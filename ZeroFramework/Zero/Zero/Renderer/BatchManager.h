@@ -25,36 +25,28 @@ namespace zr
 			ZR_PROFILER_FUNCTION();
 		}
 
-		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned> verticesIndices)
+		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
 		{
 			ZR_PROFILER_FUNCTION();
-			if (mColoredVertexBatches.empty()) {
-				// No batch at all: create one
+			// search for a batch with enough storage room
+			auto& it = std::find_if(mColoredVertexBatches.begin(), mColoredVertexBatches.end(), [&vertices](const ColoredVertexBatch& batch) {
+				return batch.hasEnoughRoomFor(vertices);
+			});
+
+			if (it != mColoredVertexBatches.end()) {
+				// There's a batch with enough room: add these vertices to it
+				it->addQuadVertices(vertices, verticesIndices);
+			}
+			else {
+				// There is no batch with enough room: create one batch and add these
+				// vertices to it
 				ColoredVertexBatch cvb;
 				cvb.addQuadVertices(vertices, verticesIndices);
 				mColoredVertexBatches.push_back(cvb);
 			}
-			else {
-				// search for a batch with enough storage room
-				auto& it = std::find_if(mColoredVertexBatches.begin(), mColoredVertexBatches.end(), [&vertices](const ColoredVertexBatch& batch) {
-					return batch.hasEnoughRoomFor(vertices);
-				});
-
-				if (it != mColoredVertexBatches.end()) {
-					// There's a batch with enough room: add these vertices to it
-					it->addQuadVertices(vertices, verticesIndices);
-				}
-				else {
-					// There is no batch with enough room: create one batch and add these
-					// vertices to it
-					ColoredVertexBatch cvb;
-					cvb.addQuadVertices(vertices, verticesIndices);
-					mColoredVertexBatches.push_back(cvb);
-				}
-			}
 		}
 
-		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned> verticesIndices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f))
+		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned>& verticesIndices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f))
 		{
 			ZR_PROFILER_FUNCTION();
 			if (mExtendedVertexBatches.empty()) {

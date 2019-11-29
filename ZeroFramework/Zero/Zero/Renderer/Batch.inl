@@ -67,7 +67,7 @@ namespace zr
 	inline void Batch<VertexType>::addQuadVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices)
 	{
 		ZR_PROFILER_FUNCTION();
-		if (vertices.size() != 4 || verticesIndices.size() != 6) {
+		/*if (vertices.size() != 4 || verticesIndices.size() != 6) {
 			ZR_CORE_ERROR("Quad has 4 vertices and 6 indices. Data received has {0} vertices and {1} indices.", vertices.size(), verticesIndices.size());
 			return;
 		}
@@ -75,11 +75,11 @@ namespace zr
 		if (mVertices.size() + vertices.size() > kMaxNumVertices) {
 			ZR_CORE_ERROR("Not enough storage to add {0} vertices", vertices.size());
 			return;
-		}
+		}*/
 
 		std::size_t indexCount = mVertices.size();
 		for (unsigned index : verticesIndices) {
-			mIndices.push_back(unsigned(index + indexCount));
+			mIndices.push_back((unsigned)indexCount + index);
 		}
 
 		for (auto& vertex : vertices) {
@@ -100,14 +100,12 @@ namespace zr
 	template <typename VertexType>
 	inline bool Batch<VertexType>::hasEnoughRoomFor(const std::vector<VertexType>& vertices) const
 	{
-		ZR_PROFILER_FUNCTION();
 		return (mVertices.size() + vertices.size() <= kMaxNumVertices);
 	}
 
 	template <typename VertexType>
 	inline bool Batch<VertexType>::hasEnoughRoomFor(unsigned verticesCount) const
 	{
-		ZR_PROFILER_FUNCTION();
 		return (mVertices.size() + verticesCount <= kMaxNumVertices);
 	}
 
