@@ -55,7 +55,48 @@ namespace lp
 		mText->setOutlineColor({ 1.f, 1.f, 1.f, 1.f });
 		mText->setPosition(0U, 600U);
 		mText->setOutlineThickness(1U);
-		mText->setString("Lidneu$");
+		std::string textString = R"(
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras dolor ipsum,
+			sollicitudin sed imperdiet vel, eleifend quis augue. Cras tortor erat, laoreet
+			eget dui ut, ullamcorper cursus enim. Donec scelerisque suscipit neque a auctor.
+			Vivamus in urna hendrerit, tempor nibh eget, condimentum ligula. Mauris semper
+			massa vitae semper elementum. Ut lacus ipsum, sodales eget nibh a, tincidunt
+			cursus dolor. Nam erat lacus, efficitur ut nisi id, mattis suscipit turpis.
+			In rutrum, massa ac imperdiet tristique, eros ante tristique nibh, a ultricies
+			nibh mi vel felis. Praesent massa ligula, gravida ac aliquet non, semper a risus.
+			Fusce dui metus, varius id tellus vel, interdum placerat erat. Vestibulum eu felis lorem.
+
+			In laoreet lacus eget vehicula sollicitudin. Phasellus consectetur augue nec libero molestie
+			tempus. Morbi dignissim interdum laoreet. Ut sed nunc a nibh vestibulum pharetra. Cras sit
+			amet laoreet enim, ac suscipit diam. Sed scelerisque, libero nec pulvinar fringilla, nisl
+			nisl suscipit tellus, in gravida sapien nisl quis nunc. Praesent eget nisl nulla. Nam
+			ultricies neque at leo mattis, vitae auctor ante tristique. Nam nec dolor sem.
+
+			Aliquam blandit ipsum ac orci iaculis vehicula non sit amet purus. Ut faucibus lacinia
+			nisi, eget feugiat turpis semper nec. Proin ultrices nisl est, vel mollis quam volutpat
+			nec. Sed fringilla iaculis fringilla. Phasellus feugiat metus libero, et elementum lorem
+			gravida sit amet. Sed sit amet eleifend libero, eu accumsan risus. Duis cursus, est blandit
+			tincidunt efficitur, lorem massa hendrerit quam, nec lacinia eros ligula id orci. Vestibulum
+			in ipsum justo.
+
+			Maecenas convallis, neque sollicitudin pellentesque feugiat, massa felis pellentesque nunc,
+			ut malesuada enim lacus vestibulum tellus. Quisque eget dapibus enim. Fusce id malesuada neque.
+			Curabitur quis blandit nunc. Ut dignissim, lorem congue rutrum placerat, nisl purus fringilla
+			tortor, a lacinia dui ex sed ante. Mauris placerat, lorem ut sagittis vestibulum, nisl risus
+			feugiat lectus, eu hendrerit massa ipsum vel quam. Etiam sit amet augue vitae lacus maximus
+			ultrices ut a augue. Vestibulum sit amet laoreet tortor. Sed lectus elit, vestibulum nec porta
+			ut, euismod vel purus. Suspendisse nec aliquet ante. Pellentesque id nunc non purus venenatis
+			laoreet. Ut ac ex ac ante malesuada mollis eget condimentum ex. Vivamus placerat pulvinar lacus,
+			id accumsan diam lacinia ut. Maecenas suscipit facilisis lacus, id accumsan mauris pellentesque
+			non. Pellentesque id malesuada libero, id imperdiet justo. Etiam at elit sit amet orci ultrices
+			pellentesque non a dolor.
+
+			Mauris efficitur risus et congue elementum. Donec sodales lacus neque, sed ultricies massa feugiat
+			non. Aenean quam ipsum, malesuada non vestibulum ac, euismod in nibh. Donec placerat est sapien.
+			Pellentesque vehicula mi sapien, nec pretium ex egestas quis. Pellentesque quis quam et risus
+			rhoncus lobortis at ut augue. Aliquam feugiat ut diam vitae luctus.
+		)";
+		mText->setString(textString);
 
 		mCameraController.reset(new zr::OrthographicCameraController(1280.f / 600.f, true));
 		mGame.reset(new PongGame);

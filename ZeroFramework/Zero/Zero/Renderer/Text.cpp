@@ -251,17 +251,19 @@ namespace zr
 		float brxTexCoord = bottomRightX / textureWidth;	// Bottom right x
 		float bryTexCoord = bottomRightY / textureHeight;	// Top right
 
-		std::vector<glm::vec3> positions;
-		positions.emplace_back(xPos + charWidth, yPos, 0.f);
-		positions.emplace_back(xPos, yPos, 0.f);
-		positions.emplace_back(xPos, yPos + charHeight, 0.f);
-		positions.emplace_back(xPos + charWidth, yPos + charHeight, 0.f);
+		std::vector<glm::vec3> positions{
+			{xPos + charWidth, yPos, 0.f},
+			{xPos, yPos, 0.f},
+			{xPos, yPos + charHeight, 0.f},
+			{xPos + charWidth, yPos + charHeight, 0.f}
+		};
 
-		std::vector<glm::vec2> textureCoordinates;
-		textureCoordinates.emplace_back(brxTexCoord, bryTexCoord);
-		textureCoordinates.emplace_back(blxTexCoord, blyTexCoord);
-		textureCoordinates.emplace_back(tlxTexCoord, tlyTexCoord);
-		textureCoordinates.emplace_back(trxTexCoord, tryTexCoord);
+		std::vector<glm::vec2> textureCoordinates{
+			{brxTexCoord, bryTexCoord},
+			{blxTexCoord, blyTexCoord},
+			{tlxTexCoord, tlyTexCoord},
+			{trxTexCoord, tryTexCoord}
+		};
 
 		Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 0, 2, 3 }, textureHandle, color);
 	}
