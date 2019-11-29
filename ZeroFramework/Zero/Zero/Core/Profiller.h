@@ -9,11 +9,21 @@
 #include "Clock.h"
 
 #ifdef ZR_PROFILING
+	#if defined(__FUNCSIG__)
+		#define ZR_FUNC_SIG __FUNCSIG__
+	#elif defined(__PRETTY_FUNCTION__)
+		#define ZR_FUNC_SIG __PRETTY_FUNCTION__
+	#else
+		#define ZR_FUNC_SIG __FUNCTION__
+	#endif
+
 	#define GLUE(a, b) a##b
 	#define ZR_PROFILER_BEGIN_SESSION(name, filepath) zr::Profiller::Get().beginSession(name, filepath)
 	#define ZR_PROFILER_END_SESSION() zr::Profiller::Get().endSession()
 	#define ZR_PROFILER_SCOPE(name) zr::Profiller::Timer GLUE(profilerTimer,__LINE__)(name)
-	#define ZR_PROFILER_FUNCTION() ZR_PROFILER_SCOPE(__func__)
+	//#define ZR_PROFILER_FUNCTION() ZR_PROFILER_SCOPE(__func__)
+	#define ZR_PROFILER_FUNCTION() ZR_PROFILER_SCOPE(ZR_FUNC_SIG)
+	//__PRETTY_FUNCTION__
 #else
 	#define ZR_PROFILER_BEGIN_SESSION(name, filepath)
 	#define ZR_PROFILER_END_SESSION()
