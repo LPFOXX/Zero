@@ -23,7 +23,6 @@ namespace zr
 	{
 		mLayers.emplace(mLayers.begin() + mLastLayerIndex, layer);
 		mLastLayerIndex++;
-		layer->onAttach();
 	}
 
 	void LayerStack::popLayer(Layer* layer)
@@ -39,7 +38,6 @@ namespace zr
 	void LayerStack::pushOverlay(Layer* layer)
 	{
 		mLayers.emplace_back(layer);
-		layer->onAttach();
 	}
 
 	void LayerStack::popOverlay(Layer* layer)

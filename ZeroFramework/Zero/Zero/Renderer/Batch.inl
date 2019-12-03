@@ -3,6 +3,8 @@
 #include "../Core/Log.h"
 #include "../Core/Profiller.h"
 
+#pragma warning(disable:4267)
+
 namespace zr
 {
 	template <typename VertexType>
@@ -12,7 +14,6 @@ namespace zr
 		mVertices(),
 		mIndices()
 	{
-		ZR_PROFILER_FUNCTION();
 	}
 
 	template <typename VertexType>
@@ -24,7 +25,6 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::addQuadVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces)
 	{
-		ZR_PROFILER_FUNCTION();
 		if (positions.size() != 4 || textureCoordinates.size() != 4 || vertexIndeces.size() != 6) {
 			return;
 		}
@@ -59,14 +59,13 @@ namespace zr
 
 		unsigned indexCount = mVertices.size();
 		for (unsigned i = 0; i < 6; ++i) {
-			mIndices.push_back(vertexIndeces[i] + indexCount);
+			mIndices.emplace_back(vertexIndeces[i] + indexCount);
 		}
 	}
 
 	template<typename VertexType>
 	inline void Batch<VertexType>::addQuadVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices)
 	{
-		ZR_PROFILER_FUNCTION();
 		/*if (vertices.size() != 4 || verticesIndices.size() != 6) {
 			ZR_CORE_ERROR("Quad has 4 vertices and 6 indices. Data received has {0} vertices and {1} indices.", vertices.size(), verticesIndices.size());
 			return;
@@ -90,7 +89,6 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::addVertex(const glm::vec3& position, const glm::vec2& textureCoordinates, const glm::vec4& color, unsigned vertexIndex)
 	{
-		ZR_PROFILER_FUNCTION();
 		/*	mPositions.push_back(position);
 			mTextureCoordinates.push_back(textureCoordinates);
 			mColors.push_back(color);*/
@@ -112,7 +110,6 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::flush()
 	{
-		ZR_PROFILER_FUNCTION();
 		mVAO->bind();
 		const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
 		vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(VertexType));

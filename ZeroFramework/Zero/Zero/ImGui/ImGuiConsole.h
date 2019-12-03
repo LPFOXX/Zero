@@ -5,10 +5,22 @@
 
 #include "../../vendor/sfml/include/SFML/System.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#pragma warning(disable:6387)
+#endif
+
 namespace zr
 {
 	struct ConsoleItem
 	{
+		ConsoleItem() :
+			Message(),
+			MessageType(Normal)
+		{
+
+		}
+
 		enum Type
 		{
 			Fatal,

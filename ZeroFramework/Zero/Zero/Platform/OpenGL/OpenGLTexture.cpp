@@ -5,6 +5,7 @@
 
 #include "../../ImageReader.h"
 #include "OpenGLTexture.h"
+#include "../../Core/Profiller.h"
 
 namespace zr
 {
@@ -14,6 +15,7 @@ namespace zr
 		Texture2D(),
 		mTextureId(0U)
 	{
+		ZR_PROFILER_FUNCTION();
 
 	}
 
@@ -21,6 +23,8 @@ namespace zr
 		Texture2D(),
 		mTextureId(0U)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (!loadFromFile(filePath, true, textureType)) {
 			ZR_CORE_ERROR("[OpenGLTexture] Can't load texture file: " + filePath);
 		}
@@ -28,6 +32,8 @@ namespace zr
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mTextureId != 0U) {
 			GL_ERR_CHECK(glDeleteTextures(1, &mTextureId));
 			mTextureId = 0U;
@@ -52,6 +58,8 @@ namespace zr
 
 	void OpenGLTexture2D::bind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (OpenGLTexture2D::sCurrentlyBoundTexture != mTextureId) {
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mTextureId));
 			OpenGLTexture2D::sCurrentlyBoundTexture = mTextureId;
@@ -60,6 +68,8 @@ namespace zr
 
 	void OpenGLTexture2D::unbind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (OpenGLTexture2D::sCurrentlyBoundTexture != 0U) {
 			GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, 0U));
 			OpenGLTexture2D::sCurrentlyBoundTexture = 0U;
@@ -68,6 +78,8 @@ namespace zr
 
 	bool OpenGLTexture2D::loadFromFile(const std::string& filePath, bool flipVertically, Texture2D::Type textureType)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int width, height, nrChannels;
 		// Get image data
 		unsigned char* data = ImageReader::LoadDataFromFile(filePath, width, height, nrChannels, flipVertically);
@@ -123,6 +135,8 @@ namespace zr
 
 	bool OpenGLTexture2D::loadFromImage(const Image& image, Texture2D::Type textureType)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (loadFromMemory(image.getWidth(), image.getHeight(), image.getData())) {
 			mTextureType = textureType;
 			mFilePath = image.getPath();
@@ -142,6 +156,8 @@ namespace zr
 
 	bool OpenGLTexture2D::update(const unsigned char* data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mTextureId == 0U) {
 			return false;
 		}
@@ -161,6 +177,8 @@ namespace zr
 
 	bool OpenGLTexture2D::update(const Image& data, unsigned xPos, unsigned yPos)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mTextureId == 0) {
 			return false;
 		}
@@ -183,6 +201,8 @@ namespace zr
 
 	bool OpenGLTexture2D::update(const std::vector<unsigned char>& data, unsigned width, unsigned height, unsigned xPos, unsigned yPos)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mTextureId == 0) {
 			return false;
 		}

@@ -256,15 +256,15 @@ namespace lp
 
 		void update()
 		{
-			float windowWidth = zr::Application::GetWindow().getWidth();
-			float windowHeight = zr::Application::GetWindow().getHeight();
+			float windowWidth = static_cast<float>(zr::Application::GetWindow().getWidth());
+			float windowHeight = static_cast<float>(zr::Application::GetWindow().getHeight());
 			const glm::vec2& ballSize = mBall->getSize();
 			const glm::vec2& ballPosition = mBall->getPosition();
 
 			mPlayerScoreText->setString(std::to_string(mPlayer->getScore()));
 			mAIPlayerScoreText->setString(std::to_string(mAIPlayer->getScore()));
 
-			float windowQuarter = windowWidth * .25f;
+			float windowQuarter = .25f * windowWidth;
 			mPlayerScoreText->setPosition(windowQuarter - mPlayerScoreText->getSize().x * .5f, 4);
 			mAIPlayerScoreText->setPosition(3.f * windowQuarter - mAIPlayerScoreText->getSize().x * .5f, 4);
 

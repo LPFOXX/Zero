@@ -2,8 +2,6 @@
 
 #include "Log.h"
 
-#include "../../vendor/spdlog/include/spdlog/sinks/stdout_color_sinks.h"
-
 namespace zr
 {
 	Ref<spdlog::logger> Log::sCoreLogger;

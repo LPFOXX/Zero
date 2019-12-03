@@ -1,6 +1,7 @@
 #include <zr_pch.h>
 
 #include "Zero/Core/Log.h"
+#include "Zero/Core/Profiller.h"
 #include "OpenGLShader.h"
 #include "GL_ERR_CHECK.h"
 
@@ -26,6 +27,8 @@ namespace zr
 		mProgramId(0U),
 		mName()
 	{
+		ZR_PROFILER_FUNCTION();
+
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& filePath) :
@@ -36,6 +39,8 @@ namespace zr
 		mProgramId(0U),
 		mName()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (!loadFromFile(filePath)) {
 			throw std::runtime_error("Can't load shader from file: " + filePath);
 		}
@@ -45,6 +50,8 @@ namespace zr
 		Shader(),
 		mName(name)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			throw std::runtime_error("Can't load shader from file: ");
 		}
@@ -58,6 +65,8 @@ namespace zr
 		Shader(),
 		mName(name)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (!createVertexAndFragShaders(vertexShaderPath, fragmentShaderPath)) {
 			throw std::runtime_error("Can't load shader from file: " + vertexShaderPath + " OR " + fragmentShaderPath);
 		}
@@ -73,6 +82,8 @@ namespace zr
 
 	OpenGLShader::~OpenGLShader()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mProgramId != 0U) {
 			GL_ERR_CHECK(glDeleteProgram(mProgramId));
 			mProgramId = 0U;
@@ -237,16 +248,22 @@ namespace zr
 
 	void OpenGLShader::bind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glUseProgram(mProgramId));
 	}
 
 	void OpenGLShader::unbind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glUseProgram(0));
 	}
 
 	void OpenGLShader::setUniform(const char* uniformName, float value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform1f(uniformLocation, value));
@@ -255,6 +272,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform2f(uniformLocation, valueX, valueY));
@@ -263,6 +282,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY, float valueZ) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform3f(uniformLocation, valueX, valueY, valueZ));
@@ -271,6 +292,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, float valueX, float valueY, float valueZ, float valueW) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform4f(uniformLocation, valueX, valueY, valueZ, valueW));
@@ -279,6 +302,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, int value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform1i(uniformLocation, value));
@@ -287,6 +312,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
@@ -295,6 +322,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY, int valueZ) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
@@ -303,6 +332,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, int valueX, int valueY, int valueZ, int valueW) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
@@ -311,6 +342,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, bool value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform1i(uniformLocation, value));
@@ -319,6 +352,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform2i(uniformLocation, valueX, valueY));
@@ -327,6 +362,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform3i(uniformLocation, valueX, valueY, valueZ));
@@ -335,6 +372,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, bool valueX, bool valueY, bool valueZ, bool valueW) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform4i(uniformLocation, valueX, valueY, valueZ, valueW));
@@ -343,6 +382,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec2& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform2f(uniformLocation, value.x, value.y));
@@ -351,6 +392,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec3& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform3f(uniformLocation, value.x, value.y, value.z));
@@ -359,6 +402,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::vec4& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniform4f(uniformLocation, value.x, value.y, value.z, value.w));
@@ -367,6 +412,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::mat3& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
@@ -375,6 +422,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const glm::mat4& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(value)));
@@ -383,6 +432,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const Material& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		std::string name(uniformName);
 		setUniform((name + ".Ambient").c_str(), value.Ambient);
 		setUniform((name + ".Diffuse").c_str(), value.Diffuse);
@@ -393,6 +444,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const Light& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		std::string name(uniformName);
 		setUniform((name + ".Ambient").c_str(), value.Ambient);
 		setUniform((name + ".Diffuse").c_str(), value.Diffuse);
@@ -407,6 +460,8 @@ namespace zr
 
 	void OpenGLShader::setUniform(const char* uniformName, const std::vector<glm::mat4>& value) const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		int uniformLocation = getUniformLocation(uniformName);
 		if (uniformLocation != -1) {
 			GL_ERR_CHECK(glUniformMatrix4fv(uniformLocation, (GLsizei)value.size(), GL_FALSE, glm::value_ptr(value[0])));
@@ -415,6 +470,8 @@ namespace zr
 
 	std::string OpenGLShader::readFile(const std::string& filePath)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		std::string result;
 		std::ifstream in(filePath, std::ios::in | std::ios::binary);
 		if (in) {
@@ -432,6 +489,8 @@ namespace zr
 
 	std::unordered_map<unsigned char, std::string> OpenGLShader::preProcess(const std::string& source)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		std::unordered_map<unsigned char, std::string> shaderSources;
 
 		const char* typeToken = "#type";
@@ -586,6 +645,8 @@ namespace zr
 
 	bool OpenGLShader::createAndLinkProgram(unsigned char whichShaders)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (whichShaders == 0) {
 			return false;
 		}

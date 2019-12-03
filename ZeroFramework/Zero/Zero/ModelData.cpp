@@ -181,7 +181,7 @@ namespace zr
 				unsigned boneIndex = 0U;
 				if (mBonesMap.find(bone->mName.C_Str()) == mBonesMap.end()) {
 					// Bone does not exist: allocate space for a new one
-					boneIndex = mBonesOffsets.size();
+					boneIndex = static_cast<unsigned>(mBonesOffsets.size());
 					mBonesOffsets[boneIndex] = mat4_cast(bone->mOffsetMatrix);
 					mBonesMap[bone->mName.C_Str()] = boneIndex;
 				}

@@ -19,6 +19,8 @@ namespace zr
 
 	Application::Application()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		Application::sInstance = this;
 		mWindow = Window::Create();
 		mWindow->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
@@ -33,12 +35,15 @@ namespace zr
 
 	Application::~Application()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		Renderer::Shutdown();
 	}
 
 	void Application::onEvent(Event& e)
 	{
 		ZR_PROFILER_FUNCTION();
+
 		EventDispatcher dispatcher(e);
 		dispatcher.dispatch<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
 		dispatcher.dispatch<WindowResizeEvent>(std::bind(&Application::onWindowResize, this, std::placeholders::_1));
@@ -56,19 +61,26 @@ namespace zr
 	void Application::pushLayer(Layer* layer)
 	{
 		ZR_PROFILER_FUNCTION();
+
 		mLayerStack.pushLayer(layer);
+		layer->onAttach();
 	}
 
 	void Application::pushOverlay(Layer* layer)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		mLayerStack.pushOverlay(layer);
+		layer->onAttach();
 	}
 
 	void Application::run()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		Clock clock;
 		while (mRunning) {
+			ZR_PROFILER_SCOPE("Run Loop");
 			CommandQueue::ExecuteCommands();
 			/*Time elapsedTime = timer.restart();
 			accumulatedTime += elapsedTime;
@@ -91,16 +103,21 @@ namespace zr
 			Time& elapsedTime = clock.restart();
 
 			if (!mIsMinimized) {
+				ZR_PROFILER_SCOPE("LayerStack onUpdates");
+
 				for (Layer* l : mLayerStack) {
 					l->onUpdate(elapsedTime);
 				}
 			}
 
 			mImGuiLayer->begin();
-			for (Layer* layer : mLayerStack)
-				layer->OnImGuiRender();
-			mImGuiLayer->end();
+			{
+				ZR_PROFILER_SCOPE("Layer onImGuiRender");
 
+				for (Layer* layer : mLayerStack)
+					layer->OnImGuiRender();
+				mImGuiLayer->end();
+			}
 			mWindow->onUpdate();
 		}
 	}
@@ -108,6 +125,7 @@ namespace zr
 	void Application::CloseWindow()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		if (Application::sInstance != nullptr) {
 			Application::sInstance->requestWindowClose();
 		}
@@ -116,6 +134,7 @@ namespace zr
 	void Application::CaptureMouseCursor(bool capture)
 	{
 		ZR_PROFILER_FUNCTION();
+
 		if (Application::sInstance != nullptr) {
 			Application::sInstance->mWindow->captureMouseCursor(capture);
 		}
@@ -124,6 +143,7 @@ namespace zr
 	void Application::requestWindowClose()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		mRunning = false;
 	}
 
@@ -137,6 +157,7 @@ namespace zr
 	bool Application::onWindowResize(WindowResizeEvent& event)
 	{
 		ZR_PROFILER_FUNCTION();
+
 		mIsMinimized = (event.getHeight() == 0U || event.getWidth() == 0U);
 		RenderCommand::SetViewportSize(event.getWidth(), event.getHeight());
 		return false;

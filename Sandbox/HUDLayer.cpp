@@ -6,7 +6,7 @@
 
 namespace lp
 {
-	static int size = 25;
+	static unsigned size = 25;
 
 	HUDLayer::HUDLayer() :
 		zr::Layer("HUDLayer"),
@@ -118,35 +118,21 @@ namespace lp
 		ZR_PROFILER_FUNCTION();
 		PROFILE_SCOPE("HUDLayer::onUpdate");
 		{
-			ZR_PROFILER_SCOPE("CameraController::onUpdate");
 			PROFILE_SCOPE("CameraController::onUpdate");
 			mCameraController->onUpdate(elapsedTime);
 		}
 
-		{
-			ZR_PROFILER_SCOPE("PongGame::onUpdate");
-			PROFILE_SCOPE("PongGame::onUpdate");
-			mGame->update();
-		}
+		mGame->update();
 
-		mText->render(mCameraController->getCamera()->getViewProjectionMatrix());
-
-		{
-			//PROFILER_SCOPE("Renderer Prep");
-			PROFILE_SCOPE("Renderer Prep");
-			zr::RenderCommand::SetClearColor(0.f, 0.f, 0.f, 1.f);
-			zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
-		}
+		zr::RenderCommand::SetClearColor(0.f, 0.f, 0.f, 1.f);
+		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
 
 		{
 			ZR_PROFILER_SCOPE("Renderer Draw");
-			PROFILE_SCOPE("Renderer Draw");
 			zr::Renderer2D::BeginScene(mCameraController->getCamera());
 			{
 				const zr::Time& time = zr::Application::GetTime();
-
 				{
-					ZR_PROFILER_SCOPE("A bunch of quads");
 					PROFILE_SCOPE("A bunch of quads");
 					for (unsigned i = 0; i < size; ++i) {
 						for (unsigned j = 0; j < size; ++j) {
@@ -158,40 +144,22 @@ namespace lp
 				}
 
 				{
-					ZR_PROFILER_SCOPE("Draw Single Quad2");
-					PROFILE_SCOPE("Draw Single Quad2");
+					PROFILE_SCOPE("Draw 2 Quads");
 					zr::Renderer2D::DrawQuad({ 0.5f, -.5f }, { .5f, .75f }, -time.asSeconds() * 30.f, { .2f, .3f, .8f, 1.f });
-				}
-
-				{
-					ZR_PROFILER_SCOPE("Draw Single Quad1");
-					PROFILE_SCOPE("Draw Single Quad1");
 					zr::Renderer2D::DrawQuad({ -1.f, 0.f }, { .8f, .8f }, time.asSeconds() * 45.f, { .8f, .2f, .3f, 1.f });
 				}
 
 				{
-					ZR_PROFILER_SCOPE("Draw CheckerBoard Texture");
-					PROFILE_SCOPE("Draw CheckerBoard Texture");
+					PROFILE_SCOPE("Draw 2 Textures");
 					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, 0, mCheckerBoardTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
-				}
-
-				{
-					ZR_PROFILER_SCOPE("Draw Ocean Texture");
-					PROFILE_SCOPE("Draw Ocean Texture");
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
-				}
-
-				{
-					ZR_PROFILER_SCOPE("Draw Logo Texture");
-					PROFILE_SCOPE("Draw Logo Texture");
+					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
 					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, 0, mLogoTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
 				}
 
-				{
-					ZR_PROFILER_SCOPE("Draw batched text");
+				/*{
 					PROFILE_SCOPE("Draw batched text");
 					mText->render(mCameraController->getCamera()->getViewProjectionMatrix());
-				}
+				}*/
 				//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, -time.asSeconds() * 45.f, mTexture, {20.f, 20.f}, { abs(sin(time.asSeconds() * .5f)), abs(cos(time.asSeconds() * .1f)), abs(sin(time.asSeconds()) * cos(time.asSeconds())), 1.f });
 				//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, 0, mTexture, {20.f, 20.f}, { 1.f, 1.f, 1.f, 1.f});
 
@@ -212,8 +180,8 @@ namespace lp
 				mText->setPosition(fpsTextPosition);
 			}
 
-			
-			ImGui::DragInt("Size", &size, 1.f, 1, 2000000);
+
+			ImGui::DragInt("Size", reinterpret_cast<int*>(&size), 1.f, 1, 2000000);
 			ImGui::Text("%i vertices", size * size * 4);
 
 			for (auto& result : mProfileResults) {

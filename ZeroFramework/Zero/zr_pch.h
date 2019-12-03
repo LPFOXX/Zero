@@ -13,6 +13,10 @@
 #include <map>
 #include <unordered_map>
 
+#ifdef _MSC_VER
+#pragma warning(disable:26451)
+#endif
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>

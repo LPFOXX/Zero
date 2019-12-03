@@ -4,6 +4,7 @@
 
 #include <Zero/Core/Input.h>
 #include <Zero/Core/EventDispatcher.h>
+#include "Zero/Core/Profiller.h"
 
 #include "Core/Log.h"
 
@@ -31,6 +32,8 @@ namespace zr
 
 	void OrthographicCameraController::onUpdate(const Time& elapsedTime)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (Input::isKeyPressed(Keyboard::W)) {
 			mCameraPosition += glm::vec3(0.f, mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f);
 		}
@@ -64,6 +67,8 @@ namespace zr
 
 	void OrthographicCameraController::onEvent(Event& e)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		EventDispatcher eventDispatcher(e);
 		eventDispatcher.dispatch<MouseScrollEvent>(std::bind(&OrthographicCameraController::onMouseScrolled, this, std::placeholders::_1));
 		eventDispatcher.dispatch<WindowResizeEvent>(std::bind(&OrthographicCameraController::onWindowResized, this, std::placeholders::_1));
@@ -86,6 +91,8 @@ namespace zr
 
 	bool OrthographicCameraController::onMouseScrolled(MouseScrollEvent& e)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		float zoomLevel = mZoomLevel - e.getYOffset() * mZoomRate;
 		zoomLevel = zr::clamp(mMaxZoomLevel, mMinZoomLevel, zoomLevel);
 		readjustCameraTranslationSpeed(zoomLevel);
@@ -95,6 +102,8 @@ namespace zr
 
 	bool OrthographicCameraController::onWindowResized(WindowResizeEvent& e)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		mAspectRatio = (float)e.getWidth() / (float)e.getHeight();
 		updateProjectionMatrix();
 		return false;

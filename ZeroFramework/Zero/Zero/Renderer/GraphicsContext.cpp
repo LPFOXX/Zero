@@ -3,6 +3,10 @@
 #include <glad/glad.h>
 #include "GraphicsContext.h"
 
+#include "Zero/Core/Profiller.h"
+#include "Zero/Core/Log.h"
+#include "Zero/Platform/OpenGL/GL_ERR_CHECK.h"
+
 namespace zr
 {
 	GraphicsContext::GraphicsContext()
@@ -57,14 +61,30 @@ namespace zr
 	// Inherited via GraphicsContext
 	void OpenGLContext::init()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		glfwMakeContextCurrent(mWindowHandle);
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 			throw std::runtime_error("Failed to initialize the loader. (GLAD)");
 		}
+
+		const unsigned char* vendor = nullptr;
+		const unsigned char* renderer = nullptr;
+		const unsigned char* version = nullptr;
+		GL_ERR_CHECK(vendor = glGetString(GL_VENDOR));
+		GL_ERR_CHECK(renderer = glGetString(GL_RENDERER));
+		GL_ERR_CHECK(version = glGetString(GL_VERSION));
+
+		ZR_CORE_INFO("OpenGL Info: ");
+		ZR_CORE_INFO("	Vendor: {0}", vendor);
+		ZR_CORE_INFO("	Renderer: {0}", renderer);
+		ZR_CORE_INFO("	Version: {0}", version);
 	}
 
 	void OpenGLContext::swapBuffers()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		glfwSwapBuffers(mWindowHandle);
 	}
 }

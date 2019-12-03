@@ -6,6 +6,7 @@
 #include "Zero/Core/Events.h"
 #include "Zero/Platform/OpenGL/OpenGLContext.h"
 #include "Zero/Core/Log.h"
+#include "Zero/Core/Profiller.h"
 
 #include "../../ImageReader.h"
 
@@ -21,6 +22,7 @@ namespace zr
 	WindowsWindow::WindowsWindow(const WindowConfig& wc) :
 		mWindowHandle(nullptr)
 	{
+		ZR_PROFILER_FUNCTION();
 		mTitle = wc.Title;
 		mData.Width = wc.Width;
 		mData.Height = wc.Height;
@@ -180,6 +182,8 @@ namespace zr
 
 	WindowsWindow::~WindowsWindow()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		glfwDestroyWindow(mWindowHandle);
 		--WindowsWindow::sGLFWWindowCount;
 
@@ -191,6 +195,8 @@ namespace zr
 
 	void WindowsWindow::onUpdate()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		glfwPollEvents();
 		mContext->swapBuffers();
 	}
@@ -217,11 +223,13 @@ namespace zr
 
 	void WindowsWindow::setVSync(bool enabled)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (enabled) {
 			glfwSwapInterval(1);
 		}
 		else {
-			glfwSwapInterval(1);
+			glfwSwapInterval(0);
 		}
 		mData.VSync = enabled;
 	}

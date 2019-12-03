@@ -4,6 +4,7 @@
 
 #include "Zero/Core/EventDispatcher.h"
 #include "Zero/Core/Application.h"
+#include "Zero/Core/Profiller.h"
 #include "ImGuiLayer.h"
 
 namespace zr
@@ -19,6 +20,8 @@ namespace zr
 
 	void ImGuiLayer::begin()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -26,6 +29,8 @@ namespace zr
 
 	void ImGuiLayer::end()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2((float)Application::GetWindow().getWidth(), (float)Application::GetWindow().getHeight());
 
@@ -43,6 +48,8 @@ namespace zr
 
 	void ImGuiLayer::onAttach()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -73,6 +80,8 @@ namespace zr
 
 	void ImGuiLayer::onDetach()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();

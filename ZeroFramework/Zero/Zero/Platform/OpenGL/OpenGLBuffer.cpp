@@ -1,5 +1,6 @@
 #include <zr_pch.h>
 
+#include "../../Core/Profiller.h"
 #include "OpenGLBuffer.h"
 
 namespace zr
@@ -33,6 +34,8 @@ namespace zr
 		mId(0),
 		mMaxLayoutIndex(0U)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mId == 0) {
 			GL_ERR_CHECK(glGenBuffers(1, &mId));
 			GL_ERR_CHECK(glBindBuffer(GL_ARRAY_BUFFER, mId));
@@ -42,6 +45,8 @@ namespace zr
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mId != 0U) {
 			GL_ERR_CHECK(glDeleteBuffers(1, &mId));
 			mId = 0U;
@@ -57,11 +62,15 @@ namespace zr
 
 	void OpenGLVertexBuffer::bind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindBuffer(GL_ARRAY_BUFFER, mId));
 	}
 
 	void OpenGLVertexBuffer::unbind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
 
@@ -100,6 +109,8 @@ namespace zr
 		mId(),
 		mCount(count)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mId == 0U) {
 			GL_ERR_CHECK(glGenBuffers(1, &mId));
 			GL_ERR_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mId));
@@ -109,6 +120,8 @@ namespace zr
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mId != 0U) {
 			GL_ERR_CHECK(glDeleteBuffers(1, &mId));
 			mId = 0U;
@@ -117,11 +130,15 @@ namespace zr
 
 	void OpenGLIndexBuffer::bind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mId));
 	}
 
 	void OpenGLIndexBuffer::unbind() const
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	}
 

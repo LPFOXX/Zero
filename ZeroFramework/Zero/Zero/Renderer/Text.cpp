@@ -11,6 +11,7 @@ namespace zr
 {
 	Text::Text() :
 		Movable(),
+		mViewportHeight(0.f),
 		mFont(nullptr),
 		mFontSize(30U),
 		mOutlineThickness(0U),
@@ -23,6 +24,7 @@ namespace zr
 
 	Text::Text(const std::string& string, const std::shared_ptr<Font>& font, unsigned fontSize, unsigned outlineThickness) :
 		Movable(),
+		mViewportHeight(0.f),
 		mFont(font),
 		mFontSize(fontSize),
 		mOutlineThickness(outlineThickness),
@@ -122,7 +124,7 @@ namespace zr
 
 			for (char c : mString) {
 				if (c == ' ') {
-					unsigned adv = mFont->getCharacter(c, mFontSize).Advance;
+					float adv = mFont->getCharacter(c, mFontSize).Advance;
 					outlineXPosition += adv;
 					fillXPosition += adv;
 					lastChar = c;
@@ -142,7 +144,7 @@ namespace zr
 					}
 					case '\t':
 					{
-						unsigned spaceWidth = mFont->getCharacter(' ', mFontSize, mOutlineThickness).Advance;
+						float spaceWidth = mFont->getCharacter(' ', mFontSize, mOutlineThickness).Advance;
 						outlineXPosition += spaceWidth * 4;
 						fillXPosition += spaceWidth * 4;
 						lastChar = ' ';
@@ -180,12 +182,12 @@ namespace zr
 			mQuadSize.y = 0U;
 			float lineWidth = 0.f;
 			unsigned lastChar = 0U;
-			int lastCharAdvance = 0;
-			mMaxVerticalBearing = 0U;
+			float lastCharAdvance = 0.f;
+			mMaxVerticalBearing = 0.f;
 
 			for (char c : mString) {
 				const Font::Character& ch = mFont->getCharacter(c, mFontSize, mOutlineThickness);
-				mQuadSize.y = std::max<unsigned>(mQuadSize.y, ch.Size.y);
+				mQuadSize.y = std::max<float>(mQuadSize.y, ch.Size.y);
 
 				switch (c) {
 					case '\n':
@@ -216,7 +218,7 @@ namespace zr
 				}
 
 				mMaxVerticalBearing = std::max<float>(mMaxVerticalBearing, ch.Bearing.y);
-				mQuadSize.x = std::max<unsigned>(mQuadSize.x, lineWidth);
+				mQuadSize.x = std::max<float>(mQuadSize.x, lineWidth);
 				lastChar = c;
 			}
 			mQuadSize.x -= lastCharAdvance;

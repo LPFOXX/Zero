@@ -5,11 +5,15 @@
 
 #include "Zero/../vendor/sfml/include/SFML/System.hpp"
 
+#define USES_BATCHES 1
+#define COMPUTE_MATRIX_TRANSFORM 1
+
 namespace zr
 {
 	void Renderer2D::Init()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		sData = new Renderer2DStorage;
 		sData->BatchManager = std::make_shared<BatchManager>();
 
@@ -47,20 +51,24 @@ namespace zr
 	void Renderer2D::Shutdown()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		delete sData;
 	}
 
 	void Renderer2D::BeginScene(const Ref<OrthographicCamera>& camera)
 	{
 		ZR_PROFILER_FUNCTION();
+
 		sData->ViewProjectionMatrix = camera->getViewProjectionMatrix();
 		sData->TextureShader->bind();
 		sData->TextureShader->setUniform("uViewProjection", sData->ViewProjectionMatrix);
+		sData->ViewMatrix = camera->getViewMatrix();
 	}
 
 	void Renderer2D::EndScene()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		sData->BatchManager->flush(sData->ViewProjectionMatrix);
 	}
 
@@ -71,26 +79,42 @@ namespace zr
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
+		#if COMPUTE_MATRIX_TRANSFORM
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
-
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
-			transform * glm::vec4( .5f, -.5f, .0f, 1.f),
-			transform * glm::vec4( .5f,  .5f, .0f, 1.f),
+			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
+			transform * glm::vec4(.5f,  .5f, .0f, 1.f),
 			transform * glm::vec4(-.5f,  .5f, .0f, 1.f)
 		};
 
 		Renderer2D::DrawQuad(positions, { color }, { 0, 1, 2, 2, 3, 0 });
+		#else
+
+		const glm::vec4& left = sData->ViewMatrix[0];
+		const glm::vec4& up = sData->ViewMatrix[1];
+
+		glm::vec2 newSize = size * .5f;
+
+		std::vector<glm::vec3> pos{
+			{position.x + (-left.x - up.x) * newSize.x, position.y + (-left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x - up.x) * newSize.x, position.y + (left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x + up.x) * newSize.x, position.y + (left.y + up.y) * newSize.y, position.z},
+			{position.x + (-left.x + up.x) * newSize.x, position.y + (-left.y + up.y) * newSize.y, position.z},
+		};
+
+		Renderer2D::DrawQuad(pos, { color }, { 0, 1, 2, 2, 3, 0 });
+		#endif
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4 & tintingColor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
 	{
 		DrawQuad({ position.x, position.y, 0.f }, size, angle, texture, textureScalingFactor, tintingColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4 & tintingColor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
 	{
-		#define USES_BATCHES 1
+		#if COMPUTE_MATRIX_TRANSFORM
 		#if USES_BATCHES
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
@@ -120,6 +144,27 @@ namespace zr
 
 		sData->QuadVertexArray->bind();
 		RenderCommand::DrawIndexed(sData->QuadVertexArray);
+		#endif
+		#else
+		const glm::vec4& left(sData->ViewMatrix[0]);
+		const glm::vec4& up(sData->ViewMatrix[1]);
+
+		glm::vec2 newSize = size * .5f;
+
+		std::vector<glm::vec3> pos{
+			{position.x + (-left.x - up.x) * newSize.x, position.y + (-left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x - up.x) * newSize.x, position.y + (left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x + up.x) * newSize.x, position.y + (left.y + up.y) * newSize.y, position.z},
+			{position.x + (-left.x + up.x) * newSize.x, position.y + (-left.y + up.y) * newSize.y, position.z},
+		};
+
+		std::vector<glm::vec2> textureCoordinates{
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{1.f, 1.f},
+			{0.f, 1.f},
+		};
+		Renderer2D::DrawQuad(pos, textureCoordinates, { 0, 1, 2, 2, 3, 0 }, texture->getHandle(), tintingColor, textureScalingFactor);
 		#endif
 	}
 

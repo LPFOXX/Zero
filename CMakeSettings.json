@@ -55,6 +55,16 @@
           "name": "BUILD_SHARED_LIBS",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_VERBOSE_MAKEFILE",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "_CRT_SECURE_NO_WARNINGS",
+          "value": "True",
+          "type": "BOOL"
         }
       ]
     },
@@ -146,6 +156,11 @@
         },
         {
           "name": "CMAKE_VERBOSE_MAKEFILE",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "_CRT_SECURE_NO_WARNINGS",
           "value": "True",
           "type": "BOOL"
         }

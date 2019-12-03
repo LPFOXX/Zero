@@ -2,9 +2,10 @@
 
 #include <glad/glad.h>
 
+#include "../..//Core/Profiller.h"
+
 #include "OpenGLVertexArray.h"
 #include "GL_ERR_CHECK.h"
-
 
 namespace zr
 {
@@ -30,6 +31,8 @@ namespace zr
 		VertexArray(),
 		mId(0)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glGenVertexArrays(1, &mId));
 		if (createAndBind) {
 			GL_ERR_CHECK(glBindVertexArray(mId));
@@ -38,6 +41,8 @@ namespace zr
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		if (mId != 0U) {
 			GL_ERR_CHECK(glDeleteVertexArrays(1, &mId));
 			mId = 0U;
@@ -46,6 +51,8 @@ namespace zr
 
 	void OpenGLVertexArray::addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindVertexArray(mId));
 		vertexBuffer->bind();
 
@@ -74,12 +81,7 @@ namespace zr
 				GL_ERR_CHECK(glVertexAttribDivisor(index, element.Divisor));
 			}
 
-			if (element.VectorSize >= 2) {
-				index += element.VectorSize;
-			}
-			else {
-				index++;
-			}
+			index += (element.VectorSize >= 2 ? element.VectorSize : 1);
 		}
 
 		mVertexBuffers.push_back(vertexBuffer);
@@ -87,6 +89,8 @@ namespace zr
 
 	void OpenGLVertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindVertexArray(mId));
 		indexBuffer->bind();
 
@@ -99,11 +103,15 @@ namespace zr
 
 	void OpenGLVertexArray::bind()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindVertexArray(mId));
 	}
 
 	void OpenGLVertexArray::unbind()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		GL_ERR_CHECK(glBindVertexArray(0));
 	}
 

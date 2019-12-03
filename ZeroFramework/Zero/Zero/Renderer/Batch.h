@@ -67,7 +67,7 @@ namespace zr
 
 	private:
 		std::vector<VertexType> mVertices;
-		std::vector<unsigned> mIndices;
+		std::vector<unsigned int> mIndices;
 	};
 	
 	class ColoredVertexBatch : public Batch<BatchVertexTypes::ColoredVertex>
@@ -125,7 +125,6 @@ namespace zr
 
 		virtual bool hasEnoughRoomFor(unsigned textureId, const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const glm::vec4& color) const
 		{
-			ZR_PROFILER_FUNCTION();
 			if (mTextureId != textureId || mColor != color)
 				return false;
 
@@ -134,7 +133,6 @@ namespace zr
 
 		virtual bool hasEnoughRoomFor(unsigned textureId, unsigned verticesCount, const glm::vec4& color) const
 		{
-			ZR_PROFILER_FUNCTION();
 			if (textureId != mTextureId || mColor != color) {
 				return false;
 			}
@@ -144,7 +142,6 @@ namespace zr
 
 		virtual void flush(const Ref<Shader>& shader)
 		{
-			ZR_PROFILER_FUNCTION();
 			Texture2D::ActivateTextureSlot(0, mTextureId);
 			shader->setUniform("uColor", mColor);
 			shader->setUniform("uTextureScalingFactor", mScalingFactor);

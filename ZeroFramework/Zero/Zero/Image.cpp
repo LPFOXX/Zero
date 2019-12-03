@@ -139,7 +139,7 @@ namespace zr
 	bool Image::setPixel(unsigned x, unsigned y, const glm::uvec4& pixelColor)
 	{
 		// origin (0, 0)
-		if (x >= mWidth || x < 0 || y >= mHeight || y < 0) {
+		if (x >= static_cast<unsigned>(mWidth) || x < 0 || y >= static_cast<unsigned>(mHeight) || y < 0) {
 			// Beyond image limit
 			return false;
 		}

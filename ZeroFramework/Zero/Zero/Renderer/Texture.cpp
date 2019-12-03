@@ -73,7 +73,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return std::make_shared<OpenGLTexture2D>();
+				return CreateRef<OpenGLTexture2D>();
 			}
 			case RendererAPI::API::Vulkan:
 			{

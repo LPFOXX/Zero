@@ -274,7 +274,7 @@ namespace zr
 		static Ref<Texture2D> Create(const std::string& filePath, Type type);
 
 	protected:
-		glm::ivec2 mSize;			/**< The texture size. */
+		glm::vec2 mSize;			/**< The texture size. */
 		Type mTextureType;			/**< The type of the texture. */
 		std::string mFilePath;		/**< The path of the texture file. Used to prevent loading it more than once when it is an ASSIMP material texture. */
 		bool mIsSRGBCapable;		/**< Whether this texture is sRGB capable or not. */

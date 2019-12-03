@@ -209,6 +209,8 @@ namespace lp
 
 	void SandboxLayer::onAttach()
 	{
+		ZR_PROFILER_FUNCTION();
+
 	}
 
 	void SandboxLayer::onDetach()

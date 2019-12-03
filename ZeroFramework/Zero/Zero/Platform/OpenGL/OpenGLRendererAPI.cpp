@@ -4,6 +4,7 @@
 #include "GL_ERR_CHECK.h"
 
 #include "OpenGLRendererAPI.h"
+#include "../../Core/Profiller.h"
 
 namespace zr
 {
@@ -20,6 +21,8 @@ namespace zr
 
 	void OpenGLRendererAPI::init()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		setBlendState(true);
 		setDepthTestState(true);
 	}

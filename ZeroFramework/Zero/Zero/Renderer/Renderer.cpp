@@ -18,6 +18,8 @@ namespace zr
 
 	void Renderer::Init()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		RenderCommand::Init();
 		Renderer2D::Init();
 	}

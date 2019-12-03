@@ -1,8 +1,6 @@
-#include "Camera.h"
-#include "Camera.h"
-#include "Camera.h"
 #include <zr_pch.h>
 
+#include "Zero/Core/Profiller.h"
 #include "Camera.h"
 
 namespace zr
@@ -57,12 +55,16 @@ namespace zr
 
 	void OrthographicCamera::setProjection(float left, float right, float bottom, float top)
 	{
+		ZR_PROFILER_FUNCTION();
+
 		mProjectionMatrix = glm::ortho(left, right, bottom, top, -1.f, 1.f);
 		mViewProjectionMatrix = mProjectionMatrix * mViewMatrix;
 	}
 
 	void OrthographicCamera::recomputeMatrices()
 	{
+		ZR_PROFILER_FUNCTION();
+
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), mPosition) *
 			glm::rotate(glm::mat4(1.f), glm::radians(mRotationAngle), glm::vec3(0.f, 0.f, 1.f));
 

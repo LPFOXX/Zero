@@ -27,7 +27,6 @@ namespace zr
 
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
 		{
-			ZR_PROFILER_FUNCTION();
 			// search for a batch with enough storage room
 			auto& it = std::find_if(mColoredVertexBatches.begin(), mColoredVertexBatches.end(), [&vertices](const ColoredVertexBatch& batch) {
 				return batch.hasEnoughRoomFor(vertices);
@@ -48,7 +47,6 @@ namespace zr
 
 		void addVertices(const std::vector<BatchVertexTypes::ExtendedVertex>& vertices, const std::vector<unsigned>& verticesIndices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f))
 		{
-			ZR_PROFILER_FUNCTION();
 			if (mExtendedVertexBatches.empty()) {
 				// No batch at all: create one
 				ExtendedVertexBatch evb(textureId, color, scalingFactor);

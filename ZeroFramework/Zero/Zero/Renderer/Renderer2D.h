@@ -13,6 +13,7 @@ namespace zr
 	{
 		Ref<VertexArray> QuadVertexArray;
 		glm::mat4 ViewProjectionMatrix;
+		glm::mat4 ViewMatrix;
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 		Ref<BatchManager> BatchManager;
