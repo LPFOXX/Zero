@@ -112,14 +112,14 @@ namespace zr
 		}
 	}
 
-	unsigned Font::getTextureWidth(unsigned fontSize) const
+	float Font::getTextureWidth(unsigned fontSize) const
 	{
 		const Page& page = mPages[fontSize];
 
 		if (page.Texture) {
 			return page.Texture->getWidth();
 		}
-		return 0;
+		return 0.f;
 	}
 
 	const Ref<Texture2D>& Font::getTexture(unsigned fontSize) const
@@ -187,7 +187,7 @@ namespace zr
 
 		character.Size = glm::ivec2(width, height);
 		character.Bearing = glm::ivec2(bitmapleft, bitmapTop);
-		character.Advance = mFontFace->glyph->advance.x >> 6;
+		character.Advance = static_cast<float>(mFontFace->glyph->advance.x >> 6);
 
 		if (codePoint != ' ') {
 			const unsigned char* glyphBitmap = bitmap.buffer;
@@ -270,11 +270,11 @@ namespace zr
 
 	bool Font::addCharacterToTexture(Page& page, Character& character, unsigned outlineThickness) const
 	{
-		glm::uvec2 characterOffset(0, 0);
+		glm::vec2 characterOffset(0.f, 0.f);
 
-		unsigned characterWidth = character.Size.x;
-		unsigned characterHeight = character.Size.y;
-		unsigned padding = 2U + outlineThickness * 2U; // padding to apply around the character
+		float characterWidth = character.Size.x;
+		float characterHeight = character.Size.y;
+		float padding = 2.f + (float)outlineThickness * 2.f; // padding to apply around the character
 
 		Rows& rows = page.Rows;
 		Ref<Texture2D>& texture = page.Texture;
@@ -284,17 +284,17 @@ namespace zr
 			Row row;
 
 			// Set its vertical offset
-			row.VerticalOffset = 0;
+			row.VerticalOffset = 0.f;
 
 			// Set its size based on the character size + the padding
-			unsigned rowHeight = characterHeight + 2 * padding;
+			float rowHeight = characterHeight + 2 * padding;
 			row.Height = rowHeight;
 
 			// Set the vertical offset of the next row
 			page.NextRowVerticalOffset = rowHeight;
 
 			// Add the character to the texture
-			texture->update(mPixelBuffer, characterWidth, characterHeight, padding, padding);
+			texture->update(mPixelBuffer, (unsigned)characterWidth, (unsigned)characterHeight, (unsigned)padding, (unsigned)padding);
 
 			// Save character position in texture
 			characterOffset.x = padding; // Horizontal offset from texture origin
@@ -302,13 +302,13 @@ namespace zr
 
 			character.CharacterRectOrigin = characterOffset;
 
-			row.LastHorizontalOffset = characterWidth + padding * 2;
+			row.LastHorizontalOffset = characterWidth + padding * 2.f;
 			rows.push_back(row);
 		}
 		else {
 			// Check for best row
-			unsigned textureWidth = texture->getWidth();
-			unsigned textureHeight = texture->getHeight();
+			float textureWidth = texture->getWidth();
+			float textureHeight = texture->getHeight();
 
 			auto it = rows.begin();
 			auto end = rows.end();
@@ -318,29 +318,29 @@ namespace zr
 
 				// Try to add the character to this row
 				// The character doesn't fit the row because the row is too small
-				if (row.Height < (characterHeight + 2 * padding)) {
+				if (row.Height < (characterHeight + 2.f * padding)) {
 					continue;
 				}
 
 				// Try to add the character to the end of the row
 				// There's no space to the character at the end of the row
-				if (row.LastHorizontalOffset + characterWidth + 2 * padding > textureWidth) {
+				if (row.LastHorizontalOffset + characterWidth + 2.f * padding > textureWidth) {
 					continue;
 				}
 
 				// All tests passed for this row
 				// Add the character to it
-				unsigned rowVerticalOffset = row.VerticalOffset;
-				unsigned rowHorizontalOffset = row.LastHorizontalOffset;
+				float rowVerticalOffset = row.VerticalOffset;
+				float rowHorizontalOffset = row.LastHorizontalOffset;
 
-				texture->update(mPixelBuffer, characterWidth, characterHeight, rowHorizontalOffset + padding, rowVerticalOffset + padding);
+				texture->update(mPixelBuffer, (unsigned)characterWidth, (unsigned)characterHeight, (unsigned)(rowHorizontalOffset + padding), (unsigned)(rowVerticalOffset + padding));
 
 				characterOffset.x = rowHorizontalOffset + padding;
 				characterOffset.y = rowVerticalOffset + padding;
 
 				character.CharacterRectOrigin = characterOffset;
 
-				row.LastHorizontalOffset += characterWidth + 2 * padding;
+				row.LastHorizontalOffset += characterWidth + 2.f * padding;
 
 				break;
 			}
@@ -350,19 +350,20 @@ namespace zr
 				// to add the character to.
 
 				// Try to add a new row at the bottom of the texture
-				if (page.NextRowVerticalOffset + characterHeight + 2 * padding > textureHeight) {
-					// The texture has no more space to the character to be added
+				if (page.NextRowVerticalOffset + characterHeight + 2.f * padding > textureHeight) {
+					// The texture has no more space for the new character to be added
 
-					unsigned maxTextureSize = Texture2D::GetMaximumSize();
-					unsigned textureSize = texture->getHeight();	// Texture is always square
+					float maxTextureSize = (float)Texture2D::GetMaximumSize();
+					float textureSize = texture->getHeight();	// Texture is always square
 
-					if (maxTextureSize >= textureSize * 2) {
+					float newTextureSize = textureSize * 2.f;
+					if (maxTextureSize >= newTextureSize) {
 						// Make the texture twice as bigger
 						Image oldTextureImage;
 						texture->loadToImage(oldTextureImage);
 
 						Image newTextureImage;
-						newTextureImage.create(textureSize * 2, textureSize * 2, glm::uvec4(255, 255, 255, 0));
+						newTextureImage.create((unsigned)newTextureSize, (unsigned)newTextureSize, glm::uvec4(255, 255, 255, 0));
 
 						texture = Texture2D::Create();
 						texture->loadFromImage(newTextureImage);
@@ -385,11 +386,11 @@ namespace zr
 					const Row& lastRow = rows.back();
 
 					row.VerticalOffset = page.NextRowVerticalOffset;
-					row.Height = characterHeight + 2 * padding;
-					row.LastHorizontalOffset = characterWidth + 2 * padding;
+					row.Height = characterHeight + 2.f * padding;
+					row.LastHorizontalOffset = characterWidth + 2.f * padding;
 
 					// Set the character offset position
-					unsigned newRowVerticalOffset = lastRow.VerticalOffset + lastRow.Height;
+					float newRowVerticalOffset = lastRow.VerticalOffset + lastRow.Height;
 					characterOffset.x = padding;
 					characterOffset.y = newRowVerticalOffset + padding;
 					character.CharacterRectOrigin = characterOffset;
@@ -400,7 +401,7 @@ namespace zr
 					// Update the vertical offset of the next row
 					page.NextRowVerticalOffset += row.Height;
 
-					texture->update(mPixelBuffer, characterWidth, characterHeight, padding, row.VerticalOffset + padding);
+					texture->update(mPixelBuffer, (unsigned)characterWidth, (unsigned)characterHeight, (unsigned)padding, (unsigned)(row.VerticalOffset + padding));
 				}
 			}
 		}

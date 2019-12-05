@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#pragma warning(disable:26451)
+#pragma warning(disable:6262)
+#endif
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -54,16 +60,16 @@ namespace zr
 			*
 			*/
 			Row() :
-				VerticalOffset(0U),
-				LastHorizontalOffset(0U),
-				Height(0U)
+				VerticalOffset(0.f),
+				LastHorizontalOffset(0.f),
+				Height(0.f)
 			{
 
 			}
 
-			unsigned VerticalOffset;			/**< Vertical offset of the row counting from texture origin. */
-			unsigned LastHorizontalOffset;		/**< Offset of the last glyph in the row. Next glyph will be inserted from here. */
-			unsigned Height;					/**< Height of the row. */
+			float VerticalOffset;			/**< Vertical offset of the row counting from texture origin. */
+			float LastHorizontalOffset;		/**< Offset of the last glyph in the row. Next glyph will be inserted from here. */
+			float Height;					/**< Height of the row. */
 		};
 
 		/**
@@ -100,7 +106,7 @@ namespace zr
 			Characters CharacterMap;			/**< A map containg character information that are already loaded. */
 			Ref<Texture2D> Texture;				/**< The texture containing the glyphs loaded from the font file. */
 			Rows Rows;							/**< Information about the rows of glyphs in the texture. */
-			unsigned NextRowVerticalOffset;		/**< The offset of the next available row to add glyphs into in the texture. */
+			float NextRowVerticalOffset;		/**< The offset of the next available row to add glyphs into in the texture. */
 		};
 
 		/**
@@ -154,7 +160,7 @@ namespace zr
 		* @return The width of the texture when it exists, 0 when it doesn't.
 		*
 		*/
-		unsigned getTextureWidth(unsigned fontSize) const;
+		float getTextureWidth(unsigned fontSize) const;
 
 		/**
 		* @brief Gets a reference to the texture that contains the character set of the given font size.

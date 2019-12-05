@@ -2,6 +2,10 @@
 
 #include "Core.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:26495)
+#endif
+
 #include "../../vendor/spdlog/include/spdlog/spdlog.h"
 #include "../../vendor/spdlog/include/spdlog/fmt/ostr.h"
 #include "../../vendor/spdlog/include/spdlog/sinks/stdout_color_sinks.h"

@@ -124,8 +124,8 @@ namespace zr
 			GL_ERR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mIsRepeated ? GL_REPEAT : GL_CLAMP_TO_EDGE));
 
 			// Update texture width and height attributes
-			mSize.x = width;
-			mSize.y = height;
+			mSize.x = (float)width;
+			mSize.y = (float)height;
 
 			return true;
 		}

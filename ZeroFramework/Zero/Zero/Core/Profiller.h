@@ -9,13 +9,27 @@
 #include "Clock.h"
 
 #ifdef ZR_PROFILING
-	#if defined(__FUNCSIG__)
-		#define ZR_FUNC_SIG __FUNCSIG__
-	#elif defined(__PRETTY_FUNCTION__)
+	// Resolve which function signature macro will be used. Note that this only
+	// is resolved when the (pre)compiler starts, so the syntax highlighting
+	// could mark the wrong one in your editor!
+	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
 		#define ZR_FUNC_SIG __PRETTY_FUNCTION__
-	#else
+	#elif defined(__DMC__) && (__DMC__ >= 0x810)
+		#define ZR_FUNC_SIG __PRETTY_FUNCTION__
+	#elif defined(__FUNCSIG__)
+		#define ZR_FUNC_SIG __FUNCSIG__
+	#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
 		#define ZR_FUNC_SIG __FUNCTION__
+	#elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
+		#define ZR_FUNC_SIG __FUNC__
+	#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
+		#define ZR_FUNC_SIG __func__
+	#elif defined(__cplusplus) && (__cplusplus >= 201103)
+		#define ZR_FUNC_SIG __func__
+	#else
+		#define ZR_FUNC_SIG "HZ_FUNC_SIG unknown!"
 	#endif
+
 
 	#define GLUE(a, b) a##b
 	#define ZR_PROFILER_BEGIN_SESSION(name, filepath) zr::Profiller::Get().beginSession(name, filepath)

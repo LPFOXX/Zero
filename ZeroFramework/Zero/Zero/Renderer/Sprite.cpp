@@ -160,7 +160,7 @@ namespace zr
 		std::memcpy(&mVertices[0], vertices, 16 * sizeof(float));
 
 		mSpriteVAO->bind();
-		mSpriteVAO->getVertexBuffers()[0]->setData(&mVertices[0], mVertices.size() * sizeof(float));
+		mSpriteVAO->getVertexBuffers()[0]->setData(&mVertices[0], static_cast<unsigned>(mVertices.size() * sizeof(float)));
 	}
 
 	void Sprite::onPositionUpdate()
@@ -190,10 +190,10 @@ namespace zr
 
 	void Sprite::setRect(int xPosition, int yPosition, unsigned width, unsigned height)
 	{
-		mPosition.x = xPosition;
-		mPosition.y = yPosition;
-		mSize.x = width;
-		mSize.y = height;
+		mPosition.x = (float)xPosition;
+		mPosition.y = (float)yPosition;
+		mSize.x = (float)width;
+		mSize.y = (float)height;
 
 		//mBorder.setPosition(mPosition);
 		//mBorder.setSize(mSize);
@@ -210,8 +210,8 @@ namespace zr
 	void Sprite::setTextureCoordinates(unsigned texPositionX, unsigned texPositionY, unsigned width, unsigned height)
 	{
 		if (mTexture != nullptr) {
-			unsigned textureWidth = mTexture->getWidth();;
-			unsigned textureHeight = mTexture->getHeight();
+			float textureWidth = mTexture->getWidth();;
+			float textureHeight = mTexture->getHeight();
 
 			// These coordinates are switched vertically in order to get the correct texture coordinates out of the
 			// sprite atlas.
