@@ -72,12 +72,17 @@ namespace zr
 		sData->BatchManager->flush(sData->ViewProjectionMatrix);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y, 0.f }, size, angle, color);
+		DrawRotatedQuad({ position.x, position.y, 0.f }, size, angle, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
+	{
+		DrawQuad({ position.x, position.y, 0.f }, size, color);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
 		#if COMPUTE_MATRIX_TRANSFORM
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
@@ -107,12 +112,47 @@ namespace zr
 		#endif
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y, 0.f }, size, angle, texture, textureScalingFactor, tintingColor);
+		#if COMPUTE_MATRIX_TRANSFORM
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		std::vector<glm::vec3> positions{
+			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
+			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
+			transform * glm::vec4(.5f,  .5f, .0f, 1.f),
+			transform * glm::vec4(-.5f,  .5f, .0f, 1.f)
+		};
+
+		Renderer2D::DrawQuad(positions, { color }, { 0, 1, 2, 2, 3, 0 });
+		#else
+
+		const glm::vec4& left = sData->ViewMatrix[0];
+		const glm::vec4& up = sData->ViewMatrix[1];
+
+		glm::vec2 newSize = size * .5f;
+
+		std::vector<glm::vec3> pos{
+			{position.x + (-left.x - up.x) * newSize.x, position.y + (-left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x - up.x) * newSize.x, position.y + (left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x + up.x) * newSize.x, position.y + (left.y + up.y) * newSize.y, position.z},
+			{position.x + (-left.x + up.x) * newSize.x, position.y + (-left.y + up.y) * newSize.y, position.z},
+		};
+
+		Renderer2D::DrawQuad(pos, { color }, { 0, 1, 2, 2, 3, 0 });
+		#endif
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
+	{
+		DrawRotatedQuad({ position.x, position.y, 0.f }, size, angle, texture, textureScalingFactor, tintingColor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
+	{
+		DrawQuad({ position.x, position.y, 0.f }, size, texture, textureScalingFactor, tintingColor);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
 	{
 		#if COMPUTE_MATRIX_TRANSFORM
 		#if USES_BATCHES
@@ -138,6 +178,62 @@ namespace zr
 		sData->TextureShader->setUniform("uTintingColor", tintingColor);
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		sData->TextureShader->setUniform("uTransform", transform);
+
+		texture->bind();
+
+		sData->QuadVertexArray->bind();
+		RenderCommand::DrawIndexed(sData->QuadVertexArray);
+		#endif
+		#else
+		const glm::vec4& left(sData->ViewMatrix[0]);
+		const glm::vec4& up(sData->ViewMatrix[1]);
+
+		glm::vec2 newSize = size * .5f;
+
+		std::vector<glm::vec3> pos{
+			{position.x + (-left.x - up.x) * newSize.x, position.y + (-left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x - up.x) * newSize.x, position.y + (left.y - up.y) * newSize.y, position.z},
+			{position.x + (left.x + up.x) * newSize.x, position.y + (left.y + up.y) * newSize.y, position.z},
+			{position.x + (-left.x + up.x) * newSize.x, position.y + (-left.y + up.y) * newSize.y, position.z},
+		};
+
+		std::vector<glm::vec2> textureCoordinates{
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{1.f, 1.f},
+			{0.f, 1.f},
+		};
+		Renderer2D::DrawQuad(pos, textureCoordinates, { 0, 1, 2, 2, 3, 0 }, texture->getHandle(), tintingColor, textureScalingFactor);
+		#endif
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor, const glm::vec4& tintingColor)
+	{
+		#if COMPUTE_MATRIX_TRANSFORM
+		#if USES_BATCHES
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		std::vector<glm::vec3> positions{
+			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
+			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
+			transform * glm::vec4(.5f,  .5f, .0f, 1.f),
+			transform * glm::vec4(-.5f,  .5f, .0f, 1.f)
+		};
+
+		std::vector<glm::vec2> textureCoordinates{
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{1.f, 1.f},
+			{0.f, 1.f},
+		};
+		Renderer2D::DrawQuad(positions, textureCoordinates, { 0, 1, 2, 2, 3, 0 }, texture->getHandle(), tintingColor, textureScalingFactor);
+		#else
+		sData->TextureShader->bind();
+		sData->TextureShader->setUniform("uTextureScalingFactor", textureScalingFactor);
+		//sData->WhiteTexture->bind();
+		sData->TextureShader->setUniform("uTintingColor", tintingColor);
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
 		sData->TextureShader->setUniform("uTransform", transform);
 
 		texture->bind();

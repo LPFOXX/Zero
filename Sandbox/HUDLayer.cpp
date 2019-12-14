@@ -138,22 +138,22 @@ namespace lp
 						for (unsigned j = 0; j < size; ++j) {
 							glm::vec4 quadColor(float(i) / size, float(j) / size, ((float(i) / size) + (float(j) / size)) / 2.f, 1.f);
 							//float rotation = time.asSeconds() + (float(i) * 45.f) + (float(j) * 90.f);
-							zr::Renderer2D::DrawQuad({ i, j }, { .9f, .9f }, 0, quadColor);
+							zr::Renderer2D::DrawQuad({ i, j }, { .9f, .9f }, quadColor);
 						}
 					}
 				}
 
 				{
 					PROFILE_SCOPE("Draw 2 Quads");
-					zr::Renderer2D::DrawQuad({ 0.5f, -.5f }, { .5f, .75f }, -time.asSeconds() * 30.f, { .2f, .3f, .8f, 1.f });
-					zr::Renderer2D::DrawQuad({ -1.f, 0.f }, { .8f, .8f }, time.asSeconds() * 45.f, { .8f, .2f, .3f, 1.f });
+					zr::Renderer2D::DrawRotatedQuad({ 0.5f, -.5f }, { .5f, .75f }, -time.asSeconds() * 30.f, { .2f, .3f, .8f, 1.f });
+					zr::Renderer2D::DrawRotatedQuad({ -1.f, 0.f }, { .8f, .8f }, time.asSeconds() * 45.f, { .8f, .2f, .3f, 1.f });
 				}
 
 				{
 					PROFILE_SCOPE("Draw 2 Textures");
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, 0, mCheckerBoardTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
+					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, mCheckerBoardTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
 					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, 0, mLogoTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
+					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
 				}
 
 				/*{
