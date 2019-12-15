@@ -16,7 +16,7 @@ namespace lp
 		virtual void onAttach() override;
 		virtual void onDetach() override;
 		virtual void onUpdate(const zr::Time& elapsedTime) override;
-		virtual void OnImGuiRender() override;
+		virtual void onImGuiRender() override;
 		virtual void onEvent(zr::Event& e) override;
 
 	private:

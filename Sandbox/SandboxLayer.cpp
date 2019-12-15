@@ -294,7 +294,7 @@ namespace lp
 		mLastDeltaTime = elapsedTime;
 	}
 
-	void SandboxLayer::OnImGuiRender()
+	void SandboxLayer::onImGuiRender()
 	{
 		ImGui::Begin("Settings");
 		{

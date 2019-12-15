@@ -91,7 +91,7 @@ namespace zr
 	{
 	}
 
-	void ImGuiLayer::OnImGuiRender()
+	void ImGuiLayer::onImGuiRender()
 	{
 		static bool isOpen = true;
 		static bool isDockOpen = true;

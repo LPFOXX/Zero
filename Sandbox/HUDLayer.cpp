@@ -170,7 +170,7 @@ namespace lp
 		//mGame->draw(mCameraController->getCamera()->getViewProjectionMatrix());
 	}
 
-	void HUDLayer::OnImGuiRender()
+	void HUDLayer::onImGuiRender()
 	{
 		ZR_PROFILER_FUNCTION();
 		ImGui::Begin("Settings");
