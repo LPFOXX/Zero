@@ -14,7 +14,9 @@ namespace zr
 		virtual void onAttach() = 0;
 		virtual void onDetach() = 0;
 		virtual void onUpdate(const Time& elapsedTime) = 0;
-		virtual void onImGuiRender() = 0;
+		virtual void onImGuiRender()
+		{
+		}
 		virtual void onEvent(Event& e) = 0;
 
 		inline const std::string& getName();

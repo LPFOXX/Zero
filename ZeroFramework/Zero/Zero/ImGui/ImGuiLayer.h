@@ -22,6 +22,7 @@ namespace zr
 		virtual void onEvent(Event& e) override;
 
 	private:
+		// ------------ Events ---------------
 		bool onMouseButtonPressedEvent(MouseButtonPressedEvent& e);
 		bool onMouseButtonReleasedEvent(MouseButtonReleasedEvent& e);
 		bool onMouseMovedEvent(MouseMoveEvent& e);
@@ -30,6 +31,9 @@ namespace zr
 		bool onKeyReleasedEvent(KeyReleasedEvent& e);
 		bool onKeyTypedEvent(KeyTypedEvent& e);
 		bool onWindowResizeEvent(WindowResizeEvent& e);
+
+		void initDockSpace();
+		void showMainMenuBar();
 
 	private:
 		float mTime = 0.0f;

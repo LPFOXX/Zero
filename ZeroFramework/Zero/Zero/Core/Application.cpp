@@ -114,8 +114,8 @@ namespace zr
 			{
 				ZR_PROFILER_SCOPE("Layer onImGuiRender");
 
-				for (auto begin = mLayerStack.rbegin(), end = mLayerStack.rend(); begin != end; ++begin) {
-					(*begin)->onImGuiRender();
+				for (auto layer : mLayerStack) {
+					layer->onImGuiRender();
 				}
 				mImGuiLayer->end();
 			}
