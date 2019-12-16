@@ -1,6 +1,8 @@
 #include <zr_pch.h>
 
 #include "GL_ERR_CHECK.h"
+#include "Zero/Renderer/RenderCommand.h"
+#include "Zero/Renderer/Renderer2D.h"
 #include "OpenGLFramebuffer.h"
 
 namespace zr
@@ -91,21 +93,25 @@ namespace zr
 
 	void OpenGLFramebuffer::draw() const
 	{
+		blit();
+
+		GL_ERR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+
+		mScreenShader->bind();
+		mScreenShader->setUniform("screenTexture", 0);
+		Texture2D::ActivateTextureSlot(0U, mUnisampledFrambuffer->getTextureHandle());
+
+		mQuadVAO->bind();
+		RenderCommand::DrawIndexed(mQuadVAO);
+	}
+
+	void OpenGLFramebuffer::blit() const
+	{
 		if (mIsMSAAactivated) {
 			GL_ERR_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mMultisampledFramebuffer->getHandle()));
 			GL_ERR_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mUnisampledFrambuffer->getHandle()));
 			GL_ERR_CHECK(glBlitFramebuffer(0, 0, mProperties.Width, mProperties.Height, 0, 0, mProperties.Width, mProperties.Height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-
-			GL_ERR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 		}
-
-		mScreenShader->bind();
-		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_2D, mUnisampledFrambuffer->getTextureHandle()));
-		GL_ERR_CHECK(glActiveTexture(GL_TEXTURE0));
-		mScreenShader->setUniform("screenTexture", 0);
-
-		mQuadVAO->bind();
-		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 	}
 
 	void OpenGLFramebuffer::BindDefault()
@@ -126,5 +132,10 @@ namespace zr
 	void OpenGLFramebuffer::unbind()
 	{
 		GL_ERR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+	}
+
+	unsigned OpenGLFramebuffer::getTextureHandle() const
+	{
+		return mUnisampledFrambuffer->getTextureHandle();
 	}
 }

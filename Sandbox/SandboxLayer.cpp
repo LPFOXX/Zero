@@ -81,7 +81,7 @@ namespace lp
 		fbp.Height = 600;
 		fbp.MSSALevel = 8;
 
-		mFramebuffer.reset(zr::Framebuffer::Create(fbp));
+		mFramebuffer = zr::Framebuffer::Create(fbp);
 
 		float vertices[3 * 7]{
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -335,11 +335,6 @@ namespace lp
 	{
 		mOrthographicCameraController->onEvent(e);
 		mPerspectiveCameraController->onEvent(e);
-
-		if (e.getType() == zr::EventType::WindowResize) {
-			//auto& resizeEvent = (zr::WindowResizeEvent&) e;
-			//mOrthographicCameraController->setZoomLevel(resizeEvent.fe)
-		}
 
 		if (e.getType() == zr::EventType::MouseMove) {
 			if (zr::Input::isKeyPressed(zr::Keyboard::X)) {

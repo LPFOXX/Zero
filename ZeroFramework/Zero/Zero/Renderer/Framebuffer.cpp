@@ -39,7 +39,7 @@ namespace zr
 		}
 	}
 
-	Framebuffer* Framebuffer::Create(const FramebufferProperties& props)
+	Ref<Framebuffer> Framebuffer::Create(const FramebufferProperties& props)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:
@@ -52,7 +52,7 @@ namespace zr
 			}
 			case RendererAPI::API::OpenGL:
 			{
-				return new OpenGLFramebuffer(props);
+				return CreateRef<OpenGLFramebuffer>(props);
 			}
 			case RendererAPI::API::Vulkan:
 			{

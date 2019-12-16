@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Zero/Core/Core.h"
+
 namespace zr
 {
 	class Framebuffer
@@ -47,10 +49,13 @@ namespace zr
 		static void BindDefault();
 
 		virtual void draw() const = 0;
+		virtual void blit() const = 0;
 
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
 
-		static Framebuffer* Create(const FramebufferProperties& props = FramebufferProperties());	
+		virtual unsigned getTextureHandle() const = 0;
+
+		static Ref<Framebuffer> Create(const FramebufferProperties& props = FramebufferProperties());	
 	};
 };

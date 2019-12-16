@@ -26,7 +26,6 @@ namespace zr
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-
 		initDockSpace();
 	}
 

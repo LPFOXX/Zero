@@ -63,6 +63,18 @@ namespace zr
 		sData->TextureShader->bind();
 		sData->TextureShader->setUniform("uViewProjection", sData->ViewProjectionMatrix);
 		sData->ViewMatrix = camera->getViewMatrix();
+		sData->Framebuffer = nullptr;
+	}
+
+	void Renderer2D::BeginScene(const Ref<OrthographicCamera>& camera, const Ref<Framebuffer>& framebuffer)
+	{
+		ZR_PROFILER_FUNCTION();
+
+		sData->ViewProjectionMatrix = camera->getViewProjectionMatrix();
+		sData->TextureShader->bind();
+		sData->TextureShader->setUniform("uViewProjection", sData->ViewProjectionMatrix);
+		sData->ViewMatrix = camera->getViewMatrix();
+		sData->Framebuffer = framebuffer;
 	}
 
 	void Renderer2D::EndScene()
@@ -70,6 +82,10 @@ namespace zr
 		ZR_PROFILER_FUNCTION();
 
 		sData->BatchManager->flush(sData->ViewProjectionMatrix);
+
+		if (sData->Framebuffer != nullptr) {
+			sData->Framebuffer->blit();
+		}
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color)

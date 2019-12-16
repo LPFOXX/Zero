@@ -35,14 +35,15 @@ namespace zr
 		OpenGLFramebuffer(const FramebufferProperties& props);
 		virtual ~OpenGLFramebuffer();
 
+		// Inherited via Framebuffer
 		virtual void draw() const override;
+		virtual void blit() const override;
+		virtual void bind() override;
+		virtual void unbind() override;
+		virtual unsigned getTextureHandle() const override;
 
 	public:
 		static void BindDefault();
-
-		// Inherited via Framebuffer
-		virtual void bind() override;
-		virtual void unbind() override;
 
 	private:
 		class MultisampledFramebuffer

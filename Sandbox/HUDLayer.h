@@ -425,13 +425,16 @@ namespace lp
 
 	private:
 		std::shared_ptr<zr::OrthographicCameraController> mCameraController;
+		bool mEditViewCanReceiveInput;
 		std::shared_ptr<zr::Font> mFont;
 		std::shared_ptr<zr::Text> mText;
+		zr::Ref<zr::Framebuffer> mFramebuffer;
 		zr::Ref<zr::Texture2D> mCheckerBoardTexture;
 		zr::Ref<zr::Texture2D> mLogoTexture;
 		zr::Ref<zr::Texture2D> mOceanTexture;
 
 		std::vector<zr::ProfileResult> mProfileResults;
+
 
 
 		// Game things

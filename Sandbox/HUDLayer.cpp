@@ -3,14 +3,21 @@
 #include <numeric>
 
 #include "HUDLayer.h"
+#include "Zero/vendor/imgui/imgui_internal.h"
 
 namespace lp
 {
 	static unsigned size = 25;
 
+	void editViewSizeCallback(ImGuiSizeCallbackData* data)
+	{
+		ZR_IMGUI_CONSOLE_INFO("Window Current Size (%.2f, %.2f) -> Window Desired Size (%.2f, %.2f)", data->CurrentSize.x, data->CurrentSize.y, data->DesiredSize.x, data->DesiredSize.y);
+	}
+
 	HUDLayer::HUDLayer() :
 		zr::Layer("HUDLayer"),
 		mCameraController(nullptr),
+		mEditViewCanReceiveInput(false),
 		mFont(nullptr),
 		mText(nullptr),
 		mGame(nullptr)
@@ -26,6 +33,12 @@ namespace lp
 	void HUDLayer::onAttach()
 	{
 		ZR_PROFILER_FUNCTION();
+
+		zr::Framebuffer::FramebufferProperties props;
+		props.Width = 1280;
+		props.Height = 600;
+		props.MSSALevel = 8;
+		mFramebuffer = zr::Framebuffer::Create(props);
 
 		mCheckerBoardTexture = zr::Texture2D::Create();
 		mCheckerBoardTexture->loadFromFile("resources/textures/Checkerboard.png", true);
@@ -119,17 +132,20 @@ namespace lp
 		PROFILE_SCOPE("HUDLayer::onUpdate");
 		{
 			PROFILE_SCOPE("CameraController::onUpdate");
-			mCameraController->onUpdate(elapsedTime);
+			if (mEditViewCanReceiveInput) {
+				mCameraController->onUpdate(elapsedTime);
+			}
 		}
 
 		mGame->update();
 
-		zr::RenderCommand::SetClearColor(0.f, 0.f, 0.f, 1.f);
+		mFramebuffer->bind();
 		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
+		zr::RenderCommand::SetClearColor(.3f, .3f, .8f, 1.f);
 
 		{
 			ZR_PROFILER_SCOPE("Renderer Draw");
-			zr::Renderer2D::BeginScene(mCameraController->getCamera());
+			zr::Renderer2D::BeginScene(mCameraController->getCamera(), mFramebuffer);
 			{
 				const zr::Time& time = zr::Application::GetTime();
 				{
@@ -151,9 +167,9 @@ namespace lp
 
 				{
 					PROFILE_SCOPE("Draw 2 Textures");
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, mCheckerBoardTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
+					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, mCheckerBoardTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
 					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 20.f, 20.f }, { .2f, .3f, .8f, .5f });
+					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
 				}
 
 				/*{
@@ -166,20 +182,23 @@ namespace lp
 				zr::Renderer2D::EndScene();
 			}
 		}
-		////zr::Renderer::Submit(mSprite);
+		zr::Framebuffer::BindDefault();
+		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color);
+		zr::RenderCommand::SetClearColor(.3f, .3f, 0.3f, 1.f);
+
 		//mGame->draw(mCameraController->getCamera()->getViewProjectionMatrix());
 	}
 
 	void HUDLayer::onImGuiRender()
 	{
 		ZR_PROFILER_FUNCTION();
+
 		ImGui::Begin("Settings");
 		{
 			static glm::vec2 fpsTextPosition(mText->getPosition());
 			if (ImGui::DragFloat2("FPS text Position", &fpsTextPosition[0])) {
 				mText->setPosition(fpsTextPosition);
 			}
-
 
 			ImGui::DragInt("Size", reinterpret_cast<int*>(&size), 1.f, 1, 2000000);
 			ImGui::Text("%i vertices", size * size * 4);
@@ -194,12 +213,47 @@ namespace lp
 
 			ImGui::End();
 		}
+
+		zr::Window& window = zr::Application::GetWindow();
+		ImGui::SetNextWindowSize(ImVec2(.66f * window.getWidth(), .66f * window.getHeight()), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(.66f * window.getWidth(), .66f * window.getHeight()), ImVec2(.8f * window.getWidth(), .8f * window.getHeight()));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
+		ImGui::Begin("View##edit_view", (bool*)false, ImGuiWindowFlags_NoCollapse);
+		{
+			auto windowFound = ImGui::FindWindowByName("View##edit_view");
+			if (windowFound) {
+				ImGuiContext* context = ImGui::GetCurrentContext();
+				mEditViewCanReceiveInput = context && context->HoveredWindow && windowFound->ID == context->HoveredWindow->ID && !windowFound->Collapsed;
+			}
+			else {
+				mEditViewCanReceiveInput = false;
+			}
+
+			ImVec2& pos = ImGui::GetCursorScreenPos();
+			ImVec2 pos0 = ImGui::GetWindowContentRegionMin();
+			ImVec2 pos1 = ImGui::GetWindowContentRegionMax();
+
+			//ImVec2 size(pos1.x - pos0.x, pos1.y - pos0.y);
+			ImVec2 size(pos1.x - pos0.x, pos1.y - pos0.y);
+
+			//ImGui::Text("WindowPosition: (%f, %f)\nPos0: (%f, %f)\nPos1: (%f, %f)", pos.x, pos.y, pos0.x, pos0.y, pos1.x, pos1.y);
+
+			ImGui::GetWindowDrawList()->AddImage((void*)(unsigned*)mFramebuffer->getTextureHandle(), pos, ImVec2(pos.x + size.x, pos.y + size.y), { 0.f, 1.f }, { 1.f, 0.f });
+			ImGui::End();
+		}
+		ImGui::PopStyleVar();
 	}
 
 	void HUDLayer::onEvent(zr::Event& e)
 	{
 		ZR_PROFILER_FUNCTION();
-		mCameraController->onEvent(e);
+		if (e.getType() == zr::EventType::WindowResize) {
+			mCameraController->onEvent(e);
+		}
+		else if (mEditViewCanReceiveInput) {
+			mCameraController->onEvent(e);
+		}
+
 
 		if (e.getType() == zr::EventType::WindowResize) {
 			const zr::WindowResizeEvent& resizeEvent = dynamic_cast<zr::WindowResizeEvent&>(e);

@@ -4,6 +4,7 @@
 #include "Buffer.h"
 #include "Shader.h"
 #include "Zero/Core/Core.h"
+#include "Zero/Renderer/Framebuffer.h"
 
 #include "BatchManager.h"
 
@@ -15,6 +16,7 @@ namespace zr
 		glm::mat4 ViewProjectionMatrix;
 		glm::mat4 ViewMatrix;
 		Ref<Shader> TextureShader;
+		Ref<Framebuffer> Framebuffer;
 		Ref<Texture2D> WhiteTexture;
 		Ref<BatchManager> BatchManager;
 	};
@@ -28,6 +30,7 @@ namespace zr
 		static void Shutdown();
 
 		static void BeginScene(const Ref<OrthographicCamera>& camera);
+		static void BeginScene(const Ref<OrthographicCamera>& camera, const Ref<Framebuffer>& framebuffer);
 		static void EndScene();
 
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const glm::vec4& color);
