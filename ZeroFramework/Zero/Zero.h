@@ -30,6 +30,7 @@
 #include "Zero/Renderer/Text.h"
 #include "Zero/Renderer/Sprite.h"
 #include "Zero/Renderer/ViewportDependable.h"
+#include "Zero/Renderer/Shape.hpp"
 
 #include "Zero/OrthographicCameraController.h"
 #include "Zero/PerspectiveCameraController.h"

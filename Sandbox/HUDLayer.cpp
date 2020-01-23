@@ -40,6 +40,10 @@ namespace lp
 		props.MSSALevel = 8;
 		mFramebuffer = zr::Framebuffer::Create(props);
 
+		for (unsigned i = 3; i <= 27; ++i) {
+			mShapes.emplace_back(zr::CreateRef<zr::RegularShape>(i));
+		}
+
 		mCheckerBoardTexture = zr::Texture2D::Create();
 		mCheckerBoardTexture->loadFromFile("resources/textures/Checkerboard.png", true);
 		mCheckerBoardTexture->setRepeat(true);
@@ -170,6 +174,13 @@ namespace lp
 					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 10.f, 10.f }, mCheckerBoardTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
 					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
 					zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
+				}
+
+				{
+					PROFILE_SCOPE("Draw Shapes");
+					for (unsigned i = 0U; i < mShapes.size(); ++i) {
+						zr::Renderer2D::DrawShape(mShapes[i], { i, 0.f }, 1.f, {.8f, .8f, .3f, 1.f});
+					}
 				}
 
 				/*{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Batch.h"
+#include "RendererAPI.h"
 
 namespace zr
 {
@@ -9,7 +10,8 @@ namespace zr
 	public:
 		BatchManager() :
 			mColoredVertexBatches(),
-			mExtendedVertexBatches()
+			mExtendedVertexBatches(),
+			mShapesVertexBatch()
 		{
 			ZR_PROFILER_FUNCTION();
 			mBatchPositionShader = Shader::Create();
@@ -42,6 +44,26 @@ namespace zr
 				ColoredVertexBatch cvb;
 				cvb.addQuadVertices(vertices, verticesIndices);
 				mColoredVertexBatches.push_back(cvb);
+			}
+		}
+
+		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, RendererAPI::DrawPrimitive primitiveType)
+		{
+			auto& it = std::find_if(mShapesVertexBatch.begin(), mShapesVertexBatch.end(), [&vertices, &primitiveType](const ShapeVertexBatch& batch) {
+				return batch.hasEnoughRoom(vertices, primitiveType);
+			});
+
+
+			if (it != mShapesVertexBatch.end()) {
+				// There's a batch with enough room: add these vertices to it
+				it->addVertices(vertices);
+			}
+			else {
+				// There is no batch with enough room: create one batch and add these
+				// vertices to it
+				ShapeVertexBatch svb(primitiveType);
+				svb.addVertices(vertices);
+				mShapesVertexBatch.push_back(svb);
 			}
 		}
 
@@ -84,6 +106,15 @@ namespace zr
 				}
 			}
 
+			// shapes
+			if (!mShapesVertexBatch.empty()) {
+				mBatchPositionShader->bind();
+				mBatchPositionShader->setUniform("uViewProjection", viewProjectionMatrix);
+				for (auto& batch : mShapesVertexBatch) {
+					batch.flush();
+				}
+			}
+
 			// textures
 			if (!mExtendedVertexBatches.empty()) {
 				mBatchTextureShader->bind();
@@ -92,11 +123,14 @@ namespace zr
 					batch.flush(mBatchTextureShader);
 				}
 			}
+
+			
 		}
 
 	private:
 		std::vector<ColoredVertexBatch> mColoredVertexBatches;
 		std::vector<ExtendedVertexBatch> mExtendedVertexBatches;
+		std::vector<ShapeVertexBatch> mShapesVertexBatch;
 
 		Ref<Shader> mBatchPositionShader;
 		Ref<Shader> mBatchTextureShader;

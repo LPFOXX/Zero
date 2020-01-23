@@ -32,6 +32,11 @@ namespace zr
 		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
+	void OpenGLRendererAPI::drawArrays(RendererAPI::DrawPrimitive primitive, unsigned offset, unsigned count)
+	{
+		GL_ERR_CHECK(glDrawArrays(PrimitiveTypeToOpenGLPrimitiveType(primitive), offset, count));
+	}
+
 	void OpenGLRendererAPI::setClearColor(float r, float g, float b, float a)
 	{
 		GL_ERR_CHECK(glClearColor(r, g, b, a));

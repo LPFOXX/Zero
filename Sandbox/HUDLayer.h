@@ -432,6 +432,7 @@ namespace lp
 		zr::Ref<zr::Texture2D> mCheckerBoardTexture;
 		zr::Ref<zr::Texture2D> mLogoTexture;
 		zr::Ref<zr::Texture2D> mOceanTexture;
+		std::vector<zr::Ref<zr::Shape>> mShapes;
 
 		std::vector<zr::ProfileResult> mProfileResults;
 

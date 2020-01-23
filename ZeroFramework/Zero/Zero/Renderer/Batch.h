@@ -4,6 +4,9 @@
 #include "../Core/Profiller.h"
 #include "Buffer.h"
 #include "Texture.h"
+#include "Shape.hpp"
+#include "RenderCommand.h"
+#include "RendererAPI.h"
 
 namespace zr
 {
@@ -69,7 +72,7 @@ namespace zr
 		std::vector<VertexType> mVertices;
 		std::vector<unsigned int> mIndices;
 	};
-	
+
 	class ColoredVertexBatch : public Batch<BatchVertexTypes::ColoredVertex>
 	{
 	public:
@@ -152,6 +155,81 @@ namespace zr
 		unsigned mTextureId;
 		glm::vec4 mColor;
 		glm::vec2 mScalingFactor;
+	};
+
+	class ShapeVertexBatch
+	{
+	public:
+		struct ShapeVertexBounds
+		{
+			ShapeVertexBounds(unsigned offset, unsigned count) :
+				Offset(offset),
+				Count(count)
+			{
+
+			}
+
+			unsigned Offset;
+			unsigned Count;
+		};
+
+	public:
+		ShapeVertexBatch(RendererAPI::DrawPrimitive primitiveType) :
+			kMaxNumVertices(1048576U / sizeof(BatchVertexTypes::ColoredVertex)), // Enough storage for 1MB worth of data
+			mPrimitiveType(primitiveType)
+		{
+			ZR_PROFILER_FUNCTION();
+			mVAO = VertexArray::Create();
+			Ref<VertexBuffer> batchVBO = VertexBuffer::Create(nullptr, kMaxNumVertices * sizeof(BatchVertexTypes::ColoredVertex), DrawMode::Dynamic);
+			batchVBO->setLayout({
+				{ ShaderDataType::Float3, "aPosition"},
+				{ ShaderDataType::Float4, "aColor"} });
+
+			mVAO->addVertexBuffer(batchVBO);
+		}
+
+		virtual ~ShapeVertexBatch()
+		{
+		}
+
+		bool hasEnoughRoom(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, RendererAPI::DrawPrimitive primitiveType) const
+		{
+			return (mPrimitiveType == primitiveType) && (mVertices.size() + vertices.size() <= kMaxNumVertices);
+		}
+
+		bool hasEnoughRoom(unsigned verticesCount, RendererAPI::DrawPrimitive primitiveType) const
+		{
+			return (mPrimitiveType == primitiveType) && (mVertices.size() + verticesCount <= kMaxNumVertices);
+		}
+
+		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices)
+		{
+			mVertexBounds.emplace_back(mVertices.size(), vertices.size());
+			mVertices.insert(mVertices.end(), vertices.begin(), vertices.end());
+		}
+
+		void flush()
+		{
+			mVAO->bind();
+			const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
+			vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex));
+
+			// Draw ranged
+			//RenderCommand::DrawIndexed(mVAO);
+			for (auto& vertexBounds : mVertexBounds) {
+				RenderCommand::DrawArrays(mPrimitiveType, vertexBounds.Offset, vertexBounds.Count);
+			}
+
+			mVertexBounds.clear();
+			mVertices.clear();
+		}
+
+	private:
+		const unsigned kMaxNumVertices;
+		RendererAPI::DrawPrimitive mPrimitiveType;
+		Ref<VertexArray> mVAO;
+		std::vector<BatchVertexTypes::ColoredVertex> mVertices;
+		std::vector<ShapeVertexBounds> mVertexBounds;
 	};
 }
 

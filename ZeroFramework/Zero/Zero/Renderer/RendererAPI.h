@@ -36,6 +36,11 @@ namespace zr
 			Back
 		};
 
+		enum class DrawPrimitive
+		{
+			TriangleFan,
+			TriangleStrip
+		};
 
 	public:
 		RendererAPI();
@@ -53,6 +58,7 @@ namespace zr
 		virtual bool getBlendState() = 0;
 
 		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void drawArrays(DrawPrimitive primitive, unsigned offset, unsigned count) = 0;
 		
 		inline static API GetAPI()
 		{

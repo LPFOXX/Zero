@@ -25,7 +25,7 @@ namespace zr
 
 		static Time Now()
 		{
-			return Time(std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch().count());
+			return Time(std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()).time_since_epoch().count());
 		}
 
 		static Time Hours(float hours)

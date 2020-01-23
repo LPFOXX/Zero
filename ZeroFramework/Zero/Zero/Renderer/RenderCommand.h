@@ -55,6 +55,11 @@ namespace zr
 			return RenderCommand::sRendererAPI->getDepthTestState();
 		}
 
+		inline static void DrawArrays(RendererAPI::DrawPrimitive primitiveType, unsigned offset, unsigned count)
+		{
+			RenderCommand::sRendererAPI->drawArrays(primitiveType, offset, count);
+		}
+
 	private:
 		static Scope<RendererAPI> sRendererAPI;
 	};
