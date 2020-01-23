@@ -71,14 +71,19 @@ namespace zr
 		const unsigned char* vendor = nullptr;
 		const unsigned char* renderer = nullptr;
 		const unsigned char* version = nullptr;
+		int maxVertices = 0, maxIndices = 0;
 		GL_ERR_CHECK(vendor = glGetString(GL_VENDOR));
 		GL_ERR_CHECK(renderer = glGetString(GL_RENDERER));
 		GL_ERR_CHECK(version = glGetString(GL_VERSION));
+		GL_ERR_CHECK(glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &maxVertices));
+		GL_ERR_CHECK(glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &maxIndices));
 
 		ZR_CORE_INFO("OpenGL Info: ");
 		ZR_CORE_INFO("	Vendor: {0}", vendor);
 		ZR_CORE_INFO("	Renderer: {0}", renderer);
 		ZR_CORE_INFO("	Version: {0}", version);
+		ZR_CORE_INFO("	Max Vertices: {0}", maxVertices);
+		ZR_CORE_INFO("	Max Indices: {0}", maxIndices);
 	}
 
 	void OpenGLContext::swapBuffers()
