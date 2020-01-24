@@ -40,9 +40,9 @@ namespace zr
 			RenderCommand::sRendererAPI->setCullingFacesState(enabled, facesToCull);
 		}
 
-		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray, RendererAPI::DrawPrimitive drawPrimitive = RendererAPI::DrawPrimitive::Triangles)
 		{
-			RenderCommand::sRendererAPI->drawIndexed(vertexArray);
+			RenderCommand::sRendererAPI->drawIndexed(vertexArray, drawPrimitive);
 		}
 
 		inline static void EnableBlend(bool blendEnabled)
@@ -55,9 +55,24 @@ namespace zr
 			return RenderCommand::sRendererAPI->getDepthTestState();
 		}
 
+		inline static int GetMaxElementsVertices()
+		{
+			return RenderCommand::sRendererAPI->getMaxElementsVertices();
+		}
+
+		inline static int GetMaxElementsIndices()
+		{
+			return RenderCommand::sRendererAPI->getMaxElementsIndices();
+		}
+
 		inline static void DrawArrays(RendererAPI::DrawPrimitive primitiveType, unsigned offset, unsigned count)
 		{
 			RenderCommand::sRendererAPI->drawArrays(primitiveType, offset, count);
+		}
+
+		inline static void MultiDrawIndexed(const Ref<VertexArray>& vertexArray, const IndexBuffer::Bounds& indexBounds, RendererAPI::DrawPrimitive drawPrimitive = RendererAPI::DrawPrimitive::Triangles)
+		{
+			RenderCommand::sRendererAPI->multiDrawIndexed(vertexArray, indexBounds, drawPrimitive);
 		}
 
 	private:

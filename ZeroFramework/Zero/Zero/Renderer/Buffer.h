@@ -201,6 +201,33 @@ namespace zr
 	class IndexBuffer
 	{
 	public:
+		struct Bounds
+		{
+			/**
+			* offset in bytes
+			*/
+			void addBounds(unsigned offset, unsigned count)
+			{
+				Offset.push_back((void*)offset);
+				Count.push_back(count);
+			}
+
+			inline int size() const
+			{
+				return Offset.size();
+			}
+
+			void clear()
+			{
+				Offset.clear();
+				Offset.clear();
+			}
+
+			std::vector<void*> Offset;
+			std::vector<int> Count;
+		};
+
+	public:
 		IndexBuffer();
 		virtual ~IndexBuffer();
 

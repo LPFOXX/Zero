@@ -38,6 +38,7 @@ namespace zr
 
 		enum class DrawPrimitive
 		{
+			Triangles,
 			TriangleFan,
 			TriangleStrip
 		};
@@ -56,9 +57,12 @@ namespace zr
 		virtual void setDepthTestState(bool depthEnabled) = 0;
 		virtual void setBlendState(bool blendEnabled) = 0;
 		virtual bool getBlendState() = 0;
+		virtual int getMaxElementsVertices() = 0;
+		virtual int getMaxElementsIndices() = 0;
 
-		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void drawIndexed(const Ref<VertexArray>& vertexArray, DrawPrimitive drawPrimitive = DrawPrimitive::Triangles) = 0;
 		virtual void drawArrays(DrawPrimitive primitive, unsigned offset, unsigned count) = 0;
+		virtual void multiDrawIndexed(const Ref<VertexArray>& vertexArray, const IndexBuffer::Bounds& indexBounds, RendererAPI::DrawPrimitive drawPrimitive = RendererAPI::DrawPrimitive::Triangles) = 0;
 		
 		inline static API GetAPI()
 		{

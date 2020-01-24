@@ -9,7 +9,7 @@ namespace zr
 {
 	template <typename VertexType>
 	inline Batch<VertexType>::Batch() :
-		kMaxNumVertices(1048576U / sizeof(VertexType)), // Enough storage for 1MB worth of data
+		kMaxNumVertices(RenderCommand::GetMaxElementsVertices()), // Enough storage for 1MB worth of data
 		mVAO(nullptr),
 		mVertices(),
 		mIndices()

@@ -346,18 +346,13 @@ namespace zr
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::scale(glm::mat4(1.f), { scale, scale, 1.f });
 		const auto& shapeVertices = shape->getVertices();
-		std::vector<glm::vec3> transformedVertices;
-
-		std::transform(shapeVertices.begin(), shapeVertices.end(), std::back_inserter(transformedVertices), [&transform] (const glm::vec3& vertex) {
-			return transform * glm::vec4(vertex, 1.f);
-		});
 
 		std::vector<BatchVertexTypes::ColoredVertex> vertices;
 		std::transform(shapeVertices.begin(), shapeVertices.end(), std::back_inserter(vertices), [&transform, &color](const glm::vec3& vertex) {
 			return BatchVertexTypes::ColoredVertex(transform * glm::vec4(vertex, 1.f), color);
 		});
 
-		sData->BatchManager->addVertices(vertices, shape->getPrimitiveType());
+		sData->BatchManager->addVertices(vertices, shape->getIndices(), shape->getPrimitiveType());
 	}
 
 }

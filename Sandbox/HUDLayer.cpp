@@ -158,7 +158,7 @@ namespace lp
 						for (unsigned j = 0; j < size; ++j) {
 							glm::vec4 quadColor(float(i) / size, float(j) / size, ((float(i) / size) + (float(j) / size)) / 2.f, 1.f);
 							//float rotation = time.asSeconds() + (float(i) * 45.f) + (float(j) * 90.f);
-							zr::Renderer2D::DrawQuad({ i, j }, { .9f, .9f }, quadColor);
+							zr::Renderer2D::DrawQuad({ i, j }, { 1.f, 1.f }, quadColor);
 						}
 					}
 				}

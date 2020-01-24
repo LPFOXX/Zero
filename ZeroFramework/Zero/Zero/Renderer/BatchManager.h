@@ -47,22 +47,22 @@ namespace zr
 			}
 		}
 
-		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, RendererAPI::DrawPrimitive primitiveType)
+		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices, RendererAPI::DrawPrimitive primitiveType)
 		{
 			auto& it = std::find_if(mShapesVertexBatch.begin(), mShapesVertexBatch.end(), [&vertices, &primitiveType](const ShapeVertexBatch& batch) {
 				return batch.hasEnoughRoom(vertices, primitiveType);
 			});
 
-
 			if (it != mShapesVertexBatch.end()) {
 				// There's a batch with enough room: add these vertices to it
-				it->addVertices(vertices);
+				//it->addVertices(vertices);
+				it->addVertices(vertices, verticesIndices);
 			}
 			else {
 				// There is no batch with enough room: create one batch and add these
 				// vertices to it
 				ShapeVertexBatch svb(primitiveType);
-				svb.addVertices(vertices);
+				svb.addVertices(vertices, verticesIndices);
 				mShapesVertexBatch.push_back(svb);
 			}
 		}

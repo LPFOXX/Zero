@@ -27,14 +27,19 @@ namespace zr
 		setDepthTestState(true);
 	}
 
-	void OpenGLRendererAPI::drawIndexed(const Ref<VertexArray>& vertexArray)
+	void OpenGLRendererAPI::drawIndexed(const Ref<VertexArray>& vertexArray, DrawPrimitive drawPrimitive)
 	{
-		GL_ERR_CHECK(glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
+		GL_ERR_CHECK(glDrawElements(PrimitiveTypeToOpenGLPrimitiveType(drawPrimitive), vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
 	void OpenGLRendererAPI::drawArrays(RendererAPI::DrawPrimitive primitive, unsigned offset, unsigned count)
 	{
 		GL_ERR_CHECK(glDrawArrays(PrimitiveTypeToOpenGLPrimitiveType(primitive), offset, count));
+	}
+
+	void OpenGLRendererAPI::multiDrawIndexed(const Ref<VertexArray>& vertexArray, const IndexBuffer::Bounds& indexBounds, RendererAPI::DrawPrimitive drawPrimitive)
+	{
+		GL_ERR_CHECK(glMultiDrawElements(PrimitiveTypeToOpenGLPrimitiveType(drawPrimitive), &indexBounds.Count[0], GL_UNSIGNED_INT, &indexBounds.Offset[0], indexBounds.size()));
 	}
 
 	void OpenGLRendererAPI::setClearColor(float r, float g, float b, float a)
@@ -111,5 +116,19 @@ namespace zr
 	bool OpenGLRendererAPI::getBlendState()
 	{
 		return OpenGLRendererAPI::sState & StateBits::BlendBit;
+	}
+
+	int OpenGLRendererAPI::getMaxElementsVertices()
+	{
+		int maxVertices = 0;
+		GL_ERR_CHECK(glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &maxVertices));
+		return maxVertices;
+	}
+
+	int OpenGLRendererAPI::getMaxElementsIndices()
+	{
+		int maxIndices = 0;
+		GL_ERR_CHECK(glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &maxIndices));
+		return maxIndices;
 	}
 }

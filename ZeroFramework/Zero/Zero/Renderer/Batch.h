@@ -67,10 +67,10 @@ namespace zr
 
 	protected:
 		Ref<VertexArray> mVAO;
+		std::vector<unsigned int> mIndices;
+		std::vector<VertexType> mVertices;
 
 	private:
-		std::vector<VertexType> mVertices;
-		std::vector<unsigned int> mIndices;
 	};
 
 	class ColoredVertexBatch : public Batch<BatchVertexTypes::ColoredVertex>
@@ -88,7 +88,7 @@ namespace zr
 
 			mVAO->addVertexBuffer(batchVBO);
 
-			Ref<IndexBuffer> batchEBO = IndexBuffer::Create(nullptr, kMaxNumVertices * 6U, DrawMode::Dynamic);
+			Ref<IndexBuffer> batchEBO = IndexBuffer::Create(nullptr, kMaxNumVertices, DrawMode::Dynamic);
 			mVAO->setIndexBuffer(batchEBO);
 		}
 
@@ -157,35 +157,15 @@ namespace zr
 		glm::vec2 mScalingFactor;
 	};
 
-	class ShapeVertexBatch
+	class ShapeVertexBatch : public ColoredVertexBatch
 	{
 	public:
-		struct ShapeVertexBounds
-		{
-			ShapeVertexBounds(unsigned offset, unsigned count) :
-				Offset(offset),
-				Count(count)
-			{
-
-			}
-
-			unsigned Offset;
-			unsigned Count;
-		};
-
-	public:
 		ShapeVertexBatch(RendererAPI::DrawPrimitive primitiveType) :
-			kMaxNumVertices(1048576U / sizeof(BatchVertexTypes::ColoredVertex)), // Enough storage for 1MB worth of data
-			mPrimitiveType(primitiveType)
+			ColoredVertexBatch(),
+			mPrimitiveType(primitiveType),
+			mIndexBounds(),
+			mNextIndex(0U)
 		{
-			ZR_PROFILER_FUNCTION();
-			mVAO = VertexArray::Create();
-			Ref<VertexBuffer> batchVBO = VertexBuffer::Create(nullptr, kMaxNumVertices * sizeof(BatchVertexTypes::ColoredVertex), DrawMode::Dynamic);
-			batchVBO->setLayout({
-				{ ShaderDataType::Float3, "aPosition"},
-				{ ShaderDataType::Float4, "aColor"} });
-
-			mVAO->addVertexBuffer(batchVBO);
 		}
 
 		virtual ~ShapeVertexBatch()
@@ -202,9 +182,13 @@ namespace zr
 			return (mPrimitiveType == primitiveType) && (mVertices.size() + verticesCount <= kMaxNumVertices);
 		}
 
-		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices)
+		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
 		{
-			mVertexBounds.emplace_back(mVertices.size(), vertices.size());
+			int nextIndex = mVertices.size();
+			mIndexBounds.addBounds(mIndices.size() * sizeof(unsigned), verticesIndices.size());
+			std::transform(verticesIndices.begin(), verticesIndices.end(), std::back_inserter(mIndices), [nextIndex](unsigned vertexIndex) {
+				return nextIndex + vertexIndex;
+			});
 			mVertices.insert(mVertices.end(), vertices.begin(), vertices.end());
 		}
 
@@ -212,24 +196,25 @@ namespace zr
 		{
 			mVAO->bind();
 			const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
-			vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex));
+			vb->setData(&mVertices[0].Position.x, (unsigned)(mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex)));
+			mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
 
 			// Draw ranged
-			//RenderCommand::DrawIndexed(mVAO);
-			for (auto& vertexBounds : mVertexBounds) {
+			//RenderCommand::DrawIndexed(mVAO, mPrimitiveType);
+			RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, RendererAPI::DrawPrimitive::TriangleFan);
+			/*for (auto& vertexBounds : mVertexBounds) {
 				RenderCommand::DrawArrays(mPrimitiveType, vertexBounds.Offset, vertexBounds.Count);
-			}
+			}*/
 
-			mVertexBounds.clear();
+			mIndexBounds.clear();
 			mVertices.clear();
+			mIndices.clear();
 		}
 
 	private:
-		const unsigned kMaxNumVertices;
 		RendererAPI::DrawPrimitive mPrimitiveType;
-		Ref<VertexArray> mVAO;
-		std::vector<BatchVertexTypes::ColoredVertex> mVertices;
-		std::vector<ShapeVertexBounds> mVertexBounds;
+		IndexBuffer::Bounds mIndexBounds;
+		unsigned mNextIndex;
 	};
 }
 
