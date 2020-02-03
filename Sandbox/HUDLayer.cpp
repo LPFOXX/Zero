@@ -36,12 +36,16 @@ namespace lp
 
 		zr::Framebuffer::FramebufferProperties props;
 		props.Width = 1280;
-		props.Height = 600;
+		props.Height = 720;
 		props.MSSALevel = 8;
 		mFramebuffer = zr::Framebuffer::Create(props);
 
 		for (unsigned i = 3; i <= 27; ++i) {
-			mShapes.emplace_back(zr::CreateRef<zr::RegularShape>(i));
+			zr::Ref<zr::RegularShape> shape = zr::CreateRef<zr::RegularShape>(i);
+			shape->setFillColor({ std::abs(std::sin(.8f * i)), .8f, std::abs(std::cos(.3f * i)), 1.f });
+			shape->setOutlineThickness(2.f);
+			shape->setOutlineColor({ std::abs(std::cos(.8f * i)), .8f, std::abs(std::sin(.3f * i)), 1.f });
+			mShapes.emplace_back(shape);
 		}
 
 		mCheckerBoardTexture = zr::Texture2D::Create();
@@ -115,7 +119,7 @@ namespace lp
 		)";
 		mText->setString(textString);
 
-		mCameraController.reset(new zr::OrthographicCameraController(1280.f / 600.f, true));
+		mCameraController.reset(new zr::OrthographicCameraController((float)props.Width / (float) props.Height, true));
 		mGame.reset(new PongGame);
 
 		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
@@ -179,7 +183,7 @@ namespace lp
 				{
 					PROFILE_SCOPE("Draw Shapes");
 					for (unsigned i = 0U; i < mShapes.size(); ++i) {
-						zr::Renderer2D::DrawShape(mShapes[i], { i, 0.f }, 1.f, {.8f, .8f, .3f, 1.f});
+						zr::Renderer2D::DrawRotatedShape(mShapes[i], { i, 0.f }, 1.f, -time.asSeconds() * 15.f);
 					}
 				}
 
@@ -264,7 +268,6 @@ namespace lp
 		else if (mEditViewCanReceiveInput) {
 			mCameraController->onEvent(e);
 		}
-
 
 		if (e.getType() == zr::EventType::WindowResize) {
 			const zr::WindowResizeEvent& resizeEvent = dynamic_cast<zr::WindowResizeEvent&>(e);

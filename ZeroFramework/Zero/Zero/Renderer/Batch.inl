@@ -23,7 +23,7 @@ namespace zr
 	}
 
 	template <typename VertexType>
-	inline void Batch<VertexType>::addQuadVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces)
+	inline void Batch<VertexType>::addVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces)
 	{
 		if (positions.size() != 4 || textureCoordinates.size() != 4 || vertexIndeces.size() != 6) {
 			return;
@@ -64,26 +64,14 @@ namespace zr
 	}
 
 	template<typename VertexType>
-	inline void Batch<VertexType>::addQuadVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices)
+	inline void Batch<VertexType>::addVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices)
 	{
-		/*if (vertices.size() != 4 || verticesIndices.size() != 6) {
-			ZR_CORE_ERROR("Quad has 4 vertices and 6 indices. Data received has {0} vertices and {1} indices.", vertices.size(), verticesIndices.size());
-			return;
-		}
-
-		if (mVertices.size() + vertices.size() > kMaxNumVertices) {
-			ZR_CORE_ERROR("Not enough storage to add {0} vertices", vertices.size());
-			return;
-		}*/
-
 		std::size_t indexCount = mVertices.size();
-		for (unsigned index : verticesIndices) {
-			mIndices.push_back((unsigned)indexCount + index);
-		}
+		std::transform(verticesIndices.begin(), verticesIndices.end(), std::back_inserter(mIndices), [&indexCount](unsigned vertexIndex) {
+			return (unsigned)indexCount + vertexIndex;
+		});
 
-		for (auto& vertex : vertices) {
-			mVertices.push_back(vertex);
-		}
+		mVertices.insert(mVertices.end(), vertices.begin(), vertices.end());
 	}
 
 	template <typename VertexType>

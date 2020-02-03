@@ -56,6 +56,8 @@ namespace zr
 
 		virtual unsigned getTextureHandle() const = 0;
 
+		virtual const glm::vec2& getPixelSize() const = 0;
+
 		static Ref<Framebuffer> Create(const FramebufferProperties& props = FramebufferProperties());	
 	};
 };

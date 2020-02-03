@@ -36,13 +36,13 @@ namespace zr
 
 			if (it != mColoredVertexBatches.end()) {
 				// There's a batch with enough room: add these vertices to it
-				it->addQuadVertices(vertices, verticesIndices);
+				it->addVertices(vertices, verticesIndices);
 			}
 			else {
 				// There is no batch with enough room: create one batch and add these
 				// vertices to it
 				ColoredVertexBatch cvb;
-				cvb.addQuadVertices(vertices, verticesIndices);
+				cvb.addVertices(vertices, verticesIndices);
 				mColoredVertexBatches.push_back(cvb);
 			}
 		}
@@ -63,7 +63,7 @@ namespace zr
 				// vertices to it
 				ShapeVertexBatch svb(primitiveType);
 				svb.addVertices(vertices, verticesIndices);
-				mShapesVertexBatch.push_back(svb);
+				mShapesVertexBatch.emplace_back(svb);
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace zr
 			if (mExtendedVertexBatches.empty()) {
 				// No batch at all: create one
 				ExtendedVertexBatch evb(textureId, color, scalingFactor);
-				evb.addQuadVertices(vertices, verticesIndices);
+				evb.addVertices(vertices, verticesIndices);
 				mExtendedVertexBatches.push_back(evb);
 			}
 			else {
@@ -83,13 +83,13 @@ namespace zr
 
 				if (it != mExtendedVertexBatches.end()) {
 					// There's a batch with enough room: add these vertices to it
-					it->addQuadVertices(vertices, verticesIndices);
+					it->addVertices(vertices, verticesIndices);
 				}
 				else {
 					// There is no batch with enough room: create one batch and add these
 					// vertices to it
 					ExtendedVertexBatch evb(textureId, color, scalingFactor);
-					evb.addQuadVertices(vertices, verticesIndices);
+					evb.addVertices(vertices, verticesIndices);
 					mExtendedVertexBatches.push_back(evb);
 				}
 			}

@@ -55,8 +55,8 @@ namespace zr
 		Batch();
 		virtual ~Batch();
 
-		virtual void addQuadVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces);
-		virtual void addQuadVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices);
+		virtual void addVertices(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& vertexIndeces);
+		virtual void addVertices(const std::vector<VertexType>& vertices, const std::vector<unsigned>& verticesIndices);
 		virtual void addVertex(const glm::vec3& position, const glm::vec2& textureCoordinates, const glm::vec4& color, unsigned vertexIndex);
 		virtual bool hasEnoughRoomFor(const std::vector<VertexType>& vertices) const;
 		virtual bool hasEnoughRoomFor(unsigned verticesCount) const;
@@ -183,7 +183,8 @@ namespace zr
 		}
 
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
-		{
+		{ 
+			// TODO: when the vertices are triangle strips insert them in reverse order
 			int nextIndex = mVertices.size();
 			mIndexBounds.addBounds(mIndices.size() * sizeof(unsigned), verticesIndices.size());
 			std::transform(verticesIndices.begin(), verticesIndices.end(), std::back_inserter(mIndices), [nextIndex](unsigned vertexIndex) {
@@ -199,12 +200,8 @@ namespace zr
 			vb->setData(&mVertices[0].Position.x, (unsigned)(mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex)));
 			mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
 
-			// Draw ranged
-			//RenderCommand::DrawIndexed(mVAO, mPrimitiveType);
-			RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, RendererAPI::DrawPrimitive::TriangleFan);
-			/*for (auto& vertexBounds : mVertexBounds) {
-				RenderCommand::DrawArrays(mPrimitiveType, vertexBounds.Offset, vertexBounds.Count);
-			}*/
+			// Multiple draw call in a single one
+			RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, mPrimitiveType);
 
 			mIndexBounds.clear();
 			mVertices.clear();

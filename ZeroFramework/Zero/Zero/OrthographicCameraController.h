@@ -16,6 +16,7 @@ namespace zr
 	{
 	public:
 		OrthographicCameraController(float aspectRatio, bool rotation = false);
+		OrthographicCameraController(float width, float height, bool rotation = false);
 		virtual ~OrthographicCameraController();
 
 		void onUpdate(const Time& elapsedTime);

@@ -43,7 +43,8 @@ namespace zr
 		mIsMSAAactivated(props.MSSALevel > 0U),
 		mProperties(props),
 		mScreenShader(),
-		mQuadVAO()
+		mQuadVAO(),
+		mPixelSize(1.f / props.Width, 1.f / props.Height)
 	{
 		if (mIsMSAAactivated) {
 			mMultisampledFramebuffer.reset(new MultisampledFramebuffer(props));
@@ -137,5 +138,9 @@ namespace zr
 	unsigned OpenGLFramebuffer::getTextureHandle() const
 	{
 		return mUnisampledFrambuffer->getTextureHandle();
+	}
+	const glm::vec2& OpenGLFramebuffer::getPixelSize() const
+	{
+		return mPixelSize;
 	}
 }

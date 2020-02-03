@@ -337,22 +337,46 @@ namespace zr
 		sData->BatchManager->addVertices(vertices, indices);
 	}
 
-	void Renderer2D::DrawShape(const Ref<Shape> shape, const glm::vec2& position, float scale, const glm::vec4& color)
+	void Renderer2D::DrawShape(const Ref<Shape> shape, const glm::vec2& position, float scale)
 	{
-		DrawShape(shape, { position.x, position.y, 0.f }, scale, color);
+		DrawShape(shape, { position.x, position.y, 0.f }, scale);
 	}
 
-	void Renderer2D::DrawShape(const Ref<Shape> shape, const glm::vec3& position, float scale, const glm::vec4& color)
+	void Renderer2D::DrawShape(const Ref<Shape> shape, const glm::vec3& position, float scale)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::scale(glm::mat4(1.f), { scale, scale, 1.f });
-		const auto& shapeVertices = shape->getVertices();
-
-		std::vector<BatchVertexTypes::ColoredVertex> vertices;
-		std::transform(shapeVertices.begin(), shapeVertices.end(), std::back_inserter(vertices), [&transform, &color](const glm::vec3& vertex) {
-			return BatchVertexTypes::ColoredVertex(transform * glm::vec4(vertex, 1.f), color);
-		});
-
-		sData->BatchManager->addVertices(vertices, shape->getIndices(), shape->getPrimitiveType());
+		DrawShape(shape, transform);
 	}
 
+	void Renderer2D::DrawRotatedShape(const Ref<Shape>& shape, const glm::vec2& position, float scale, float angle)
+	{
+		Renderer2D::DrawRotatedShape(shape, { position.x, position.y, 0.f }, scale, angle);
+	}
+
+	void Renderer2D::DrawRotatedShape(const Ref<Shape>& shape, const glm::vec3& position, float scale, float angle)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { 0.f, 0.f, 1.f }) * glm::scale(glm::mat4(1.f), { scale, scale, 1.f });
+		DrawShape(shape, transform);
+	}
+
+	void Renderer2D::DrawShape(const Ref<Shape>& shape, const glm::mat4& transform)
+	{
+		const auto& shapeVertices = shape->getVertices();
+		const auto& shapeOutline = shape->getOutline();
+
+		std::vector<BatchVertexTypes::ColoredVertex> innerVertices;
+		std::transform(shapeVertices.begin(), shapeVertices.end(), std::back_inserter(innerVertices), [&transform, &shape](const glm::vec3& vertex) {
+			return BatchVertexTypes::ColoredVertex(transform * glm::vec4(vertex, 1.f), shape->getFillColor());
+		});
+		sData->BatchManager->addVertices(innerVertices, shape->getIndices(), shape->getPrimitiveType());
+
+		if (shapeOutline.getThickness() > 0.f) {
+			std::vector<BatchVertexTypes::ColoredVertex> outlineVertices;
+			const auto& shapeOutlineVertices = shapeOutline.getVertices();
+			std::transform(shapeOutlineVertices.begin(), shapeOutlineVertices.end(), std::back_inserter(outlineVertices), [&transform, &shapeOutline](const glm::vec3& vertex) {
+				return BatchVertexTypes::ColoredVertex(transform * glm::vec4(vertex, 1.f), shapeOutline.getColor());
+			});
+			sData->BatchManager->addVertices(outlineVertices, shapeOutline.getIndices(), shapeOutline.getPrimitiveType());
+		}
+	}
 }

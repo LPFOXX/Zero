@@ -220,7 +220,7 @@ namespace zr
 			void clear()
 			{
 				Offset.clear();
-				Offset.clear();
+				Count.clear();
 			}
 
 			std::vector<void*> Offset;

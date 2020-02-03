@@ -41,6 +41,7 @@ namespace zr
 		virtual void bind() override;
 		virtual void unbind() override;
 		virtual unsigned getTextureHandle() const override;
+		virtual const glm::vec2& getPixelSize() const override;
 
 	public:
 		static void BindDefault();
@@ -201,6 +202,8 @@ namespace zr
 
 		std::shared_ptr<Shader> mScreenShader;
 
-		std::shared_ptr<VertexArray> mQuadVAO;;
+		std::shared_ptr<VertexArray> mQuadVAO;
+
+		glm::vec2 mPixelSize;
 	};
 };

@@ -22,6 +22,9 @@ namespace zr
 		ZR_PROFILER_FUNCTION();
 
 		Application::sInstance = this;
+		/**
+		TODO: manage window size better
+		*/
 		mWindow = Window::Create();
 		mWindow->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
 

@@ -52,7 +52,13 @@ namespace zr
 		static void DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec2>& textureCoordinates, const std::vector<unsigned>& indices, unsigned textureId, const glm::vec4& color = glm::vec4(1.f, 1.f, 1.f, 1.f), const glm::vec2& scalingFactor = glm::vec2(1.f));
 		static void DrawQuad(const std::vector<glm::vec3>& positions, const std::vector<glm::vec4>& colors, const std::vector<unsigned>& indices);
 
-		static void DrawShape(const Ref<Shape> shape, const glm::vec2& position, float scale, const glm::vec4& color);
-		static void DrawShape(const Ref<Shape> shape, const glm::vec3& position, float scale, const glm::vec4& color);
+		static void DrawShape(const Ref<Shape> shape, const glm::vec2& position, float scale);
+		static void DrawShape(const Ref<Shape> shape, const glm::vec3& position, float scale);
+
+		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec2& position, float scale, float angle);
+		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec3& position, float scale, float angle);
+
+	private:
+		static void DrawShape(const Ref<Shape>& shape, const glm::mat4& transform);
 	};
 }

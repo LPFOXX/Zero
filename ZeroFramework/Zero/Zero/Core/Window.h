@@ -8,7 +8,7 @@ namespace zr
 {
 	struct WindowConfig
 	{
-		WindowConfig(const std::string& title = "ZeRo", unsigned width = 1280, unsigned height = 600) :
+		WindowConfig(const std::string& title = "ZeRo", unsigned width = 1280, unsigned height = 720) :
 			Title(title),
 			Width(width),
 			Height(height)
