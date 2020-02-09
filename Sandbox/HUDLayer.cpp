@@ -1,7 +1,5 @@
 #include <pch.h>
 
-#include <numeric>
-
 #include "HUDLayer.h"
 #include "Zero/vendor/imgui/imgui_internal.h"
 

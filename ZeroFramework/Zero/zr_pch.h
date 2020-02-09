@@ -13,9 +13,6 @@
 #include <map>
 #include <unordered_map>
 
-#define GLM_FORCE_CXX11
-#define GLM_FORCE_CTOR_INIT
-#define GLM_FORCE_INLINE
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -28,4 +25,5 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 

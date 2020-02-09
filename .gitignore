@@ -31,5 +31,30 @@
 *.out
 *.app
 
+# Intermediate folders
+int
+**/int
+
+# Binary folders
+bin/
+**/bin/
+
+# Obj Folder
+obj/
+**/obj/
 out/
+
+# Visual Studio config folder
 .vs/
+
+# Resources folder
+resources
+
+# Visual Studio solution and projet config files 
+**/*.sln
+**/*.vcxproj
+**/*.vcxproj.user
+**/*.vcxproj.filters
+
+# Profiling data files
+*.json

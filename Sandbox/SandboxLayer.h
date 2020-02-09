@@ -2,8 +2,6 @@
 
 #include <Zero/Zero.h>
 
-#include <SFML/System.hpp>
-
 namespace lp
 {
 	class SandboxLayer : public zr::Layer

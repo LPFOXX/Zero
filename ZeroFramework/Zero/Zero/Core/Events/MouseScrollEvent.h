@@ -10,8 +10,8 @@ namespace zr
 		MouseScrollEvent(float xOffset, float yOffset);
 		virtual ~MouseScrollEvent();
 
-		inline float getXOffset() const;
-		inline float getYOffset() const;
+		float getXOffset() const;
+		float getYOffset() const;
 
 		virtual EventType getType() const override;
 		static EventType GetStaticType();

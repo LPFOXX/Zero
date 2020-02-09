@@ -3,7 +3,7 @@
 #include "Renderer2D.h"
 #include "RenderCommand.h"
 
-#include "Zero/../vendor/sfml/include/SFML/System.hpp"
+#include "SFML/System.hpp"
 
 #define USES_BATCHES 1
 #define COMPUTE_MATRIX_TRANSFORM 1
