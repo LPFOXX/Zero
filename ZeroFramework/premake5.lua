@@ -153,7 +153,9 @@ project "FREETYPE"
     filter {}
 
     filter "configurations:Debug"
-        defines { "DEBUG" }
+        defines {
+            ---"DEBUG"
+        }
 		runtime "Debug"
         symbols "on"
 

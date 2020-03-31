@@ -31,6 +31,7 @@
 #include "Zero/Renderer/Sprite.h"
 #include "Zero/Renderer/ViewportDependable.h"
 #include "Zero/Renderer/Shape.hpp"
+#include "Zero/Renderer/Line.hpp"
 
 #include "Zero/OrthographicCameraController.h"
 #include "Zero/PerspectiveCameraController.h"

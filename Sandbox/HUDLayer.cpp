@@ -117,8 +117,23 @@ namespace lp
 		)";
 		mText->setString(textString);
 
-		mCameraController.reset(new zr::OrthographicCameraController((float)props.Width / (float) props.Height, true));
+		mCameraController.reset(new zr::OrthographicCameraController((float)props.Width / (float)props.Height, true));
 		mGame.reset(new PongGame);
+
+		mLine = zr::CreateRef<zr::Line>();
+		mLine->setThickness(1.f);
+		mLine->setPoints({ 0.f, 0.f }, { 0.f, 0.f });
+		mLine->setFillColor({ 1.f, 1.f, 0.f, 1.f });
+
+		mMultiLine = zr::CreateRef<zr::MultiLine>();
+		mMultiLine->setThickness(1.f);
+		mMultiLine->setVertices({
+			mA,	// A
+			mB,	// B
+			mC,	// C
+			mD	// D
+			});
+		mMultiLine->setFillColor({ 0.f, 1.f, 1.f, 1.f });
 
 		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
 		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mGame));
@@ -151,9 +166,34 @@ namespace lp
 
 		{
 			ZR_PROFILER_SCOPE("Renderer Draw");
+			const zr::Time& time = zr::Application::GetTime();
+
+			if (mAutomatePoint1) {
+				mPoint1.x = mLength * glm::sin(time.asSeconds());
+				mPoint1.y = mLength * glm::cos(time.asSeconds());
+
+				mLine->setPoint1(mPoint1);
+			}
+
+			if (mAutomaticC) {
+				mA.x = mLength * .5f * glm::cos(time.asSeconds());
+				mA.y = mLength * .5f * glm::sin(time.asSeconds());
+
+				mB.x = mLength * glm::cos(time.asSeconds() * mLength);
+				mB.y = mLength * glm::sin(time.asSeconds() * mLength);
+
+				mC.x = mLength * glm::sin(time.asSeconds());
+				mC.y = mLength * glm::cos(time.asSeconds());
+
+				mD.x = mLength * .5f * glm::sin(time.asSeconds() * mLength);
+				mD.y = mLength * .5f * glm::cos(time.asSeconds() * mLength);
+
+				mMultiLine->setVertices({ mA, mB, mC, mD });
+			}
+
+
 			zr::Renderer2D::BeginScene(mCameraController->getCamera(), mFramebuffer);
 			{
-				const zr::Time& time = zr::Application::GetTime();
 				{
 					PROFILE_SCOPE("A bunch of quads");
 					for (unsigned i = 0; i < size; ++i) {
@@ -185,6 +225,16 @@ namespace lp
 					}
 				}
 
+				{
+					PROFILE_SCOPE("Draw Line");
+					zr::Renderer2D::DrawShape(mLine, { 0.f, 0.f }, 1.f);
+				}
+
+				{
+					PROFILE_SCOPE("Draw MultiLine");
+					zr::Renderer2D::DrawShape(mMultiLine, { 0.f, 0.f }, 1.f);
+				}
+
 				/*{
 					PROFILE_SCOPE("Draw batched text");
 					mText->render(mCameraController->getCamera()->getViewProjectionMatrix());
@@ -213,8 +263,32 @@ namespace lp
 				mText->setPosition(fpsTextPosition);
 			}
 
+			static glm::vec2 point0(0.f, 0.f);
+			if (ImGui::DragFloat2("Point 0", &point0.x)) {
+				mLine->setPoint0(point0);
+			}
+
+			ImGui::Checkbox("Automatic Point 1", &mAutomatePoint1);
+			ImGui::Checkbox("Automatic Points", &mAutomaticC);
+			if (ImGui::DragFloat2("Point 1", &mPoint1.x)) {
+				mLine->setPoint1(mPoint1);
+			}
+
+			ImGui::DragFloat("Line Length", &mLength, 0.1f, 0.1f, 5000.f);
+
+			static float lineThickness = 0.1f;
+			if (ImGui::DragFloat("Line Thickness", &lineThickness, 0.01f, 0.01f, 5000.f)) {
+				mLine->setThickness(lineThickness);
+				mMultiLine->setThickness(lineThickness);
+			}
+
 			ImGui::DragInt("Size", reinterpret_cast<int*>(&size), 1.f, 1, 2000000);
 			ImGui::Text("%i vertices", size * size * 4);
+
+			if (ImGui::DragFloat2("A", &mA.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
+			if (ImGui::DragFloat2("B", &mB.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
+			if (ImGui::DragFloat2("C", &mC.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
+			if (ImGui::DragFloat2("D", &mD.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
 
 			for (auto& result : mProfileResults) {
 				char label[50];

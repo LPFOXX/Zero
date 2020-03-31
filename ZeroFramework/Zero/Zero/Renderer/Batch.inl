@@ -98,14 +98,16 @@ namespace zr
 	template <typename VertexType>
 	inline void Batch<VertexType>::flush()
 	{
-		mVAO->bind();
-		const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
-		vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(VertexType));
-		mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
+		if (!mVertices.empty()) {
+			mVAO->bind();
+			const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
+			vb->setData(&mVertices[0].Position.x, mVertices.size() * sizeof(VertexType));
+			mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
 
-		RenderCommand::DrawIndexed(mVAO);
+			RenderCommand::DrawIndexed(mVAO);
 
-		mVertices.clear();
-		mIndices.clear();
+			mVertices.clear();
+			mIndices.clear();
+		}
 	}
 }

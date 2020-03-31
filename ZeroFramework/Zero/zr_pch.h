@@ -12,6 +12,7 @@
 #include <chrono>
 #include <map>
 #include <unordered_map>
+#include <array>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

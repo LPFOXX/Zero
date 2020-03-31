@@ -195,17 +195,19 @@ namespace zr
 
 		void flush()
 		{
-			mVAO->bind();
-			const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
-			vb->setData(&mVertices[0].Position.x, (unsigned)(mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex)));
-			mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
+			if (!mVertices.empty()) {
+				mVAO->bind();
+				const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
+				vb->setData(&mVertices[0].Position.x, (unsigned)(mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex)));
+				mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
 
-			// Multiple draw call in a single one
-			RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, mPrimitiveType);
+				// Multiple draw call in a single one
+				RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, mPrimitiveType);
 
-			mIndexBounds.clear();
-			mVertices.clear();
-			mIndices.clear();
+				mIndexBounds.clear();
+				mVertices.clear();
+				mIndices.clear();
+			}
 		}
 
 	private:
