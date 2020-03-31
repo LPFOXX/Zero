@@ -280,7 +280,7 @@ namespace lp
 			}
 
 			if (!mIsGameOver) {
- 				if (mBall->getPosition().x <= 0.f) {
+				if (mBall->getPosition().x <= 0.f) {
 					resetBall(mAIPlayer, mPlayer);
 				}
 
@@ -435,14 +435,15 @@ namespace lp
 		std::vector<zr::Ref<zr::Shape>> mShapes;
 		zr::Ref<zr::Line> mLine;
 		zr::Ref<zr::MultiLine> mMultiLine;
-		/*glm::vec2 mA = glm::vec2(-3.80f, 1.90f);
-		glm::vec2 mB = glm::vec2(1.21f, 1.80f);
-		glm::vec2 mC = glm::vec2(-2.05f, -2.00f);
-		glm::vec2 mD = glm::vec2(-1.75f, -7.00f);*/
-		glm::vec2 mA = glm::vec2(5.f, 0.f);
-		glm::vec2 mB = glm::vec2(0.f, 0.f);
-		glm::vec2 mC = glm::vec2(12.266f, 0.00f);
-		glm::vec2 mD = glm::vec2(-1.75f, -7.00f);
+		
+		glm::vec2 mA = glm::vec2(0.f, 5.f);
+		glm::vec2 mB = glm::vec2(-4.8f, 1.5f);
+		glm::vec2 mC = glm::vec2(-3.f, -4.05f);
+		glm::vec2 mD = glm::vec2( 3.f, -4.05f);
+		glm::vec2 mE = glm::vec2(4.80f, 1.5f);
+		/*glm::vec2 mF = glm::vec2(1.21f, 1.80f);
+		glm::vec2 mG = glm::vec2(-2.05f, -2.00f);
+		glm::vec2 mH = glm::vec2(-1.f, 2.0f);*/
 
 		std::vector<zr::ProfileResult> mProfileResults;
 

@@ -127,12 +127,8 @@ namespace lp
 
 		mMultiLine = zr::CreateRef<zr::MultiLine>();
 		mMultiLine->setThickness(1.f);
-		mMultiLine->setVertices({
-			mA,	// A
-			mB,	// B
-			mC,	// C
-			mD	// D
-			});
+		//mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+		mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
 		mMultiLine->setFillColor({ 0.f, 1.f, 1.f, 1.f });
 
 		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
@@ -179,16 +175,20 @@ namespace lp
 				mA.x = mLength * .5f * glm::cos(time.asSeconds());
 				mA.y = mLength * .5f * glm::sin(time.asSeconds());
 
-				mB.x = mLength * glm::cos(time.asSeconds() * mLength);
-				mB.y = mLength * glm::sin(time.asSeconds() * mLength);
+				mB.x = mLength * glm::cos(time.asSeconds() * mLength * .1f);
+				mB.y = mLength * glm::sin(time.asSeconds() * mLength * .1f);
 
 				mC.x = mLength * glm::sin(time.asSeconds());
 				mC.y = mLength * glm::cos(time.asSeconds());
 
-				mD.x = mLength * .5f * glm::sin(time.asSeconds() * mLength);
-				mD.y = mLength * .5f * glm::cos(time.asSeconds() * mLength);
+				mD.x = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
+				mD.y = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
 
-				mMultiLine->setVertices({ mA, mB, mC, mD });
+				mE.x = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
+				mE.y = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
+
+				// mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+				mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
 			}
 
 
@@ -285,10 +285,15 @@ namespace lp
 			ImGui::DragInt("Size", reinterpret_cast<int*>(&size), 1.f, 1, 2000000);
 			ImGui::Text("%i vertices", size * size * 4);
 
-			if (ImGui::DragFloat2("A", &mA.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
-			if (ImGui::DragFloat2("B", &mB.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
-			if (ImGui::DragFloat2("C", &mC.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
-			if (ImGui::DragFloat2("D", &mD.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD });
+			/*if (ImGui::DragFloat2("A", &mA.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+			if (ImGui::DragFloat2("B", &mB.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+			if (ImGui::DragFloat2("C", &mC.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+			if (ImGui::DragFloat2("D", &mD.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });*/
+			if (ImGui::DragFloat2("A", &mA.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
+			if (ImGui::DragFloat2("B", &mB.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
+			if (ImGui::DragFloat2("C", &mC.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
+			if (ImGui::DragFloat2("D", &mD.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
+			if (ImGui::DragFloat2("E", &mE.x, 0.1f)) mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
 
 			for (auto& result : mProfileResults) {
 				char label[50];

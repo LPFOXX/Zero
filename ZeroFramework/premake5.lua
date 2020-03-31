@@ -336,6 +336,35 @@ project "ImGui"
         optimize "on"
     filter {}
 
+project "Lua"
+    kind "StaticLib"
+    language "C"
+    --cppdialect "C++11"
+    staticruntime "on"
+
+    targetdir ("out/" .. outputdir .. "/%{prj.name}")
+    objdir ("int/" .. outputdir .. "/%{prj.name}")
+
+    includedirs {
+        "Zero/vendor/lua/src"
+    }
+
+    files {
+        "Zero/vendor/lua/src/*.c"
+    }
+
+    filter "configurations:Debug"
+        defines { "DEBUG" }
+		runtime "Debug"
+        symbols "on"
+    filter {}
+
+    filter "configurations:Release"
+        defines { "NDEBUG" }
+		runtime "Release"
+        optimize "on"
+    filter {}
+
 project "SFML"
     kind "StaticLib"
     language "C++"
@@ -449,6 +478,7 @@ project "ZeroFramework"
         "Zero/vendor/glfw/include",
         "Zero/vendor/glm/include",
         "Zero/vendor/imgui",
+        "Zero/vendor/lua/src",
         "Zero/vendor/sfml/include",
         "Zero/vendor/spdlog/include",
         "Zero/vendor/stb_image/include"
@@ -491,6 +521,7 @@ project "ZeroFramework"
         "GLAD",
         "GLFW",
         "ImGui",
+        "Lua",
         "SFML",
         "SPDLOG"
     }
