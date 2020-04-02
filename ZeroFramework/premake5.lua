@@ -353,6 +353,11 @@ project "Lua"
         "Zero/vendor/lua/src/*.c"
     }
 
+    removefiles {
+        "Zero/vendor/lua/src/lua.c",
+        "Zero/vendor/lua/src/luac.c"
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }
 		runtime "Debug"
