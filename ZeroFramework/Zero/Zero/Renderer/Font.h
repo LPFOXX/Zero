@@ -14,6 +14,8 @@
 #include "../Core/Core.h"
 #include "../Image.h"
 
+#include "../Core/Loadable.hpp"
+
 #include "Texture.h"
 
 namespace zr
@@ -27,7 +29,7 @@ namespace zr
 	* @see lp::Text
 	*
 	*/
-	class Font
+	class Font : public Loadable
 	{
 	public:
 		struct Character

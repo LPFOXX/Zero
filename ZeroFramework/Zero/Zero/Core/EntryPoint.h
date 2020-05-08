@@ -4,6 +4,8 @@
 
 extern zr::Application* zr::createApplication();
 
+#include "../Platform/Lua/LuaBindings.hpp"
+
 int main(int argc, char** argv)
 {
 	zr::Log::Init();

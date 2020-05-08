@@ -101,7 +101,7 @@ namespace zr
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color)
 	{
 		#if COMPUTE_MATRIX_TRANSFORM
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), angle, { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
 			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
@@ -172,7 +172,7 @@ namespace zr
 	{
 		#if COMPUTE_MATRIX_TRANSFORM
 		#if USES_BATCHES
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), angle, { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
 		std::vector<glm::vec3> positions{
 			transform * glm::vec4(-.5f, -.5f, .0f, 1.f),
 			transform * glm::vec4(.5f, -.5f, .0f, 1.f),
@@ -193,7 +193,7 @@ namespace zr
 		//sData->WhiteTexture->bind();
 		sData->TextureShader->setUniform("uTintingColor", tintingColor);
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), angle, { .0f, .0f, 1.f }) * glm::scale(glm::mat4(1.f), { size.x, size.y, 1.f });
 		sData->TextureShader->setUniform("uTransform", transform);
 
 		texture->bind();
@@ -355,8 +355,22 @@ namespace zr
 
 	void Renderer2D::DrawRotatedShape(const Ref<Shape>& shape, const glm::vec3& position, float scale, float angle)
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), glm::radians(angle), { 0.f, 0.f, 1.f }) * glm::scale(glm::mat4(1.f), { scale, scale, 1.f });
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), position) * glm::rotate(glm::mat4(1.f), angle, { 0.f, 0.f, 1.f }) * glm::scale(glm::mat4(1.f), { scale, scale, 1.f });
 		DrawShape(shape, transform);
+	}
+
+	void Renderer2D::Draw(const Drawable2D& drawable)
+	{
+		const auto& objectVertices = drawable.getVertices();
+		const auto& objectIndices = drawable.getIndices();
+		const auto& colors = drawable.getColors();
+
+		std::vector<BatchVertexTypes::ColoredVertex> innerVertices;
+		for (unsigned i = 0; i < objectVertices.size(); ++i) {
+			innerVertices.emplace_back(objectVertices[i], colors[i]);
+		}
+
+		sData->BatchManager->addVertices(innerVertices, objectIndices);
 	}
 
 	void Renderer2D::DrawShape(const Ref<Shape>& shape, const glm::mat4& transform)

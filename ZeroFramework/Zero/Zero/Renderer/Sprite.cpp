@@ -163,12 +163,6 @@ namespace zr
 		mSpriteVAO->getVertexBuffers()[0]->setData(&mVertices[0], static_cast<unsigned>(mVertices.size() * sizeof(float)));
 	}
 
-	void Sprite::onPositionUpdate()
-	{
-		mNeedsUpdate = true;
-		//mBorder.setPosition(mPosition);
-	}
-
 	void Sprite::onSizeUpdate()
 	{
 		mNeedsUpdate = true;
@@ -254,5 +248,8 @@ namespace zr
 	void Sprite::setBorderColor(const glm::vec4& borderColor)
 	{
 		//mBorder.setColor(borderColor);
+	}
+	void Sprite2D::transformVertices() const
+	{
 	}
 }

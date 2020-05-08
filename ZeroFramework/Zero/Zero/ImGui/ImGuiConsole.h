@@ -273,6 +273,10 @@ namespace zr
 				for (int i = first > 0 ? first : 0; i < History.Size; i++)
 					AddLog(ConsoleItem::Normal, "%3d: %s\n", i, History[i]);
 			}
+			else if (Stricmp(command_line, "LUA") == 0) {
+				AddLog(ConsoleItem::Info, "Lua interpreter started.");
+				AddLog(ConsoleItem::Normal, "> >");
+			}
 			else {
 				AddLog(ConsoleItem::Warn, "Unknown command: '%s'\n", command_line);
 			}

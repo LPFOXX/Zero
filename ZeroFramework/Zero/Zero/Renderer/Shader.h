@@ -3,6 +3,7 @@
 #include "../../vendor/glm/include/glm/glm.hpp"
 #include "Material.h"
 #include "../Core/Core.h"
+#include "../Core/Loadable.hpp"
 
 
 namespace zr
@@ -18,9 +19,9 @@ namespace zr
 	};
 
 	/**
-	 * @brief lp::Shader represents a shader program for the OpenGL state machine.
+	 * @brief zr::Shader represents a shader program for the OpenGL state machine.
 	 */
-	class Shader
+	class Shader : public Loadable
 	{
 	public:
 		/**

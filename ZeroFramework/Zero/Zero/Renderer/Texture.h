@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Zero/Core/Loadable.hpp"
 #include "Zero/Core/Core.h"
 #include "Zero/Image.h"
 
@@ -25,7 +26,7 @@ namespace zr
 	/**
 	 * @brief lp::Texture is a representation of an image object loaded into graphic memory.
 	 */
-	class Texture2D : public Texture
+	class Texture2D : public Texture, public Loadable
 	{
 	public:
 		/**

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../Movable.h"
+#include "Drawable2D.hpp"
+
+#include "Transformable.hpp"
 #include "Resizable.h"
 #include "ViewportDependable.h"
 #include "Buffer.h"
@@ -9,10 +11,39 @@
 
 namespace zr
 {
+	class Sprite2D : public Transformable2D, public Drawable2D
+	{
+	public:
+		Sprite2D() :
+			Transformable2D(),
+			Drawable2D()
+		{
+
+		}
+
+		virtual ~Sprite2D() = default;
+
+		void setTexture(const Ref<Texture>& texture)
+		{
+			mTexture = texture;
+		}
+
+		void setTextureCoordinates()
+		{
+
+		}
+
+		// Inherited via Drawable2D
+		virtual void transformVertices() const override;
+
+	protected:
+		Ref<Texture> mTexture;
+	};
+
 	/**
 	 * @brief lp::Sprite represents a 2D image to be drawn.
 	 */
-	class Sprite : public Movable, public Resizable, public ViewportResizeListener
+	class Sprite : public Movable2D, public Resizable, public ViewportResizeListener
 	{
 	public:
 		/**
@@ -100,11 +131,6 @@ namespace zr
 		 * @brief Updates the vertices according to the viewport size.
 		 */
 		void updateVertices();
-
-		/**
-		 * @brief Inherited via Movable
-		 */
-		virtual void onPositionUpdate() override;
 
 		/**
 		 * @brief Inherited via Resizable

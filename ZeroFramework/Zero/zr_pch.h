@@ -13,6 +13,7 @@
 #include <map>
 #include <unordered_map>
 #include <array>
+#include <numeric>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,4 +28,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_internal.h>
+
+#include <rttr/registration>
 

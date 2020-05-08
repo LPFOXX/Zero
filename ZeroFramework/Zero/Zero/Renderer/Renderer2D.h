@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "Zero/Core/Core.h"
 #include "Zero/Renderer/Framebuffer.h"
+#include "Drawable2D.hpp"
 
 #include "BatchManager.h"
 #include "Shape.hpp"
@@ -58,7 +59,26 @@ namespace zr
 		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec2& position, float scale, float angle);
 		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec3& position, float scale, float angle);
 
+		// -------------- Draw classes ---------------
+		//template <typename VertexType, typename IndexType>
+		static void Draw(const Drawable2D& drawable);
+
 	private:
 		static void DrawShape(const Ref<Shape>& shape, const glm::mat4& transform);
 	};
+
+	/*template<typename VertexType, typename IndexType>
+	inline void Renderer2D::Draw(const Drawable<VertexType, IndexType>& drawable)
+	{
+		const auto& objectVertices = drawable.getVertices();
+		const auto& objectIndices = drawable.getIndices();
+		const auto& colors = drawable.getColors();
+
+		std::vector<BatchVertexTypes::ColoredVertex> innerVertices;
+		for (unsigned i = 0; i < objectVertices.size(); ++i) {
+			innerVertices.emplace_back(objectVertices[i], colors[i]);
+		}
+
+		sData->BatchManager->addVertices(innerVertices, objectIndices);
+	}*/
 }

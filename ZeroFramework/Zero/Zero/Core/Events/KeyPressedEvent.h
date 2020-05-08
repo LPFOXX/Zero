@@ -14,7 +14,7 @@ namespace zr
 		static EventType GetStaticType();
 		virtual const char* getName() const override;
 		virtual std::string toString() const override;
-		inline int getRepeatCount() const;
+		int getRepeatCount() const;
 
 	private:
 		int mRepeatCount;

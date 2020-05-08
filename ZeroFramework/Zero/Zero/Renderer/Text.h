@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Movable.h"
+#include "Transformable.hpp"
 #include "ViewportDependable.h"
 #include "Font.h"
 #include "Buffer.h"
@@ -13,7 +13,7 @@ namespace zr
 	 *
 	 * Handles positioning, color and size of text displayed.
 	 */
-	class Text : public Movable, public ViewportResizeListener
+	class Text : public Movable2D, public ViewportResizeListener
 	{
 	public:
 		/**
@@ -118,11 +118,6 @@ namespace zr
 		virtual const glm::vec2& getSize() const;
 
 	protected:
-		/**
-		 * @brief Inherited via Movable
-		 */
-		virtual void onPositionUpdate() override;
-
 		virtual void onSizeUpdate();
 
 	private:

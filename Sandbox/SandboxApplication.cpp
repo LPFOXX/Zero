@@ -3,6 +3,7 @@
 #include "SandboxLayer.h"
 #include "HUDLayer.h"
 #include "SandboxApplication.h"
+#include "SandboxLuaLayer.hpp"
 
 #include "Zero/Zero/Core/EntryPoint.h"
 
@@ -67,6 +68,7 @@ namespace lp
 		zr::Application::GetWindow().setIcon("resources/textures/logo.png");
 		//pushLayer(new SandboxLayer);
 		pushLayer(new HUDLayer);
+		//pushLayer(new SandboxLuaLayer);
 	}
 
 	SandboxApplication::~SandboxApplication()

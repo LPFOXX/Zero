@@ -123,8 +123,6 @@ namespace zr
 					batch.flush(mBatchTextureShader);
 				}
 			}
-
-			
 		}
 
 	private:

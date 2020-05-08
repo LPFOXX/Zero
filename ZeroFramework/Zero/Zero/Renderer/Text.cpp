@@ -10,7 +10,7 @@
 namespace zr
 {
 	Text::Text() :
-		Movable(),
+		Movable2D(),
 		mViewportHeight(0.f),
 		mFont(nullptr),
 		mFontSize(30U),
@@ -23,7 +23,7 @@ namespace zr
 	}
 
 	Text::Text(const std::string& string, const std::shared_ptr<Font>& font, unsigned fontSize, unsigned outlineThickness) :
-		Movable(),
+		Movable2D(),
 		mViewportHeight(0.f),
 		mFont(font),
 		mFontSize(fontSize),
@@ -276,11 +276,6 @@ namespace zr
 		ZR_CORE_INFO("[TEXT] Viewport updated to: {0}, {1}", viewportSize.x, viewportSize.y);
 		mViewportHeight = viewportSize.y;
 		dryRun();
-	}
-
-	void Text::onPositionUpdate()
-	{
-		//mViewportHeight = ViewportDependable::GetViewportSize().y - 2.f * mPosition.y;
 	}
 
 	void Text::onSizeUpdate()

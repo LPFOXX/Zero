@@ -139,6 +139,7 @@ namespace zr
 	{
 		return mUnisampledFrambuffer->getTextureHandle();
 	}
+
 	const glm::vec2& OpenGLFramebuffer::getPixelSize() const
 	{
 		return mPixelSize;

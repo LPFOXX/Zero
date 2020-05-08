@@ -25,9 +25,19 @@ namespace zr
 			return sInstance->isKeyPressedImpl(key);
 		}
 
+		inline static bool isKeyPressed(unsigned key)
+		{
+			return isKeyPressed((Keyboard)key);
+		}
+
 		inline static bool isMouseButtonPressed(MouseButton button)
 		{
 			return sInstance->isMouseButtonPressedImpl(button);
+		}
+
+		inline static bool isMouseButtonPressed(unsigned button)
+		{
+			return sInstance->isMouseButtonPressed((MouseButton)button);
 		}
 
 		inline static std::pair<float, float> getMousePosition()

@@ -163,7 +163,7 @@ namespace zr
 		ZR_PROFILER_FUNCTION();
 
 		mIsMinimized = (event.getHeight() == 0U || event.getWidth() == 0U);
-		RenderCommand::SetViewportSize(event.getWidth(), event.getHeight());
+		//RenderCommand::SetViewportSize(event.getWidth(), event.getHeight());
 		return false;
 	}
 }

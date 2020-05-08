@@ -4,7 +4,7 @@
 
 namespace zr
 {
-	 enum class Keyboard
+	 enum class Keyboard : unsigned int
 	 {
 		 /* Printable keys */
 		 Space =				GLFW_KEY_SPACE,

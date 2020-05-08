@@ -11,6 +11,10 @@
 #include "Zero/Core/Profiller.h"
 #include "Zero/Core/InputCodes.h"
 #include "Zero/Core/Input.h"
+#include "Zero/Core/AssetManager.hpp"
+
+// ----- Core (Lua) ---------------
+#include "Zero/Platform/Lua/LuaVM.hpp"
 
 // ------- ImGui ----------------
 #include "Zero/ImGui/ImGuiLayer.h"
@@ -30,8 +34,12 @@
 #include "Zero/Renderer/Text.h"
 #include "Zero/Renderer/Sprite.h"
 #include "Zero/Renderer/ViewportDependable.h"
+
+// ----- Drawables ----------
+#include "Zero/Renderer/Drawable.hpp"
 #include "Zero/Renderer/Shape.hpp"
 #include "Zero/Renderer/Line.hpp"
+#include "Zero/Renderer/Quad.hpp"
 
 #include "Zero/OrthographicCameraController.h"
 #include "Zero/PerspectiveCameraController.h"

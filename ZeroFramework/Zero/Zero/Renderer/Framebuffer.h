@@ -30,6 +30,15 @@ namespace zr
 			{
 
 			}
+
+			FramebufferProperties(unsigned width, unsigned height, unsigned mssaLevel) :
+				Width(width),
+				Height(height),
+				MSSALevel(mssaLevel)
+			{
+
+			}
+
 			unsigned Width;
 			unsigned Height;
 			unsigned MSSALevel;
