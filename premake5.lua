@@ -20,21 +20,11 @@ IncludeDirs["glad"] = "ZeroFramework/Zero/vendor/glad/include"
 IncludeDirs["glfw"] = "ZeroFramework/Zero/vendor/glfw/include"
 IncludeDirs["glm"] = "ZeroFramework/Zero/vendor/glm/include"
 IncludeDirs["imgui"] = "ZeroFramework/Zero/vendor/imgui"
+IncludeDirs["lua"] = "ZeroFramework/Zero/vendor/lua/src"
+IncludeDirs["rttr"] = "ZeroFramework/Zero/vendor/rttr/src"
 IncludeDirs["sfml"] = "ZeroFramework/Zero/vendor/sfml/include"
 IncludeDirs["spdlog"] = "ZeroFramework/Zero/vendor/spdlog/include"
 IncludeDirs["stb_image"] = "ZeroFramework/Zero/vendor/stb_image/include"
-
---group "Dependencies"
---	include "ZeroFramework/Zero/vendor/assimp"
---	include "ZeroFramework/Zero/vendor/freetype"
---	include "ZeroFramework/Zero/vendor/glad"
---	include "ZeroFramework/Zero/vendor/glfw"
---	include "ZeroFramework/Zero/vendor/glm"
---	include "ZeroFramework/Zero/vendor/imgui"
---	include "ZeroFramework/Zero/vendor/sfml"
---	include "ZeroFramework/Zero/vendor/spdlog"
---	include "ZeroFramework/Zero/vendor/stb_image"00
---group ""
 
 include "ZeroFramework"
 
@@ -75,6 +65,8 @@ project "Sandbox"
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.glfw}",
 		"%{IncludeDirs.imgui}",
+		"%{IncludeDirs.lua}",
+		"%{IncludeDirs.rttr}",
 		"%{IncludeDirs.sfml}",
 		"%{IncludeDirs.spdlog}",
 		"Sandbox"

@@ -33,6 +33,7 @@ project "ASSIMP"
         "Zero/vendor/assimp/code/**.cpp",
         "Zero/vendor/assimp/code/**.h",
         "Zero/vendor/assimp/code/**.hpp",
+        "Zero/vendor/assimp/code/**.inl",
 
         ---- clipper files
         "Zero/vendor/assimp/contrib/clipper/*.cpp",
@@ -370,6 +371,43 @@ project "Lua"
         optimize "on"
     filter {}
 
+project "RTTR"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++11"
+    staticruntime "on"
+
+    targetdir ("out/" .. outputdir .. "/%{prj.name}")
+    objdir ("int/" .. outputdir .. "/%{prj.name}")
+
+    defines {
+        "BUILD_STATIC",
+        "BUILD_WITH_STATIC_RUNTIME_LIBS",
+        "BUILD_WITH_RTTI"
+    }
+
+    includedirs {
+        "Zero/vendor/rttr/src",
+        "Zero/vendor/rttr/src/rttr"
+    }
+
+    files {
+        "Zero/vendor/rttr/src/rttr/**.cpp",
+        "Zero/vendor/rttr/src/rttr/**.h"
+    }
+
+    filter "configurations:Debug"
+        defines { "DEBUG" }
+		runtime "Debug"
+        symbols "on"
+    filter {}
+
+    filter "configurations:Release"
+        defines { "NDEBUG" }
+		runtime "Release"
+        optimize "on"
+    filter {}
+
 project "SFML"
     kind "StaticLib"
     language "C++"
@@ -484,6 +522,8 @@ project "ZeroFramework"
         "Zero/vendor/glm/include",
         "Zero/vendor/imgui",
         "Zero/vendor/lua/src",
+        "Zero/vendor/rttr/src/",
+        "Zero/vendor/rttr/src/rttr",
         "Zero/vendor/sfml/include",
         "Zero/vendor/spdlog/include",
         "Zero/vendor/stb_image/include"
@@ -493,9 +533,11 @@ project "ZeroFramework"
         "Zero/*.h",
         "Zero/*.hpp",
         "Zero/*.cpp",
+        "Zero/*.inl",
 		"Zero/Zero/**.h",
 		"Zero/Zero/**.hpp",
 		"Zero/Zero/**.cpp",
+		"Zero/Zero/**.inl",
 		"Zero/vendor/stb_image/**.h",
 		"Zero/vendor/glm/glm/**.hpp",
 		"Zero/vendor/glm/glm/**.inl"
@@ -526,7 +568,8 @@ project "ZeroFramework"
         "GLAD",
         "GLFW",
         "ImGui",
-        "Lua",
+        "LUA",
+        "RTTR",
         "SFML",
         "SPDLOG"
     }
