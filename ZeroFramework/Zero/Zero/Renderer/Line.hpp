@@ -401,7 +401,7 @@ namespace zr
 						linesInfo.emplace_back(MultiLine::ComputeInterceptionPoints(mLineVertices[i], mLineVertices[i + 1], mLineVertices[i + 2], mThickness));
 					}
 
-					unsigned size = mLineVertices.size();
+					unsigned size = (unsigned)mLineVertices.size();
 					linesInfo.emplace_back(MultiLine::ComputeInterceptionPoints(mLineVertices[size - 2], mLineVertices[size - 1], mLineVertices[1], mThickness));
 					linesInfo.emplace_back(MultiLine::ComputeInterceptionPoints(mLineVertices[size - 1], mLineVertices[1], mLineVertices[2], mThickness));
 

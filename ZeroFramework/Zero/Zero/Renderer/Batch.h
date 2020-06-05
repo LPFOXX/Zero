@@ -185,8 +185,8 @@ namespace zr
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
 		{ 
 			// TODO: when the vertices are triangle strips insert them in reverse order
-			int nextIndex = mVertices.size();
-			mIndexBounds.addBounds(mIndices.size() * sizeof(unsigned), verticesIndices.size());
+			int nextIndex = (int)mVertices.size();
+			mIndexBounds.addBounds((unsigned)(mIndices.size() * sizeof(unsigned)), (unsigned)verticesIndices.size());
 			std::transform(verticesIndices.begin(), verticesIndices.end(), std::back_inserter(mIndices), [nextIndex](unsigned vertexIndex) {
 				return nextIndex + vertexIndex;
 			});
@@ -199,7 +199,7 @@ namespace zr
 				mVAO->bind();
 				const Ref<VertexBuffer>& vb = mVAO->getVertexBuffers()[0]; // Using a single VBO for the vertices
 				vb->setData(&mVertices[0].Position.x, (unsigned)(mVertices.size() * sizeof(BatchVertexTypes::ColoredVertex)));
-				mVAO->getIndexBuffer()->setData(&mIndices[0], mIndices.size());
+				mVAO->getIndexBuffer()->setData(&mIndices[0], (unsigned)mIndices.size());
 
 				// Multiple draw call in a single one
 				RenderCommand::MultiDrawIndexed(mVAO, mIndexBounds, mPrimitiveType);

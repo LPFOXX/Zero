@@ -74,11 +74,11 @@ reg::class_<test::Sprite>("Sprite")
 .property("mY", &test::Sprite::mY, reg::private_access);
 
 	reg::class_<zr::Input>("Input")(rttr::metadata(zr::RTTRMetadata::Bool::StaticClass, true))
-		.method("IsKeyPressed", static_cast<bool(*)(unsigned)>(&zr::Input::isKeyPressed))
-		.method("IsMouseButtonPressed", static_cast<bool(*)(unsigned)>(&zr::Input::isMouseButtonPressed))
-		.method("GetMousePosition", &zr::Input::getMousePosition)
-		.method("GetMouseX", &zr::Input::getMouseX)
-		.method("GetMouseY", &zr::Input::getMouseY);
+		.method("IsKeyPressed", static_cast<bool(*)(unsigned)>(&zr::Input::IsKeyPressed))
+		.method("IsMouseButtonPressed", static_cast<bool(*)(unsigned)>(&zr::Input::IsMouseButtonPressed))
+		.method("GetMousePosition", &zr::Input::GetMousePosition)
+		.method("GetMouseX", &zr::Input::GetMouseX)
+		.method("GetMouseY", &zr::Input::GetMouseY);
 
 	reg::method("HelloWorld", &zr::HelloWorld);
 	reg::method("HelloWorld1", &zr::HelloWorld1);
@@ -218,7 +218,6 @@ reg::class_<test::Sprite>("Sprite")
 		rttr::value("Button5", zr::MouseButton::Button5),
 		rttr::value("Button6", zr::MouseButton::Button6),
 		rttr::value("Button7", zr::MouseButton::Button7),
-		rttr::value("ButtonLast", zr::MouseButton::ButtonLast),
 		rttr::value("ButtonLeft", zr::MouseButton::ButtonLeft),
 		rttr::value("ButtonRight", zr::MouseButton::ButtonRight),
 		rttr::value("ButtonMiddle", zr::MouseButton::ButtonMiddle)

@@ -66,6 +66,18 @@ namespace zr
 		sData->Framebuffer = nullptr;
 	}
 
+	void Renderer2D::BeginScene(const Ref<Viewer>& viewer)
+	{
+		ZR_PROFILER_FUNCTION();
+
+		const auto& camera = viewer->getCamera();
+		sData->ViewProjectionMatrix = camera->getViewProjectionMatrix();
+		sData->TextureShader->bind();
+		sData->TextureShader->setUniform("uViewProjection", sData->ViewProjectionMatrix);
+		sData->ViewMatrix = camera->getViewMatrix();
+		sData->Framebuffer = viewer->getFramebuffer();
+	}
+
 	void Renderer2D::BeginScene(const Ref<OrthographicCamera>& camera, const Ref<Framebuffer>& framebuffer)
 	{
 		ZR_PROFILER_FUNCTION();

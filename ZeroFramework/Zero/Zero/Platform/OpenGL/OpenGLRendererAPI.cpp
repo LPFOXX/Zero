@@ -58,7 +58,7 @@ namespace zr
 
 	void OpenGLRendererAPI::setViewportSize(unsigned width, unsigned height)
 	{
-		//GL_ERR_CHECK(glViewport(0, 0, width, height));
+		GL_ERR_CHECK(glViewport(0, 0, width, height));
 	}
 
 	void OpenGLRendererAPI::setCullingFacesState(bool enabled, CullFace facesToCull)

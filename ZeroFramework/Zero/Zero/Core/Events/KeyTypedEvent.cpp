@@ -30,7 +30,7 @@ namespace zr
 
 	unsigned KeyTypedEvent::getFamilyFlags() const
 	{
-		return EventFamily::InputEvent | EventFamily::KeyboadEvent;
+		return EventFamily::InputEvent | EventFamily::KeyboardEvent;
 	}
 
 	std::string KeyTypedEvent::toString() const

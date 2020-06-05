@@ -10,6 +10,8 @@
 #include "Events/MouseButtonReleasedEvent.h"
 #include "Events/MouseMoveEvent.h"
 #include "Events/MouseScrollEvent.h"
+#include "Events/RenderWindowResizeEvent.hpp"
+#include "Events/RenderWindowFramebufferResizeEvent.hpp"
 #include "Events/WindowCloseEvent.h"
 #include "Events/WindowResizeEvent.h"
 #include "Events/WindowGainedFocusEvent.h"

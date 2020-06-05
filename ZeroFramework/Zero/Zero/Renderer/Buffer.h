@@ -208,13 +208,13 @@ namespace zr
 			*/
 			void addBounds(unsigned offset, unsigned count)
 			{
-				Offset.push_back((void*)offset);
+				Offset.push_back((void*)(uintptr_t)offset);
 				Count.push_back(count);
 			}
 
 			inline int size() const
 			{
-				return Offset.size();
+				return (int)Offset.size();
 			}
 
 			void clear()

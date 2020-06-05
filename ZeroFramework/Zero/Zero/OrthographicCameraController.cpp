@@ -1,3 +1,5 @@
+#include "OrthographicCameraController.h"
+#include "OrthographicCameraController.h"
 #include <zr_pch.h>
 
 #include "OrthographicCameraController.h"
@@ -11,6 +13,7 @@
 namespace zr
 {
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation) :
+		CameraController(),
 		mAspectRatio(aspectRatio),
 		mZoomLevel(1.f),
 		mRotation(rotation),
@@ -21,9 +24,25 @@ namespace zr
 		mCameraTranslationSpeed(5.f),
 		mZoomRate(.25f),
 		mMaxZoomLevel(.25f),
-		mMinZoomLevel(20000.f)
+		mMinZoomLevel(std::numeric_limits<float>::max())
 	{
 		mCamera = CreateRef<OrthographicCamera>(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
+	}
+
+	OrthographicCameraController::OrthographicCameraController(float width, float height, bool rotation) :
+		CameraController(),
+		mAspectRatio(width / height),
+		mZoomLevel(1.f),
+		mRotation(rotation),
+		mCamera(nullptr),
+		mCameraPosition(0.f, 0.f, 0.f),
+		mCameraRotation(0.f),
+		mCameraRotationSpeed(45.f),
+		mCameraTranslationSpeed(5.f),
+		mZoomRate(.25f),
+		mMaxZoomLevel(.25f),
+		mMinZoomLevel(std::numeric_limits<float>::max())
+	{
 	}
 
 	OrthographicCameraController::~OrthographicCameraController()
@@ -34,28 +53,28 @@ namespace zr
 	{
 		ZR_PROFILER_FUNCTION();
 
-		if (Input::isKeyPressed(Keyboard::W)) {
+		if (mInputMapper->isInputPressed(zr::CameraController::Actions::MoveCameraUp)) {
 			mCameraPosition += glm::vec3(0.f, mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f);
 		}
 
-		if (Input::isKeyPressed(Keyboard::S)) {
+		if (mInputMapper->isInputPressed(zr::CameraController::Actions::MoveCameraDown)) {
 			mCameraPosition += glm::vec3(0.f, -mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f);
 		}
 
-		if (Input::isKeyPressed(Keyboard::A)) {
-			mCameraPosition += glm::vec3(-mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f, 0.f);
-		}
-
-		if (Input::isKeyPressed(Keyboard::D)) {
+		if (mInputMapper->isInputPressed(zr::CameraController::Actions::MoveCameraLeft)) {
 			mCameraPosition += glm::vec3(mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f, 0.f);
 		}
 
+		if (mInputMapper->isInputPressed(zr::CameraController::Actions::MoveCameraRight)) {
+			mCameraPosition += glm::vec3(-mCameraTranslationSpeed * elapsedTime.asSeconds(), 0.f, 0.f);
+		}
+
 		if (mRotation) {
-			if (zr::Input::isKeyPressed(zr::Keyboard::Q)) {
+			if (mInputMapper->isInputPressed(zr::CameraController::Actions::RotateCameraLeft)) {
 				mCameraRotation += mCameraRotationSpeed * elapsedTime.asSeconds();
 			}
 
-			if (zr::Input::isKeyPressed(zr::Keyboard::E)) {
+			if (mInputMapper->isInputPressed(zr::CameraController::Actions::RotateCameraRight)) {
 				mCameraRotation -= mCameraRotationSpeed * elapsedTime.asSeconds();
 			}
 
@@ -71,12 +90,26 @@ namespace zr
 
 		EventDispatcher eventDispatcher(e);
 		eventDispatcher.dispatch<MouseScrollEvent>(std::bind(&OrthographicCameraController::onMouseScrolled, this, std::placeholders::_1));
-		eventDispatcher.dispatch<WindowResizeEvent>(std::bind(&OrthographicCameraController::onWindowResized, this, std::placeholders::_1));
+		eventDispatcher.dispatch<RenderWindowResizeEvent>(std::bind(&OrthographicCameraController::onRenderWindowResized, this, std::placeholders::_1));
 	}
 
-	const Ref<OrthographicCamera>& OrthographicCameraController::getCamera() const
+	const Ref<Camera>& OrthographicCameraController::getCamera() const
 	{
 		return mCamera;
+	}
+
+	const Ref<InputMapper16>& OrthographicCameraController::getInputMapper() const
+	{
+		if (!mInputMapper) {
+			mInputMapper = CreateRef<InputMapper16>();
+		}
+
+		return mInputMapper;
+	}
+
+	void OrthographicCameraController::enableRotation(bool enabled)
+	{
+		mRotation = enabled;
 	}
 
 	void OrthographicCameraController::setZoomLevel(float zoomLevel)
@@ -100,13 +133,20 @@ namespace zr
 		return false;
 	}
 
-	bool OrthographicCameraController::onWindowResized(WindowResizeEvent& e)
+	bool OrthographicCameraController::onRenderWindowResized(RenderWindowResizeEvent& e)
 	{
 		ZR_PROFILER_FUNCTION();
 
 		mAspectRatio = (float)e.getWidth() / (float)e.getHeight();
 		updateProjectionMatrix();
-		return false;
+		return true;
+	}
+
+	bool OrthographicCameraController::onRenderWindowFramebufferResized(RenderWindowFramebufferResizeEvent& e)
+	{
+		mAspectRatio = (float)e.getWidth() / (float)e.getHeight();
+		updateProjectionMatrix();
+		return true;
 	}
 
 	void OrthographicCameraController::readjustCameraTranslationSpeed(float zoomLevel)
@@ -118,6 +158,6 @@ namespace zr
 
 	void OrthographicCameraController::updateProjectionMatrix()
 	{
-		mCamera->setProjection(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
+		dynamic_cast<OrthographicCamera&>(*mCamera).setProjection(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
 	}
 }

@@ -8,28 +8,33 @@
 #include "Core/Events/WindowResizeEvent.h"
 #include "Core/Events/MouseScrollEvent.h"
 
+#include "CameraController.hpp"
+
 #include "Core/Core.h"
 
 namespace zr
 {
-	class OrthographicCameraController
+	class OrthographicCameraController : public CameraController
 	{
 	public:
-		OrthographicCameraController(float aspectRatio, bool rotation = false);
+		OrthographicCameraController(float aspectRatio = (16.f / 9.f), bool rotation = false);
 		OrthographicCameraController(float width, float height, bool rotation = false);
 		virtual ~OrthographicCameraController();
 
-		void onUpdate(const Time& elapsedTime);
-		void onEvent(Event& e);
+		virtual void onUpdate(const Time& elapsedTime) override;
+		virtual void onEvent(Event& e) override;
 
-		const Ref<OrthographicCamera>& getCamera() const;
+		virtual const Ref<Camera>& getCamera() const override;
+		virtual const Ref<InputMapper16>& getInputMapper() const override;
+		virtual void enableRotation(bool enabled) override;
 
 		void setZoomLevel(float zoomLevel);
 		float getZoomLevel() const;
 
 	private:
 		bool onMouseScrolled(MouseScrollEvent& e);
-		bool onWindowResized(WindowResizeEvent& e);
+		bool onRenderWindowResized(RenderWindowResizeEvent& e);
+		bool onRenderWindowFramebufferResized(RenderWindowFramebufferResizeEvent& e);
 		void readjustCameraTranslationSpeed(float zoomLevel);
 		void updateProjectionMatrix();
 
@@ -37,7 +42,7 @@ namespace zr
 		float mAspectRatio;
 		float mZoomLevel;
 		bool mRotation;
-		Ref<OrthographicCamera> mCamera;
+		Ref<Camera> mCamera;
 
 		glm::vec3 mCameraPosition;
 		float mCameraRotation;
@@ -47,5 +52,7 @@ namespace zr
 		float mZoomRate;
 		float mMaxZoomLevel;
 		float mMinZoomLevel;
+
+		mutable Ref<InputMapper16> mInputMapper;
 	};
 }

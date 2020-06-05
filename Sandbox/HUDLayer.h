@@ -9,13 +9,6 @@ namespace lp
 	class HUDLayer : public zr::Layer, public zr::ViewportDependable, public zr::ViewportResizeListener
 	{
 	public:
-		struct Viewer
-		{
-			zr::Ref<zr::OrthographicCameraController> CameraController;
-			zr::Ref<zr::Framebuffer> Framebuffer;
-		};
-
-	public:
 		HUDLayer();
 		virtual ~HUDLayer();
 
@@ -27,14 +20,16 @@ namespace lp
 		virtual void onEvent(zr::Event& e) override;
 
 	private:
-		void drawEditorWindow(const zr::Ref<zr::Framebuffer>& framebuffer, bool& canReceiveInput);
+		//void drawEditorWindow(const zr::Ref<zr::Framebuffer>& framebuffer, bool& canReceiveInput);
+		void drawEditorWindow(zr::Ref<zr::Viewer>& viewer, bool& open);
 
 	private:
-		std::shared_ptr<zr::OrthographicCameraController> mCameraController;
-		bool mEditViewCanReceiveInput;
+		/// Viewer Things
+		zr::Ref<zr::Viewer> mViewer;
+
+		/// Temp things
 		std::shared_ptr<zr::Font> mFont;
 		std::shared_ptr<zr::Text> mText;
-		zr::Ref<zr::Framebuffer> mFramebuffer;
 		zr::Ref<zr::Texture2D> mCheckerBoardTexture;
 		zr::Ref<zr::MultiLine> mMultiLine;
 		

@@ -76,12 +76,7 @@ namespace lp
 			ZR_ERROR("CubeMap loading error.");
 		}
 
-		zr::Framebuffer::FramebufferProperties fbp;
-		fbp.Width = 1280;
-		fbp.Height = 600;
-		fbp.MSSALevel = 8;
-
-		mFramebuffer = zr::Framebuffer::Create(fbp);
+		mFramebuffer = zr::Framebuffer::Create({1280, 600, 8});
 
 		float vertices[3 * 7]{
 			-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -226,27 +221,27 @@ namespace lp
 			model->update(elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::I)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::I)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Forward, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::K)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::K)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Backward, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::J)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::J)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Left, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::L)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::L)) {
 			mFPSCamera->move(zr::FPSCamera::MovementDirection::Right, elapsedTime);
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::U)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::U)) {
 			mFPSCamera->rotate(elapsedTime.asSeconds());
 		}
 
-		if (zr::Input::isKeyPressed(zr::Keyboard::P)) {
+		if (zr::Input::IsKeyPressed(zr::Keyboard::P)) {
 			mFPSCamera->rotate(-elapsedTime.asSeconds());
 		}
 
@@ -337,7 +332,7 @@ namespace lp
 		mPerspectiveCameraController->onEvent(e);
 
 		if (e.getType() == zr::EventType::MouseMove) {
-			if (zr::Input::isKeyPressed(zr::Keyboard::X)) {
+			if (zr::Input::IsKeyPressed(zr::Keyboard::X)) {
 				mModelScaleFactor -= zr::MouseMoveEvent::GetMovementOffset().y * .001f * mLastDeltaTime.asSeconds();
 				if (mModelScaleFactor <= .001f) {
 					mModelScaleFactor = .001f;
@@ -350,7 +345,7 @@ namespace lp
 				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
 				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
 			}
-			else if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button0)) {
+			else if (zr::Input::IsMouseButtonPressed(zr::MouseButton::ButtonLeft)) {
 				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
@@ -358,7 +353,7 @@ namespace lp
 				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
 			}
 
-			if (zr::Input::isMouseButtonPressed(zr::MouseButton::Button1)) {
+			if (zr::Input::IsMouseButtonPressed(zr::MouseButton::ButtonRight)) {
 				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 			}

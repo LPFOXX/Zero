@@ -14,11 +14,9 @@ namespace lp
 
 	HUDLayer::HUDLayer() :
 		zr::Layer("HUDLayer"),
-		mCameraController(nullptr),
-		mEditViewCanReceiveInput(false),
+		mViewer(nullptr),
 		mFont(nullptr),
 		mText(nullptr)
-		//mGame(nullptr)
 	{
 		ZR_PROFILER_FUNCTION();
 	}
@@ -32,16 +30,27 @@ namespace lp
 	{
 		ZR_PROFILER_FUNCTION();
 
-		std::cout << std::boolalpha;
-		std::cout << "zr::Font is abstract: " << std::is_abstract<zr::Font>::value << "\n";
-		std::cout << "zr::Texture2D is abstract: " << std::is_abstract<zr::Texture2D>::value << "\n";
+		mViewer = zr::CreateRef<zr::Viewer>();
+		mViewer->setCameraController(new zr::OrthographicCameraController);
+		mViewer->setFramebuffer(zr::Framebuffer::Create({ 1920, 1080, 8 }));
+
+		mViewer->getInput()
+			->map(zr::CameraController::Actions::MoveCameraRight, zr::Keyboard::A)
+			.map(zr::CameraController::Actions::MoveCameraLeft, zr::Keyboard::D)
+			.map(zr::CameraController::Actions::MoveCameraUp, zr::Keyboard::W)
+			.map(zr::CameraController::Actions::MoveCameraDown, zr::Keyboard::S)
+			.map(zr::CameraController::Actions::RotateCameraRight, zr::Keyboard::E)
+			.map(zr::CameraController::Actions::RotateCameraLeft, zr::Keyboard::Q);
+
+		float windowWidth = (float)zr::Application::GetWindow().getWidth();
+		float windowHeight = (float)zr::Application::GetWindow().getHeight();
 
 		const auto& handler1 = zr::AssetManager<zr::Font>::Get().load("resources/fonts/futura_book_font.ttf");
 		const auto& handler2 = zr::AssetManager<zr::Texture2D>::Get().load("resources/textures/Checkerboard.png");
 		const auto& handler3 = zr::AssetManager<zr::Shader>::Get().load("resources/shaders/Texture.glsl");
 		//const auto& handler4 = zr::AssetManager<zr::Model3D>::Get().load("resources/models/nanosuit.obj");
 
-		const auto& handler5 = zr::AssetManager<zr::Framebuffer>::Get().create("MainFramebuffer", zr::Framebuffer::FramebufferProperties { 1280, 720, 8 });
+		//const auto& handler5 = zr::AssetManager<zr::Framebuffer>::Get().create("MainFramebuffer", zr::Framebuffer::Properties{ 1280, 720, 8 });
 
 		if (!mLuaVM.loadFile("resources/scripts/Layer.lua")) {
 			ZR_IMGUI_CONSOLE_ERROR("Unable to load Lua script file.");
@@ -64,8 +73,8 @@ namespace lp
 		mSprite2D.setSize(25.f, 25.f);
 		// mSprite2D.setTexture();
 		mQuad.setSize(25.f, 25.f);
-		
-		mFramebuffer = zr::Framebuffer::Create({ 1280, 720, 8 });
+
+
 
 		/*for (unsigned i = 3; i <= 27; ++i) {
 			zr::Ref<zr::RegularShape> shape = zr::CreateRef<zr::RegularShape>(i);
@@ -146,9 +155,6 @@ namespace lp
 		)";
 		mText->setString(textString);
 
-		float windowWidth = (float)zr::Application::GetWindow().getWidth();
-		float windowHeight = (float)zr::Application::GetWindow().getHeight();
-		mCameraController.reset(new zr::OrthographicCameraController(windowWidth / windowHeight, true));
 		//mGame.reset(new PongGame);
 
 		/*mLine = zr::CreateRef<zr::Line>();
@@ -188,17 +194,10 @@ namespace lp
 		PROFILE_SCOPE("HUDLayer::onUpdate");
 		{
 			PROFILE_SCOPE("CameraController::onUpdate");
-			if (mEditViewCanReceiveInput) {
-				mCameraController->onUpdate(elapsedTime);
-			}
+			mViewer->onUpdate(elapsedTime);
 		}
 
-		//mGame->update();
-
-		mFramebuffer->bind();
-		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth);
-		zr::RenderCommand::SetClearColor(.3f, .3f, .8f, 1.f);
-
+		mViewer->bind(zr::RendererAPI::ClearBuffers::Color | zr::RendererAPI::ClearBuffers::Depth, .3f, .3f, .8f, 1.f);
 		{
 			ZR_PROFILER_SCOPE("Renderer Draw");
 			const zr::Time& time = zr::Application::GetTime();
@@ -210,58 +209,58 @@ namespace lp
 				mLine->setPoint1(mPoint1);
 			}*/
 
-			if (mAutomaticC) {
-				mA.x = mLength * .5f * glm::cos(time.asSeconds());
-				mA.y = mLength * .5f * glm::sin(time.asSeconds());
+			//if (mAutomaticC) {
+			//	mA.x = mLength * .5f * glm::cos(time.asSeconds());
+			//	mA.y = mLength * .5f * glm::sin(time.asSeconds());
 
-				mB.x = mLength * glm::cos(time.asSeconds() * mLength * .1f);
-				mB.y = mLength * glm::sin(time.asSeconds() * mLength * .1f);
+			//	mB.x = mLength * glm::cos(time.asSeconds() * mLength * .1f);
+			//	mB.y = mLength * glm::sin(time.asSeconds() * mLength * .1f);
 
-				mC.x = mLength * glm::sin(time.asSeconds());
-				mC.y = mLength * glm::cos(time.asSeconds());
+			//	mC.x = mLength * glm::sin(time.asSeconds());
+			//	mC.y = mLength * glm::cos(time.asSeconds());
 
-				mD.x = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
-				mD.y = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
+			//	mD.x = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
+			//	mD.y = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
 
-				mE.x = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
-				mE.y = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
+			//	mE.x = mLength * .5f * glm::cos(time.asSeconds() * mLength * .5f);
+			//	mE.y = mLength * .5f * glm::sin(time.asSeconds() * mLength * .5f);
 
-				// mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
-				mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
-			}
+			//	// mMultiLine->setVertices({ mA, mB, mC, mD, mE, mF, mG, mH });
+			//	mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
+			//}
 
 
-			zr::Renderer2D::BeginScene(mCameraController->getCamera(), mFramebuffer);
+			zr::Renderer2D::BeginScene(mViewer);
 			{
-				{
-					PROFILE_SCOPE("Draw Background");
-					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 100.f, 100.f }, mCheckerBoardTexture, { 5.f, 5.f });
+				//{
+				//	PROFILE_SCOPE("Draw Background");
+				//	zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 100.f, 100.f }, mCheckerBoardTexture, { 5.f, 5.f });
 
 
-					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
-					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
-				}
+				//	//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
+				//	//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
+				//}
 
-				{
+				/*{
 					PROFILE_SCOPE("Draw Quad Class");
-					if (zr::Input::isKeyPressed(zr::Keyboard::Up)) {
-						mQuad.move(0.f, time.asSeconds() * .1);
+					if (zr::Input::IsKeyPressed(zr::Keyboard::Up)) {
+						mQuad.move(0.f, (float)(time.asSeconds() * .1));
 					}
 
-					if (zr::Input::isKeyPressed(zr::Keyboard::Down)) {
-						mQuad.move(0.f, -time.asSeconds() * .1f);
+					if (zr::Input::IsKeyPressed(zr::Keyboard::Down)) {
+						mQuad.move(0.f, (float)(-time.asSeconds() * .1f));
 					}
 
-					if (zr::Input::isKeyPressed(zr::Keyboard::Left)) {
-						mQuad.move(-time.asSeconds() * .1f, 0.f);
+					if (zr::Input::IsKeyPressed(zr::Keyboard::Left)) {
+						mQuad.move((float)(-time.asSeconds() * .1f), 0.f);
 					}
 
-					if (zr::Input::isKeyPressed(zr::Keyboard::Right)) {
-						mQuad.move(time.asSeconds() * .1f, 0.f);
+					if (zr::Input::IsKeyPressed(zr::Keyboard::Right)) {
+						mQuad.move((float)(time.asSeconds() * .1f), 0.f);
 					}
 
 					mQuad.draw();
-				}
+				}*/
 
 				//{
 				//	PROFILE_SCOPE("A bunch of quads");
@@ -274,13 +273,13 @@ namespace lp
 				//	}
 				//}
 
-				/*{
-					PROFILE_SCOPE("Draw 2 Quads");
-					zr::Renderer2D::DrawRotatedQuad({ 0.5f, -.5f }, { .5f, .75f }, -time.asSeconds() * 30.f, { .2f, .3f, .8f, 1.f });
-					zr::Renderer2D::DrawRotatedQuad({ -1.f, 0.f }, { .8f, .8f }, time.asSeconds() * 45.f, { .8f, .2f, .3f, 1.f });
-				}*/
-
 				{
+					PROFILE_SCOPE("Draw 2 Quads");
+					zr::Renderer2D::DrawRotatedQuad({ 0.5f, -.5f }, { .5f, .75f }, glm::radians(-time.asSeconds() * 30.f), { .2f, .3f, .8f, 1.f });
+					zr::Renderer2D::DrawRotatedQuad({ -1.f, 0.f }, { .8f, .8f }, glm::radians(time.asSeconds() * 45.f), { .8f, .2f, .3f, 1.f });
+				}
+
+				/*{
 					PROFILE_SCOPE("Draw MultiLine");
 					zr::Renderer2D::DrawRotatedShape(mMultiLine, { 0.f, 0.f }, 1.f, glm::radians(time.asSeconds() * -30.f));
 					zr::Renderer2D::DrawRotatedShape(mMultiLine, { 0.f, 0.f }, 1.5f, glm::radians(time.asSeconds() * 30.f));
@@ -288,9 +287,9 @@ namespace lp
 					zr::Renderer2D::DrawRotatedShape(mMultiLine, { 0.f, 0.f }, 3.f, glm::radians(time.asSeconds() * 40.f));
 					zr::Renderer2D::DrawRotatedShape(mMultiLine, { 0.f, 0.f }, 4.f, glm::radians(time.asSeconds() * -60.f));
 					zr::Renderer2D::DrawRotatedShape(mMultiLine, { 0.f, 0.f }, 5.5f, glm::radians(time.asSeconds() * 60.f));
-				}
+				}*/
 
-				zr::Renderer2D::DrawQuad({ 0.f, 0.f, 1.f }, { 10.f, 10.f }, { .2f, .3f, .8f, .1f });
+				//zr::Renderer2D::DrawQuad({ 0.f, 0.f, 1.f }, { 10.f, 10.f }, { .2f, .3f, .8f, .1f });
 
 				/*{
 					PROFILE_SCOPE("Draw Shapes");
@@ -314,16 +313,26 @@ namespace lp
 				zr::Renderer2D::EndScene();
 			}
 		}
+
+		zr::Window& window = zr::Application::GetWindow();
 		zr::Framebuffer::BindDefault();
+		zr::RenderCommand::SetViewportSize(window.getWidth(), window.getHeight());
 		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color);
 		zr::RenderCommand::SetClearColor(.3f, .3f, 0.3f, 1.f);
-
-		//mGame->draw(mCameraController->getCamera()->getViewProjectionMatrix());
 	}
 
 	void HUDLayer::onImGuiRender()
 	{
 		ZR_PROFILER_FUNCTION();
+
+		static bool showViewer = true;
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("View")) {
+				ImGui::MenuItem("Show Viewer", nullptr, &showViewer);
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 
 		ImGui::Begin("Settings");
 		{
@@ -377,51 +386,101 @@ namespace lp
 				mQuad.setDepthLevel(quadDepthLevel);
 			}
 
-			drawEditorWindow(mFramebuffer, mEditViewCanReceiveInput);
+			if (showViewer) drawEditorWindow(mViewer, showViewer);
 
 			ImGui::End();
 		}
 	}
 
-	void HUDLayer::drawEditorWindow(const zr::Ref<zr::Framebuffer>& framebuffer, bool& canReceiveInput)
+	void HUDLayer::drawEditorWindow(zr::Ref<zr::Viewer>& viewer, bool& open)
 	{
+		auto& framebuffer = viewer->getFramebuffer();
+
+		unsigned windowFlags =
+			ImGuiWindowFlags_MenuBar |
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoScrollbar |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoNav |
+			ImGuiWindowFlags_NoBackground;
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-		ImGui::Begin("View##edit_view", (bool*)false, ImGuiWindowFlags_NoCollapse);
-		{
-			auto windowFound = ImGui::FindWindowByName("View##edit_view");
-			if (windowFound) {
-				ImGuiContext* context = ImGui::GetCurrentContext();
-				canReceiveInput = context && context->HoveredWindow && windowFound->ID == context->HoveredWindow->ID && !windowFound->Collapsed;
-			}
-			else {
-				canReceiveInput = false;
-			}
-
-			ImVec2& pos = ImGui::GetCursorScreenPos();
-			ImVec2 pos0 = ImGui::GetWindowContentRegionMin();
-			ImVec2 pos1 = ImGui::GetWindowContentRegionMax();
-
-			ImVec2 avail = ImGui::GetContentRegionAvail();
-			//std::cout << "avail = " << avail.x << " " << avail.y << "\n";
-
-			auto& framebufferSize = framebuffer->getPixelSize();
-
-			//if (avail.x != framebufferSize.x || avail.y != framebufferSize.y) {
-			//	/*mFramebufferSize.x = avail.x;
-			//	mFramebufferSize.y = avail.y;*/
-			//	zr::WindowResizeEvent e(mFramebufferSize.x, mFramebufferSize.y);
-			//	mCameraController->onEvent(e);
-			//}
-
-			//ImVec2 size(pos1.x - pos0.x, pos1.y - pos0.y);
-			ImVec2 size(pos1.x - pos0.x, pos1.y - pos0.y);
-
-			//ImGui::Text("WindowPosition: (%f, %f)\nPos0: (%f, %f)\nPos1: (%f, %f)", pos.x, pos.y, pos0.x, pos0.y, pos1.x, pos1.y);
-
-			ImGui::GetWindowDrawList()->AddImage((void*)(unsigned*)mFramebuffer->getTextureHandle(), pos, ImVec2(pos.x + size.x, pos.y + size.y), { 0.f, 1.f }, { 1.f, 0.f });
+		if (!ImGui::Begin("View##edit_view", &open, windowFlags)) {
 			ImGui::End();
+			ImGui::PopStyleVar();
+			return;
 		}
+
 		ImGui::PopStyleVar();
+
+
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("Menu")) {
+				if (ImGui::BeginMenu("Options")) {
+					static bool enableRotation = false;
+					if (ImGui::Checkbox("Enable Z Rotation", &enableRotation)) {
+						mViewer->getCameraController()->enableRotation(true);
+					}
+
+					const char* cameraOptions[] = { "Orthographic Camera", "Perspective Camera" };
+					static const char* cameraOptionSelected = cameraOptions[0];
+					if (ImGui::BeginCombo("Camera", cameraOptionSelected)) {
+						for (unsigned i = 0; i < 2; ++i) {
+							bool selected = cameraOptionSelected == cameraOptions[i];
+							if (ImGui::Selectable(cameraOptions[i], selected)) cameraOptionSelected = cameraOptions[i];
+							if (selected) ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
+					}
+
+					ImGui::Separator();
+
+					static int framebufferSize[] = { (int)framebuffer->getProperties().Width, (int)framebuffer->getProperties().Height };
+					static std::pair<unsigned, unsigned> framebufferLimits = zr::Framebuffer::GetMaxViewportSize();
+					if (ImGui::DragInt("Framebuffer Width", &framebufferSize[0], 1.f, 1, framebufferLimits.first)) {
+						framebuffer->setSize((unsigned)framebufferSize[0], (unsigned)framebufferSize[1]);
+					}
+
+					if (ImGui::DragInt("Framebuffer Height", &framebufferSize[1], 1.f, 1, framebufferLimits.second)) {
+						framebuffer->setSize((unsigned)framebufferSize[0], (unsigned)framebufferSize[1]);
+					}
+
+					static int msaaLevel = framebuffer->getProperties().getMSAASamples() == 0 ? 0 : (int)std::log2f((float)framebuffer->getProperties().getMSAASamples());
+					if (ImGui::Combo("MSSA", &msaaLevel, "Disabled\0x2\0x4\0x8\0x16\0\0")) {
+						unsigned sampleCount = msaaLevel == 0 ? 0 : (unsigned)std::pow(2U, msaaLevel - 1);
+						unsigned actualValueSet = framebuffer->setMSAASamples((unsigned)msaaLevel);
+						if (actualValueSet != (unsigned)msaaLevel) {
+							ZR_IMGUI_CONSOLE_ERROR("Can't set framebuffer multi-sample anti-aliasing level to %d. Set instead to %d.", msaaLevel, actualValueSet);
+						}
+					}
+
+					ImGui::EndMenu();
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Close Window")) open = false;
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+
+		bool canReceiveInput = false;
+		auto windowFound = ImGui::FindWindowByName("View##edit_view");
+		if (windowFound) {
+			ImGuiContext* context = ImGui::GetCurrentContext();
+			canReceiveInput = context && context->HoveredWindow && windowFound->ID == context->HoveredWindow->ID && !windowFound->Collapsed;
+		}
+		viewer->mIsEditable = canReceiveInput;
+
+		ImVec2 avail = ImGui::GetContentRegionAvail();
+		auto& renderWindowSize = viewer->getRenderWindowSize();
+
+		if (avail.x != renderWindowSize.x || avail.y != renderWindowSize.y) {
+			viewer->onEvent(zr::RenderWindowResizeEvent((unsigned)avail.x, (unsigned)avail.y));
+		}
+
+		ImVec2& pos = ImGui::GetCursorScreenPos();
+		ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)framebuffer->getTextureHandle(), pos, ImVec2(pos.x + avail.x, pos.y + avail.y), { 0.f, 1.f }, { 1.f, 0.f });
+		ImGui::End();
 	}
 
 	void HUDLayer::onEvent(zr::Event& e)
@@ -432,30 +491,11 @@ namespace lp
 		}
 
 		if (e.getType() == zr::EventType::WindowResize) {
-			/*zr::WindowResizeEvent ev(mFramebufferSize.x, mFramebufferSize.y);
-			mCameraController->onEvent(ev);*/
-			mCameraController->onEvent(e);
-		}
-		else if (mEditViewCanReceiveInput) {
-			/*zr::WindowResizeEvent ev(mFramebufferSize.x, mFramebufferSize.y);
-			mCameraController->onEvent(ev);*/
-			mCameraController->onEvent(e);
-		}
-
-		if (e.getType() == zr::EventType::WindowResize) {
-		/*	auto& framebufferSize = mFramebuffer->getPixelSize();*/
 			const zr::WindowResizeEvent& resizeEvent = dynamic_cast<zr::WindowResizeEvent&>(e);
-			//mCameraController->getCamera()->setSize(framebufferSize.x, framebufferSize.y);
 			viewportUpdate(resizeEvent.getWidth(), resizeEvent.getHeight());
 		}
 
-		if (e.getType() == zr::EventType::KeyPressed) {
-			const zr::KeyPressedEvent& keyEvent = dynamic_cast<zr::KeyPressedEvent&>(e);
-
-			if (keyEvent.getKeyCode() == (int)zr::Keyboard::Space) {
-				//mGame->reset();
-			}
-		}
+		mViewer->onEvent(e);
 	}
 
 	void HUDLayer::onViewportUpdate(const glm::vec2& viewportSize)

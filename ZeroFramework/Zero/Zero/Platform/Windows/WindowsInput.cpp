@@ -4,6 +4,8 @@
 #include "Zero/Core/Application.h"
 #include "WindowsInput.h"
 
+#include "GLFW/glfw3.h"
+
 namespace zr
 {
 	Scope<Input> Input::sInstance = CreateScope<WindowsInput>();
@@ -32,7 +34,7 @@ namespace zr
 
 	std::pair<float, float> WindowsInput::getMousePositionImpl()
 	{
-		return std::make_pair(getMouseX(), getMouseY());
+		return { (float)GetMouseX(), (float)GetMouseY() };
 	}
 
 	float WindowsInput::getMouseXImpl()

@@ -75,7 +75,7 @@ namespace zr
 					ShaderDataTypeToOpenGLBaseType(element.Type),	// type of each component
 					element.Normalized ? GL_TRUE : GL_FALSE,		// whether or not to normalized fixed point values
 					layout.getStride(),								// stride in bytes. if 0 then is thighly packed
-					(const void*)element.Offset));					// offset from very first byte on the buffer
+					(const void*)(uintptr_t)element.Offset));		// offset from very first byte on the buffer
 			}
 			if (element.Divisor != 0U) {
 				GL_ERR_CHECK(glVertexAttribDivisor(index, element.Divisor));

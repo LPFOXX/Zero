@@ -34,6 +34,7 @@
 #include "Zero/Renderer/Text.h"
 #include "Zero/Renderer/Sprite.h"
 #include "Zero/Renderer/ViewportDependable.h"
+#include "Zero/Renderer/Viewer.hpp"
 
 // ----- Drawables ----------
 #include "Zero/Renderer/Drawable.hpp"

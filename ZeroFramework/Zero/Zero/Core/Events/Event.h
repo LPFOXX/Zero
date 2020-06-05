@@ -21,7 +21,10 @@ namespace zr
 		MouseMove,				/**< */
 		MouseScroll,			/**< */
 
-		ApplicationEvent
+		ApplicationEvent,
+
+		RenderWindowResize,
+		RenderWindowFramebufferResize
 	};
 	
 	enum EventFamily
@@ -29,7 +32,7 @@ namespace zr
 		None = 0,
 		ApplicationEvent	= 1 << 0,
 		InputEvent		 	= 1 << 1,
-		KeyboadEvent		= 1 << 2,
+		KeyboardEvent		= 1 << 2,
 		MouseEvent			= 1 << 3,
 		MouseButtonEvent	= 1 << 4
 	};

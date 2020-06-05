@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "Zero/Core/Core.h"
 #include "Zero/Renderer/Framebuffer.h"
+#include "Zero/Renderer/Viewer.hpp"
 #include "Drawable2D.hpp"
 
 #include "BatchManager.h"
@@ -32,6 +33,7 @@ namespace zr
 		static void Shutdown();
 
 		static void BeginScene(const Ref<OrthographicCamera>& camera);
+		static void BeginScene(const Ref<Viewer>& viewer);
 		static void BeginScene(const Ref<OrthographicCamera>& camera, const Ref<Framebuffer>& framebuffer);
 		static void EndScene();
 

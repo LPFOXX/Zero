@@ -233,7 +233,7 @@ namespace zr
 
 	void ImGuiLayer::showMainMenuBar()
 	{
-		if (ImGui::BeginMenuBar()) {
+		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("Docking")) {
 				// Disabling fullscreen would allow the window to be moved to the front of other windows,
 				// which we can't undo at the moment without finer window depth/z control.
@@ -250,8 +250,7 @@ namespace zr
 				}*/
 				ImGui::EndMenu();
 			}
-
-			ImGui::EndMenuBar();
+			ImGui::EndMainMenuBar();
 		}
 	}
 }
