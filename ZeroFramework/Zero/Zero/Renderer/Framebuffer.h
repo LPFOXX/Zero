@@ -21,27 +21,56 @@ namespace zr
 			RGBA32F
 		};
 
-		struct FramebufferProperties
+		struct Properties
 		{
-			FramebufferProperties() :
+			Properties() :
 				Width(1280),
-				Height(600),
-				MSSALevel(0)
+				Height(720),
+				mMSAASamples(0),
+				mMaxMSAASamplesSupported(0)
 			{
 
 			}
 
-			FramebufferProperties(unsigned width, unsigned height, unsigned mssaLevel) :
+			Properties(unsigned width, unsigned height, unsigned msaaSamples) :
 				Width(width),
 				Height(height),
-				MSSALevel(mssaLevel)
+				mMSAASamples(msaaSamples),
+				mMaxMSAASamplesSupported(0)
 			{
 
+			}
+
+			unsigned getMaxMSAASamplesSupported() const
+			{
+				return mMaxMSAASamplesSupported;
+			}
+
+			void setMaxMSAASamplesSupported(unsigned maxSamples)
+			{
+				mMaxMSAASamplesSupported = maxSamples;
+				setMSAASamples(mMSAASamples);
+			}
+
+			unsigned getMSAASamples() const
+			{
+				return mMSAASamples;
+			}
+
+			void setMSAASamples(unsigned sampleCount)
+			{
+				mMSAASamples = sampleCount == 0 ? 1 : sampleCount;
+				if (mMSAASamples > mMaxMSAASamplesSupported) {
+					mMSAASamples = mMaxMSAASamplesSupported;
+				}
 			}
 
 			unsigned Width;
 			unsigned Height;
-			unsigned MSSALevel;
+
+		private:
+			unsigned mMSAASamples;
+			unsigned mMaxMSAASamplesSupported;
 		};
 
 		/**
@@ -55,18 +84,40 @@ namespace zr
 		Framebuffer();
 		virtual ~Framebuffer();
 
-		static void BindDefault();
-
 		virtual void draw() const = 0;
 		virtual void blit() const = 0;
-
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
-
 		virtual unsigned getTextureHandle() const = 0;
-
 		virtual const glm::vec2& getPixelSize() const = 0;
+		virtual const Properties& getProperties() const = 0;
+		virtual void setSize(unsigned width, unsigned height) = 0;
+		virtual void setSize(const glm::vec2& size)
+		{
+			if (size.x < 0.f || size.y < 0.f) return;
 
-		static Ref<Framebuffer> Create(const FramebufferProperties& props = FramebufferProperties());	
+			setSize((unsigned)size.x, (unsigned)size.y);
+		}
+
+		/**
+		* \brief Sets the MSAA (Multi-sample anti-aliasing) level for this framebuffer.
+		*
+		* \param msaaLevel The antialiasing level.
+		* - 1 - (=1)  single sample
+		* - 2 - (=2)  two samples
+		* - 4 - (=4)  four samples
+		* - 8 - (=8)  eight samples
+		* - 16 - (=16) 16 samples
+		* - .
+		* - .
+		* - .
+		*/
+		virtual unsigned setMSAASamples(unsigned msaaLevel) = 0;
+
+	public:
+		static Ref<Framebuffer> Create(const Properties& props = Properties());
+		static void BindDefault();
+		static unsigned GetMaxSamples();
+		static std::pair<unsigned, unsigned> GetMaxViewportSize();
 	};
 };

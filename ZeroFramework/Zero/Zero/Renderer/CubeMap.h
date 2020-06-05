@@ -44,5 +44,7 @@ namespace zr
 		virtual void render(const glm::mat4& viewProjectionMatrix) = 0;
 
 		static Ref<CubeMap> Create();
+
+		static unsigned GetMaxTextureSize();
 	};
 }

@@ -40,10 +40,12 @@ namespace zr
 
 		virtual void render(const glm::mat4& viewProjectionMatrix) override;
 
-
 		// Inherited via CubeMap
 		virtual void bind() const override;
 		virtual void unbind() const override;
+
+	public:
+		static unsigned GetMaxTextureSize();
 
 	private:
 		void genTexture();

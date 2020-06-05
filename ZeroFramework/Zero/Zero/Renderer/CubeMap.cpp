@@ -42,4 +42,30 @@ namespace zr
 		}
 		return nullptr;
 	}
+
+	unsigned CubeMap::GetMaxTextureSize()
+	{
+		switch (Renderer::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				return 16;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				return 16;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				return OpenGLCubeMap::GetMaxTextureSize();
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				return 16;
+			}
+			default:
+			break;
+		}
+
+		return 16;
+	}
 }

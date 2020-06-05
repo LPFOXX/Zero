@@ -39,7 +39,57 @@ namespace zr
 		}
 	}
 
-	Ref<Framebuffer> Framebuffer::Create(const FramebufferProperties& props)
+	unsigned Framebuffer::GetMaxSamples()
+	{
+		switch (Renderer::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				return 1;
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				return 1;
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				return OpenGLFramebuffer::GetMaxSamples();
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				return 1;
+			}
+			default:
+			break;
+		}
+		return 1;
+	}
+
+	std::pair<unsigned, unsigned> Framebuffer::GetMaxViewportSize()
+	{
+		switch (Renderer::GetAPI()) {
+			case RendererAPI::API::None:
+			{
+				return { 1280, 720 };
+			}
+			case RendererAPI::API::Direct3D:
+			{
+				return { 1280, 720 };
+			}
+			case RendererAPI::API::OpenGL:
+			{
+				return OpenGLFramebuffer::GetMaxViewportSize();
+			}
+			case RendererAPI::API::Vulkan:
+			{
+				return { 1280, 720 };
+			}
+			default:
+			break;
+		}
+		return { 1280, 720 };
+	}
+
+	Ref<Framebuffer> Framebuffer::Create(const Properties& props)
 	{
 		switch (Renderer::GetAPI()) {
 			case RendererAPI::API::None:

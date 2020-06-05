@@ -129,6 +129,7 @@ namespace zr
 		GL_ERR_CHECK(glGenTextures(1, &mTextureId));
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureId));
 
+		/// TODO: check if texture can fit
 		std::unique_ptr<unsigned char> data;
 		for (unsigned i = 0; i < faces.size(); i++) {
 			int width, height, nrChannels;
@@ -205,5 +206,12 @@ namespace zr
 	void OpenGLCubeMap::unbind() const
 	{
 		GL_ERR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
+	}
+
+	unsigned OpenGLCubeMap::GetMaxTextureSize()
+	{
+		int size;
+		GL_ERR_CHECK(glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &size));
+		return size;
 	}
 }
