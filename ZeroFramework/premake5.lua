@@ -516,6 +516,7 @@ project "ZeroFramework"
         "Zero",
         "Zero/Zero",
         "Zero/vendor/assimp/include",
+        "Zero/vendor/entt/src/entt",
         "Zero/vendor/freetype/include",
         "Zero/vendor/glad/include",
         "Zero/vendor/glfw/include",

@@ -48,7 +48,9 @@ out/
 .vs/
 
 # Resources folder
-resources
+resources/fonts/
+resources/models/
+resources/*.*
 
 # Visual Studio solution and projet config files 
 **/*.sln
@@ -57,4 +59,4 @@ resources
 **/*.vcxproj.filters
 
 # Profiling data files
-*.json
+**/*.json

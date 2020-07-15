@@ -26,7 +26,7 @@ namespace zr
 		public:
 			using EventCallback = std::function<void(Event&)>;
 			
-			static Scope<Window> Create(const WindowConfig& wc = WindowConfig());
+			static Scope<Window> Create(const WindowConfig& wc);
 			virtual ~Window() {};
 			
 			virtual void onUpdate() = 0;

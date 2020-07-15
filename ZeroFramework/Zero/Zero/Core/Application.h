@@ -12,7 +12,7 @@ namespace zr
 	class Application
 	{
 	public:
-		Application();
+		explicit Application(const std::string& windowTitle);
 		virtual ~Application();
 
 		void onEvent(Event& e);

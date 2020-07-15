@@ -17,15 +17,14 @@ namespace zr
 	Application* Application::sInstance = nullptr;
 	Scope<Clock> Application::sClock = nullptr;
 
-	Application::Application()
+	Application::Application(const std::string& windowTitle)
 	{
 		ZR_PROFILER_FUNCTION();
 
 		Application::sInstance = this;
-		/**
-		TODO: manage window size better
-		*/
-		mWindow = Window::Create();
+		WindowConfig windowConfigurations;
+		windowConfigurations.Title = windowTitle;
+		mWindow = Window::Create(windowConfigurations);
 		mWindow->setEventCallback(std::bind(&Application::onEvent, this, std::placeholders::_1));
 
 		Application::sClock = CreateScope<Clock>();
@@ -108,9 +107,9 @@ namespace zr
 			if (!mIsMinimized) {
 				ZR_PROFILER_SCOPE("LayerStack onUpdates");
 
-				for (Layer* l : mLayerStack) {
-					l->onUpdate(elapsedTime);
-				}
+			}
+			for (Layer* l : mLayerStack) {
+				l->onUpdate(elapsedTime);
 			}
 
 			mImGuiLayer->begin();

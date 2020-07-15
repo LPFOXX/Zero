@@ -30,9 +30,11 @@ namespace lp
 	{
 		ZR_PROFILER_FUNCTION();
 
+		const zr::Window& window = zr::Application::GetWindow();
+
 		mViewer = zr::CreateRef<zr::Viewer>();
 		mViewer->setCameraController(new zr::OrthographicCameraController);
-		mViewer->setFramebuffer(zr::Framebuffer::Create({ 1920, 1080, 8 }));
+		mViewer->setFramebuffer(zr::Framebuffer::Create({ window.getWidth(), window.getHeight(),  8 }));
 
 		mViewer->getInput()
 			->map(zr::CameraController::Actions::MoveCameraRight, zr::Keyboard::A)
@@ -171,7 +173,6 @@ namespace lp
 		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
 		//this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mGame));
 
-		zr::Window& window = zr::Application::GetWindow();
 		viewportUpdate(window.getWidth(), window.getHeight());
 	}
 
@@ -325,32 +326,12 @@ namespace lp
 	{
 		ZR_PROFILER_FUNCTION();
 
-		static bool showViewer = true;
-		if (ImGui::BeginMainMenuBar()) {
-			if (ImGui::BeginMenu("View")) {
-				ImGui::MenuItem("Show Viewer", nullptr, &showViewer);
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
 		ImGui::Begin("Settings");
 		{
 			static glm::vec2 fpsTextPosition(mText->getPosition());
 			if (ImGui::DragFloat2("FPS text Position", &fpsTextPosition[0])) {
 				mText->setPosition(fpsTextPosition.x, fpsTextPosition.y);
 			}
-
-			/*static glm::vec2 point0(0.f, 0.f);
-			if (ImGui::DragFloat2("Point 0", &point0.x)) {
-				mLine->setPoint0(point0);
-			}*/
-
-			/*ImGui::Checkbox("Automatic Point 1", &mAutomatePoint1);
-			ImGui::Checkbox("Automatic Points", &mAutomaticC);
-			if (ImGui::DragFloat2("Point 1", &mPoint1.x)) {
-				mLine->setPoint1(mPoint1);
-			}*/
 
 			ImGui::DragFloat("Line Length", &mLength, 0.1f, 0.1f, 5000.f);
 
@@ -386,101 +367,8 @@ namespace lp
 				mQuad.setDepthLevel(quadDepthLevel);
 			}
 
-			if (showViewer) drawEditorWindow(mViewer, showViewer);
-
 			ImGui::End();
 		}
-	}
-
-	void HUDLayer::drawEditorWindow(zr::Ref<zr::Viewer>& viewer, bool& open)
-	{
-		auto& framebuffer = viewer->getFramebuffer();
-
-		unsigned windowFlags =
-			ImGuiWindowFlags_MenuBar |
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoScrollbar |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoNav |
-			ImGuiWindowFlags_NoBackground;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-		if (!ImGui::Begin("View##edit_view", &open, windowFlags)) {
-			ImGui::End();
-			ImGui::PopStyleVar();
-			return;
-		}
-
-		ImGui::PopStyleVar();
-
-
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu("Menu")) {
-				if (ImGui::BeginMenu("Options")) {
-					static bool enableRotation = false;
-					if (ImGui::Checkbox("Enable Z Rotation", &enableRotation)) {
-						mViewer->getCameraController()->enableRotation(true);
-					}
-
-					const char* cameraOptions[] = { "Orthographic Camera", "Perspective Camera" };
-					static const char* cameraOptionSelected = cameraOptions[0];
-					if (ImGui::BeginCombo("Camera", cameraOptionSelected)) {
-						for (unsigned i = 0; i < 2; ++i) {
-							bool selected = cameraOptionSelected == cameraOptions[i];
-							if (ImGui::Selectable(cameraOptions[i], selected)) cameraOptionSelected = cameraOptions[i];
-							if (selected) ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}
-
-					ImGui::Separator();
-
-					static int framebufferSize[] = { (int)framebuffer->getProperties().Width, (int)framebuffer->getProperties().Height };
-					static std::pair<unsigned, unsigned> framebufferLimits = zr::Framebuffer::GetMaxViewportSize();
-					if (ImGui::DragInt("Framebuffer Width", &framebufferSize[0], 1.f, 1, framebufferLimits.first)) {
-						framebuffer->setSize((unsigned)framebufferSize[0], (unsigned)framebufferSize[1]);
-					}
-
-					if (ImGui::DragInt("Framebuffer Height", &framebufferSize[1], 1.f, 1, framebufferLimits.second)) {
-						framebuffer->setSize((unsigned)framebufferSize[0], (unsigned)framebufferSize[1]);
-					}
-
-					static int msaaLevel = framebuffer->getProperties().getMSAASamples() == 0 ? 0 : (int)std::log2f((float)framebuffer->getProperties().getMSAASamples());
-					if (ImGui::Combo("MSSA", &msaaLevel, "Disabled\0x2\0x4\0x8\0x16\0\0")) {
-						unsigned sampleCount = msaaLevel == 0 ? 0 : (unsigned)std::pow(2U, msaaLevel - 1);
-						unsigned actualValueSet = framebuffer->setMSAASamples((unsigned)msaaLevel);
-						if (actualValueSet != (unsigned)msaaLevel) {
-							ZR_IMGUI_CONSOLE_ERROR("Can't set framebuffer multi-sample anti-aliasing level to %d. Set instead to %d.", msaaLevel, actualValueSet);
-						}
-					}
-
-					ImGui::EndMenu();
-				}
-				ImGui::Separator();
-				if (ImGui::MenuItem("Close Window")) open = false;
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-
-		bool canReceiveInput = false;
-		auto windowFound = ImGui::FindWindowByName("View##edit_view");
-		if (windowFound) {
-			ImGuiContext* context = ImGui::GetCurrentContext();
-			canReceiveInput = context && context->HoveredWindow && windowFound->ID == context->HoveredWindow->ID && !windowFound->Collapsed;
-		}
-		viewer->mIsEditable = canReceiveInput;
-
-		ImVec2 avail = ImGui::GetContentRegionAvail();
-		auto& renderWindowSize = viewer->getRenderWindowSize();
-
-		if (avail.x != renderWindowSize.x || avail.y != renderWindowSize.y) {
-			viewer->onEvent(zr::RenderWindowResizeEvent((unsigned)avail.x, (unsigned)avail.y));
-		}
-
-		ImVec2& pos = ImGui::GetCursorScreenPos();
-		ImGui::GetWindowDrawList()->AddImage((void*)(uintptr_t)framebuffer->getTextureHandle(), pos, ImVec2(pos.x + avail.x, pos.y + avail.y), { 0.f, 1.f }, { 1.f, 0.f });
-		ImGui::End();
 	}
 
 	void HUDLayer::onEvent(zr::Event& e)

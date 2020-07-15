@@ -20,10 +20,6 @@ namespace lp
 		virtual void onEvent(zr::Event& e) override;
 
 	private:
-		//void drawEditorWindow(const zr::Ref<zr::Framebuffer>& framebuffer, bool& canReceiveInput);
-		void drawEditorWindow(zr::Ref<zr::Viewer>& viewer, bool& open);
-
-	private:
 		/// Viewer Things
 		zr::Ref<zr::Viewer> mViewer;
 

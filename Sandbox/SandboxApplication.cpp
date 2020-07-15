@@ -12,7 +12,7 @@
 namespace lp
 {
 	SandboxApplication::SandboxApplication() :
-		zr::Application()
+		zr::Application("ZeRo")
 	{
 		ZR_PROFILER_FUNCTION();
 

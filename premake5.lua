@@ -82,3 +82,58 @@ project "Sandbox"
 	links { 
 		"ZeroFramework"
 	}
+
+project "ZeroEditor"
+	kind "ConsoleApp"
+	language "C++"
+    cppdialect "C++11"
+	staticruntime "on"
+	
+	targetdir ("out/" .. outputdir .. "/%{prj.name}")
+    objdir ("int/" .. outputdir .. "/%{prj.name}")
+
+	pchheader "pch.hpp"
+	pchsource "ZeroEditor/pch.cpp"
+
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+		"IMGUI_IMPL_OPENGL_LOADER_GLAD",
+		"SFML_STATIC"
+	}
+
+	filter "configurations:Debug"
+		defines { "DEBUG" }
+		runtime "Debug"
+		symbols "On"
+	filter {}
+	
+	filter "configurations:Release"
+		defines { "NDEBUG" }
+		runtime "Release"
+		optimize "On"
+	filter {}
+
+	includedirs {
+		"ZeroFramework",
+		"%{IncludeDirs.assimp}",
+		"%{IncludeDirs.freetype}",
+		"%{IncludeDirs.glm}",
+		"%{IncludeDirs.glfw}",
+		"%{IncludeDirs.imgui}",
+		"%{IncludeDirs.lua}",
+		"%{IncludeDirs.rttr}",
+		"%{IncludeDirs.sfml}",
+		"%{IncludeDirs.spdlog}",
+		"ZeroEditor"
+	}
+
+	files {
+		"ZeroEditor/**.h",
+		"ZeroEditor/**.hpp",
+		"ZeroEditor/**.cpp",
+		"ZeroEditor/**.inl",
+	}
+
+	links { 
+		"ZeroFramework"
+	}
