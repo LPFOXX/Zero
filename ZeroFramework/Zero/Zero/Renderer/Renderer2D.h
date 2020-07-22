@@ -42,12 +42,14 @@ namespace zr
 
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float angle, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
+		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
 
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor = glm::vec2(1.f, 1.f), const glm::vec4& tintingColor = glm::vec4(1.f, 1.f, 1.f, 1.f));
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor = glm::vec2(1.f, 1.f), const glm::vec4& tintingColor = glm::vec4(1.f, 1.f, 1.f, 1.f));
 
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float angle, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor = glm::vec2(1.f, 1.f), const glm::vec4& tintingColor = glm::vec4(1.f, 1.f, 1.f, 1.f));
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor = glm::vec2(1.f, 1.f), const glm::vec4& tintingColor = glm::vec4(1.f, 1.f, 1.f, 1.f));
+		static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, const glm::vec2& textureScalingFactor = glm::vec2(1.f, 1.f), const glm::vec4& tintingColor = glm::vec4(1.f, 1.f, 1.f, 1.f));
 
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float angle, const std::vector<glm::vec4>& colors, const glm::vec2& textureCoordinates, unsigned textureId);
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const std::vector<glm::vec4>& colors, const glm::vec2& textureCoordinates, unsigned textureId);
@@ -57,6 +59,7 @@ namespace zr
 
 		static void DrawShape(const Ref<Shape> shape, const glm::vec2& position, float scale);
 		static void DrawShape(const Ref<Shape> shape, const glm::vec3& position, float scale);
+		static void DrawShape(const Ref<Shape>& shape, const glm::mat4& transform);
 
 		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec2& position, float scale, float angle);
 		static void DrawRotatedShape(const Ref<Shape>& shape, const glm::vec3& position, float scale, float angle);
@@ -64,9 +67,6 @@ namespace zr
 		// -------------- Draw classes ---------------
 		//template <typename VertexType, typename IndexType>
 		static void Draw(const Drawable2D& drawable);
-
-	private:
-		static void DrawShape(const Ref<Shape>& shape, const glm::mat4& transform);
 	};
 
 	/*template<typename VertexType, typename IndexType>

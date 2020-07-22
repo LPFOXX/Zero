@@ -1,6 +1,9 @@
 #pragma once
 
 #include "entt.hpp"
+#include "glm/glm.hpp"
+
+#include "Zero/Core/Clock.h" 
 
 namespace zr
 {
@@ -16,6 +19,11 @@ namespace zr
 		}
 	};*/
 
+	struct Transformable
+	{
+		glm::mat4 Transform;
+	};
+
 	class Scene
 	{
 	public:
@@ -26,6 +34,17 @@ namespace zr
 		}
 
 		virtual ~Scene() = default;
+
+		void onUpdate(const Time& deltaTime)
+		{
+
+		}
+
+		void function()
+		{
+			auto entity = mRegistry.create();
+			//mRegistry.emplace<Transformable>(entity, );
+		}
 
 	private:
 		entt::registry mRegistry;
