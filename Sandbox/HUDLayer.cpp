@@ -47,9 +47,9 @@ namespace lp
 		float windowWidth = (float)zr::Application::GetWindow().getWidth();
 		float windowHeight = (float)zr::Application::GetWindow().getHeight();
 
-		const auto& handler1 = zr::AssetManager<zr::Font>::Get().load("resources/fonts/futura_book_font.ttf");
+		/*const auto& handler1 = zr::AssetManager<zr::Font>::Get().load("resources/fonts/futura_book_font.ttf");
 		const auto& handler2 = zr::AssetManager<zr::Texture2D>::Get().load("resources/textures/Checkerboard.png");
-		const auto& handler3 = zr::AssetManager<zr::Shader>::Get().load("resources/shaders/Texture.glsl");
+		const auto& handler3 = zr::AssetManager<zr::Shader>::Get().load("resources/shaders/Texture.glsl");*/
 		//const auto& handler4 = zr::AssetManager<zr::Model3D>::Get().load("resources/models/nanosuit.obj");
 
 		//const auto& handler5 = zr::AssetManager<zr::Framebuffer>::Get().create("MainFramebuffer", zr::Framebuffer::Properties{ 1280, 720, 8 });
@@ -78,13 +78,13 @@ namespace lp
 
 
 
-		/*for (unsigned i = 3; i <= 27; ++i) {
+		for (unsigned i = 3; i <= 27; ++i) {
 			zr::Ref<zr::RegularShape> shape = zr::CreateRef<zr::RegularShape>(i);
 			shape->setFillColor({ std::abs(std::sin(.8f * i)), .8f, std::abs(std::cos(.3f * i)), 1.f });
 			shape->setOutlineThickness(2.f);
 			shape->setOutlineColor({ std::abs(std::cos(.8f * i)), .8f, std::abs(std::sin(.3f * i)), 1.f });
 			mShapes.emplace_back(shape);
-		}*/
+		}
 
 		mCheckerBoardTexture = zr::Texture2D::Create();
 		mCheckerBoardTexture->loadFromFile("resources/textures/Checkerboard.png", true);
@@ -170,7 +170,7 @@ namespace lp
 		mMultiLine->setVertices({ mA, mB, mC, mD, mE, mA });
 		mMultiLine->setFillColor({ 0.f, 1.f, 1.f, 1.f });
 
-		this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
+		//this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mText));
 		//this->subscribe(static_cast<std::shared_ptr<zr::Observer<glm::vec2>>>(mGame));
 
 		viewportUpdate(window.getWidth(), window.getHeight());
@@ -233,14 +233,14 @@ namespace lp
 
 			zr::Renderer2D::BeginScene(mViewer);
 			{
-				//{
-				//	PROFILE_SCOPE("Draw Background");
-				//	zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 100.f, 100.f }, mCheckerBoardTexture, { 5.f, 5.f });
+				{
+					PROFILE_SCOPE("Draw Background");
+					zr::Renderer2D::DrawQuad({ .0f, .0f, -.2f }, { 100.f, 100.f }, mCheckerBoardTexture, { 5.f, 5.f });
 
 
-				//	//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
-				//	//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
-				//}
+					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.15f }, { 10.f, 10.f }, 0, mOceanTexture, { 10.f, 10.f }, { 1.f, 1.f, 1.f, 1.f });
+					//zr::Renderer2D::DrawQuad({ .0f, .0f, -.1f }, { 10.f, 10.f }, mLogoTexture, { 10.f, 10.f }, { .2f, .3f, .8f, .5f });
+				}
 
 				/*{
 					PROFILE_SCOPE("Draw Quad Class");
@@ -263,16 +263,16 @@ namespace lp
 					mQuad.draw();
 				}*/
 
-				//{
-				//	PROFILE_SCOPE("A bunch of quads");
-				//	for (unsigned i = 0; i < size; ++i) {
-				//		for (unsigned j = 0; j < size; ++j) {
-				//			glm::vec4 quadColor(float(i) / size, float(j) / size, ((float(i) / size) + (float(j) / size)) / 2.f, 1.f);
-				//			//float rotation = time.asSeconds() + (float(i) * 45.f) + (float(j) * 90.f);
-				//			zr::Renderer2D::DrawQuad({ i, j }, { 1.f, 1.f }, quadColor);
-				//		}
-				//	}
-				//}
+				{
+					PROFILE_SCOPE("A bunch of quads");
+					for (unsigned i = 0; i < size; ++i) {
+						for (unsigned j = 0; j < size; ++j) {
+							glm::vec4 quadColor(float(i) / size, float(j) / size, ((float(i) / size) + (float(j) / size)) / 2.f, 1.f);
+							//float rotation = time.asSeconds() + (float(i) * 45.f) + (float(j) * 90.f);
+							zr::Renderer2D::DrawQuad({ i, j }, { 1.f, 1.f }, quadColor);
+						}
+					}
+				}
 
 				{
 					PROFILE_SCOPE("Draw 2 Quads");
@@ -292,12 +292,12 @@ namespace lp
 
 				//zr::Renderer2D::DrawQuad({ 0.f, 0.f, 1.f }, { 10.f, 10.f }, { .2f, .3f, .8f, .1f });
 
-				/*{
+				{
 					PROFILE_SCOPE("Draw Shapes");
 					for (unsigned i = 0U; i < mShapes.size(); ++i) {
-						zr::Renderer2D::DrawRotatedShape(mShapes[i], { i, 0.f }, 1.f, -time.asSeconds() * 15.f);
+						//zr::Renderer2D::DrawRotatedShape(mShapes[i], { i, 0.f }, 1.f, -time.asSeconds() * 15.f);
 					}
-				}*/
+				}
 
 				/*{
 					PROFILE_SCOPE("Draw Line");
@@ -318,8 +318,8 @@ namespace lp
 		zr::Window& window = zr::Application::GetWindow();
 		zr::Framebuffer::BindDefault();
 		zr::RenderCommand::SetViewportSize(window.getWidth(), window.getHeight());
-		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color);
 		zr::RenderCommand::SetClearColor(.3f, .3f, 0.3f, 1.f);
+		zr::RenderCommand::Clear(zr::RendererAPI::ClearBuffers::Color);
 	}
 
 	void HUDLayer::onImGuiRender()

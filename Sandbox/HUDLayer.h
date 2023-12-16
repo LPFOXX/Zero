@@ -48,6 +48,8 @@ namespace lp
 		zr::Quad mQuad;
 		zr::Sprite2D mSprite2D;
 
+		std::vector<zr::Ref<zr::RegularShape>> mShapes;
+
 		// Lua things
 		zr::LuaVM mLuaVM;
 

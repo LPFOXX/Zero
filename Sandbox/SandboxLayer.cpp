@@ -32,11 +32,11 @@ namespace lp
 			zr::MeshData::Animations |
 			zr::MeshData::Materials;
 		std::vector<std::string> modelsToLoad{ {
-				//{"resources/nanosuit/nanosuit.obj"},
-				//{"resources/anim_model/anim_model.dae"},
-				{"resources/iron_man_fixed/iron_man_fixed.obj"},
-				//{"resources/bob_lamp/boblampclean.md5mesh"},
-				//{"resources/teapot3/teapot.obj"}
+				{"resources/nanosuit/nanosuit.obj"},
+				{"resources/anim_model/anim_model.dae"},
+				{"resources/models/iron_man_fixed/iron_man_fixed.obj"},
+				{"resources/bob_lamp/boblampclean.md5mesh"},
+				{"resources/teapot3/teapot.obj"}
 				} };
 
 		for (unsigned i = 0; i < modelsToLoad.size(); ++i) {
@@ -64,12 +64,12 @@ namespace lp
 
 		mCubeMap = zr::CubeMap::Create();
 		bool success = mCubeMap->loadFromFiles({
-			"resources/skybox/right.jpg",
-			"resources/skybox/left.jpg",
-			"resources/skybox/top.jpg",
-			"resources/skybox/bottom.jpg",
-			"resources/skybox/back.jpg",
-			"resources/skybox/front.jpg"
+			"resources/skyboxes/skybox/right.jpg",
+			"resources/skyboxes/skybox/left.jpg",
+			"resources/skyboxes/skybox/top.jpg",
+			"resources/skyboxes/skybox/bottom.jpg",
+			"resources/skyboxes/skybox/back.jpg",
+			"resources/skyboxes/skybox/front.jpg"
 			});
 
 		if (!success) {
@@ -255,7 +255,7 @@ namespace lp
 			zr::Renderer::Submit(mCubeMap, true);
 
 			for (unsigned i = 0; i < mModels.size(); ++i) {
-				glm::mat4& model = glm::mat4(1.f);
+				glm::mat4 model = glm::mat4(1.f);
 				model = glm::translate(model, glm::vec3(10.f * i, 0.f, 0.f));
 				model = glm::scale(model, glm::vec3(mModelScaleFactor, mModelScaleFactor, mModelScaleFactor));
 				mModels[i]->setModelTransform(model);
@@ -339,14 +339,14 @@ namespace lp
 				}
 			}
 			else if (mIsMouseCaptured) {
-				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				glm::vec2 movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
 				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
 				mFPSCamera->processMouseMovement(movementOffset * mCameraSpeed * mLastDeltaTime.asSeconds());
 			}
 			else if (zr::Input::IsMouseButtonPressed(zr::MouseButton::ButtonLeft)) {
-				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				glm::vec2 movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 				//std::cout << "Mouse movement offset: " << movementOffset.x << ", " << movementOffset.y << "\n";
 				//mPerspectiveCamera->move({ movementOffset.x * mCameraSpeed * mLastDeltaTime.count(), movementOffset.y * mCameraSpeed * mLastDeltaTime.count(), 0.f });
@@ -354,7 +354,7 @@ namespace lp
 			}
 
 			if (zr::Input::IsMouseButtonPressed(zr::MouseButton::ButtonRight)) {
-				glm::vec2& movementOffset = zr::MouseMoveEvent::GetMovementOffset();
+				glm::vec2 movementOffset = zr::MouseMoveEvent::GetMovementOffset();
 				e.setHandled();
 			}
 		}
