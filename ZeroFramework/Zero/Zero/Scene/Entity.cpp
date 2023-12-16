@@ -4,17 +4,9 @@
 
 namespace zr
 {
-	Entity::Entity() :
-		mNativeId(entt::null),
-		mRegistry(nullptr)
+	Entity::Entity(Scene* scene, entt::entity nativeId) :
+		mScene{ scene },
+		mNativeId{ nativeId }
 	{
-
-	}
-
-	Entity::Entity(entt::registry& registry, const entt::entity& entity) :
-		mNativeId(entity),
-		mRegistry(&registry)
-	{
-
 	}
 }

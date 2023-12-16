@@ -12,6 +12,9 @@
 #include "Zero/Core/InputCodes.h"
 #include "Zero/Core/Input.h"
 #include "Zero/Core/AssetManager.hpp"
+#include "Zero/Scene/Scene.hpp"
+#include "Zero/Scene/Entity.hpp"
+#include "Zero/Scene/Components.hpp"
 
 // ----- Core (Lua) ---------------
 #include "Zero/Platform/Lua/LuaVM.hpp"

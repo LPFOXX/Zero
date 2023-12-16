@@ -1,51 +1,54 @@
 #pragma once
 
-#include "../Core/Core.h"
 #include "entt.hpp"
+
+#include "../Core/Core.h"
+#include "../Core/UUID.hpp"
+#include "../Scene/Scene.hpp"
 
 namespace zr
 {
 	class Entity
 	{
 	public:
+		Entity(Scene* scene, entt::entity id);
 		virtual ~Entity() = default;
 
 		template <typename ComponentType, typename... Args>
-		ComponentType& attachComponent(Args&&... args)
+		ComponentType& AttachComponent(Args&&... args)
 		{
-			return mRegistry->emplace_or_replace<ComponentType>(mNativeId, std::forward<Args>(args)...);
+			return mScene->mRegistry->emplace_or_replace<ComponentType>(mNativeId, std::forward<Args>(args)...);
 		}
 
 		template <typename ComponentType>
-		void detachComponent()
+		void DetachComponent()
 		{
-			mRegistry->remove_if_exists<ComponentType>(mNativeId);
+			mScene->mRegistry->remove_if_exists<ComponentType>(mNativeId);
 		}
 
 		template <typename ComponentType>
-		ComponentType& getComponent()
+		ComponentType& GetComponent()
 		{
-			return mRegistry->get<ComponentType>(mNativeId);
+			return mScene->mRegistry->get<ComponentType>(mNativeId);
 		}
 
 		template <typename ComponentType>
-		bool hasComponent()
+		bool HasComponent()
 		{
-			return mRegistry->has<ComponentType>(mNativeId);
+			return mScene->mRegistry->has<ComponentType>(mNativeId);
 		}
 
 		operator bool()
 		{
-			return mRegistry->valid(mNativeId);
+			//return mScene->mRegistry->valid(mNativeId);
+			return true;
 		}
 
 	private:
 		friend class Scene;
-		Entity();
-		Entity(entt::registry& registry, const entt::entity& nativeId);
 
 	private:
+		Scene* mScene;
 		entt::entity mNativeId;
-		entt::registry* mRegistry;
 	};
 }

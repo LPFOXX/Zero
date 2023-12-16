@@ -1,52 +1,51 @@
 #pragma once
 
+#include "../Core/Core.h"
+#include "../Core/Clock.h"
 #include "entt.hpp"
-#include "glm/glm.hpp"
-
-#include "Zero/Core/Clock.h" 
 
 namespace zr
 {
-	/*struct Component
-	{
-		Component() = default;
-		Component(const Component&& move) = default;
-		virtual ~Component() = default;
-
-		Component& operator=(const Component&& copy)
-		{
-			return *this;
-		}
-	};*/
-
-	struct Transformable
-	{
-		glm::mat4 Transform;
-	};
-
+	class Entity;
 	class Scene
 	{
 	public:
-		Scene() :
-			mRegistry()
-		{
-
-		}
-
+		Scene();
 		virtual ~Scene() = default;
 
-		void onUpdate(const Time& deltaTime)
-		{
+		Entity CreateEntity();
+		Entity CreateEntity(const std::string& name);
 
+		void DestroyEntity(Entity entity);
+
+		void onUpdate(const Time& elapsedTime);
+
+		template <typename... Components, typename Function>
+		void Each(const Function&& function) const
+		{
+			mRegistry->view<Components...>().each(function);
 		}
 
-		void function()
+		template <typename... Components, typename Function>
+		void Each(const Function&& function)
 		{
-			auto entity = mRegistry.create();
-			//mRegistry.emplace<Transformable>(entity, );
+			mRegistry->view<Components...>().each(function);
+		}
+
+		template <typename... Components>
+		inline decltype(auto) View() const
+		{
+			return mRegistry->view<Components...>();
+		}
+
+		template <typename... Components>
+		inline decltype(auto) View() 
+		{
+			return mRegistry->view<Components...>();
 		}
 
 	private:
-		entt::registry mRegistry;
+		friend class Entity;
+		Ref<entt::registry> mRegistry;
 	};
 }
