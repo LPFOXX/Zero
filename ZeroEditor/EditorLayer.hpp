@@ -20,22 +20,18 @@ namespace lp
 		virtual void onEvent(zr::Event& e) override;
 
 	private:
-		void drawEditorWindow(zr::Ref<zr::Viewer>& viewer, bool& open);
+		bool drawEditorWindow(zr::Ref<zr::Viewer>& viewer, uint32_t count);
 		// Inherited via ViewportResizeListener
 		virtual void onViewportUpdate(const glm::vec2& viewportSize) override;
+		void AddSceneViewer();
 
 	private:
 		/// Viewer Things
-		zr::Ref<zr::Viewer> mViewer;
+		std::vector<zr::Ref<zr::Viewer>> mViewers;
+		//zr::Ref<zr::Viewer> mViewer;
 
 		/// Temp things
 		std::vector<zr::ProfileResult> mProfileResults;
-
-
-		zr::Quad mQuad;
-		zr::Sprite2D mSprite2D;
-
-		// Lua things
-		zr::LuaVM mLuaVM;
+		zr::Ref<zr::Scene> mCurrentScene;
 	};
 }

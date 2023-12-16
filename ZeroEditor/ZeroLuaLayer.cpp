@@ -236,7 +236,7 @@ namespace lp
 				//mEditViewCanReceiveInput = false;
 			}
 
-			ImVec2& pos = ImGui::GetCursorScreenPos();
+			ImVec2 pos = ImGui::GetCursorScreenPos();
 			ImVec2 pos0 = ImGui::GetWindowContentRegionMin();
 			ImVec2 pos1 = ImGui::GetWindowContentRegionMax();
 

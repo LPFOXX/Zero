@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Zero/Zero.h>
 #include <Zero/Zero/Platform/RTTR/TestSprite.h>
 
