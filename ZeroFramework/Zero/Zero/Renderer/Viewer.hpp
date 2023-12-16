@@ -30,7 +30,10 @@ namespace zr
 
 		void onUpdate(const Time& elapsedTime)
 		{
-			mCameraController->onUpdate(elapsedTime);
+			if (mIsEditable)
+			{
+				mCameraController->onUpdate(elapsedTime);
+			}
 		}
 
 		void onEvent(Event& e)
@@ -52,8 +55,8 @@ namespace zr
 		{
 			bind();
 
-			zr::RenderCommand::Clear(bufferBits);
 			zr::RenderCommand::SetClearColor(r, g, b, a);
+			zr::RenderCommand::Clear(bufferBits);
 		}
 
 		void setCameraController(CameraController* cameraController)

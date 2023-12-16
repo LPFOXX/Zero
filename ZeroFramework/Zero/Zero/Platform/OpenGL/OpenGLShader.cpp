@@ -100,14 +100,14 @@ namespace zr
 		std::string source = readFile(filePath);
 		if (source.empty()) return false;
 
-		auto& shaderSources = preProcess(source);
+		auto shaderSources = preProcess(source);
 
 		// Extract name from filepath
 		auto lastSlash = filePath.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
 		auto lastDot = filePath.rfind('.');
 		auto count = lastDot == std::string::npos ? filePath.size() - lastSlash : lastDot - lastSlash;
-		auto& shaderName = filePath.substr(lastSlash, count);
+		auto shaderName = filePath.substr(lastSlash, count);
 
 		bool hasGeometryShader = shaderSources.find(ShaderType::GeometryShader) != shaderSources.end();
 		bool returnResult = false;

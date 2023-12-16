@@ -29,9 +29,6 @@ namespace zr
 			mPosition = position;
 		}
 
-		template <typename... Args>
-		void setPosition(const Args&... args) = 0;
-
 		/**
 		* @brief Gets the center position of the object.
 		*

@@ -66,7 +66,7 @@ namespace zr
 		Ref<VertexBuffer> VBO = VertexBuffer::Create(&v[0].Position.x, static_cast<unsigned>(v.size() * sizeof(MeshData::Vertex)), DrawMode::Static);
 		
 		BufferLayout bl;
-		bl.addElement(BufferElement(ShaderDataType::Float3, "aPosition"));
+		bl.addElement(BufferElement{ ShaderDataType::Float3, "aPosition" });
 
 		if (mProperties.Components & MeshData::Normals) {
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aNormal"));
@@ -112,7 +112,7 @@ namespace zr
 			BufferLayout positionLayout;
 			positionLayout.addElement(BufferElement(ShaderDataType::Float3, "aPosition"));
 			std::vector<float>& p = v.VertexData[MeshData::Positions];
-			Ref<VertexBuffer>& positionVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
+			Ref<VertexBuffer> positionVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
 			positionVBO->setLayout(positionLayout);
 			mVAO->addVertexBuffer(positionVBO);
 		}
@@ -121,7 +121,7 @@ namespace zr
 			BufferLayout bl;
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aNormal"));
 			std::vector<float>& p = v.VertexData[MeshData::Normals];
-			Ref<VertexBuffer>& normalVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
+			Ref<VertexBuffer> normalVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
 			normalVBO->setLayout(bl);
 			mVAO->addVertexBuffer(normalVBO);
 		}
@@ -131,7 +131,7 @@ namespace zr
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aTangent"));
 			bl.addElement(BufferElement(ShaderDataType::Float3, "aBitangent"));
 			std::vector<float>& p = v.VertexData[MeshData::TangentsAndBitangents];
-			Ref<VertexBuffer>& tangentsAndBitangentsVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
+			Ref<VertexBuffer> tangentsAndBitangentsVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
 			tangentsAndBitangentsVBO->setLayout(bl);
 			mVAO->addVertexBuffer(tangentsAndBitangentsVBO);
 		}
@@ -140,7 +140,7 @@ namespace zr
 			BufferLayout bl;
 			bl.addElement(BufferElement(ShaderDataType::Float2, "aTexturesCoordinates"));
 			std::vector<float>& p = v.VertexData[MeshData::TextureCoordinates];
-			Ref<VertexBuffer>& textCoordinatesVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
+			Ref<VertexBuffer> textCoordinatesVBO = VertexBuffer::Create(&p[0], static_cast<unsigned>(p.size() * sizeof(float)), DrawMode::Static);
 			textCoordinatesVBO->setLayout(bl);
 			mVAO->addVertexBuffer(textCoordinatesVBO);
 		}
@@ -170,11 +170,11 @@ namespace zr
 			boneIndicesLayout.addElement(BufferElement(ShaderDataType::Int4, "aBoneIndeces", mAttributeLength));
 			boneWeightsLayout.addElement(BufferElement(ShaderDataType::Float4, "aBoneWeights", mAttributeLength));
 
-			Ref<VertexBuffer>& boneIndicesVBO = VertexBuffer::Create(&boneIndices[0], static_cast<unsigned>(boneIndices.size() * sizeof(unsigned)), DrawMode::Static);
+			Ref<VertexBuffer> boneIndicesVBO = VertexBuffer::Create(&boneIndices[0], static_cast<unsigned>(boneIndices.size() * sizeof(unsigned)), DrawMode::Static);
 			boneIndicesVBO->setLayout(boneIndicesLayout);
 			mVAO->addVertexBuffer(boneIndicesVBO);
 
-			Ref<VertexBuffer>& boneWeightsVBO = VertexBuffer::Create(&boneWeights[0], static_cast<unsigned>(boneWeights.size() * sizeof(float)), DrawMode::Static);
+			Ref<VertexBuffer> boneWeightsVBO = VertexBuffer::Create(&boneWeights[0], static_cast<unsigned>(boneWeights.size() * sizeof(float)), DrawMode::Static);
 			boneWeightsVBO->setLayout(boneWeightsLayout);
 			mVAO->addVertexBuffer(boneWeightsVBO);
 
@@ -191,14 +191,14 @@ namespace zr
 			file.close();*/
 		}
 
-		Ref<IndexBuffer>& EBO = IndexBuffer::Create(&v.Indices[0], static_cast<unsigned>(v.Indices.size()), DrawMode::Static);
+		Ref<IndexBuffer> EBO = IndexBuffer::Create(&v.Indices[0], static_cast<unsigned>(v.Indices.size()), DrawMode::Static);
 		mVAO->setIndexBuffer(EBO);
 
 		// Map textures
 		auto& textures = meshData.getTextures();
 		for (auto& t : textures) {
 			for (auto& imagePath : t.second) {
-				auto& it = std::find_if(modelTextures.begin(), modelTextures.end(), [&imagePath](Ref<Texture2D>& textureRef) {
+				auto it = std::find_if(modelTextures.begin(), modelTextures.end(), [&imagePath](Ref<Texture2D>& textureRef) {
 					return textureRef->getFilePath() == imagePath;
 				});
 
@@ -277,7 +277,7 @@ namespace zr
 	unsigned Mesh::getVertexArrayMaxLayoutIndex() const
 	{
 		auto& vertexBuffers = mVAO->getVertexBuffers();
-		auto& it = std::max_element(vertexBuffers.begin(), vertexBuffers.end(), [](const Ref<VertexBuffer>& a, const Ref<VertexBuffer>& b) {
+		auto it = std::max_element(vertexBuffers.begin(), vertexBuffers.end(), [](const Ref<VertexBuffer>& a, const Ref<VertexBuffer>& b) {
 			return a->getMaxLayoutIndex() > b->getMaxLayoutIndex();
 		});
 		return (*it)->getMaxLayoutIndex();

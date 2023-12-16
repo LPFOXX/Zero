@@ -16,6 +16,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDirs = {}
 IncludeDirs["assimp"] = "ZeroFramework/Zero/vendor/assimp/include"
 IncludeDirs["freetype"] = "ZeroFramework/Zero/vendor/freetype/include"
+IncludeDirs["entt"] = "ZeroFramework/Zero/vendor/entt/src/entt"
 IncludeDirs["glad"] = "ZeroFramework/Zero/vendor/glad/include"
 IncludeDirs["glfw"] = "ZeroFramework/Zero/vendor/glfw/include"
 IncludeDirs["glm"] = "ZeroFramework/Zero/vendor/glm/include"
@@ -31,7 +32,7 @@ include "ZeroFramework"
 project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
 	staticruntime "on"
 	
 	targetdir ("out/" .. outputdir .. "/%{prj.name}")
@@ -61,6 +62,7 @@ project "Sandbox"
 	includedirs {
 		"ZeroFramework",
 		"%{IncludeDirs.assimp}",
+		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.freetype}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.glfw}",
@@ -86,7 +88,7 @@ project "Sandbox"
 project "ZeroEditor"
 	kind "ConsoleApp"
 	language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
 	staticruntime "on"
 	
 	targetdir ("out/" .. outputdir .. "/%{prj.name}")
@@ -116,6 +118,7 @@ project "ZeroEditor"
 	includedirs {
 		"ZeroFramework",
 		"%{IncludeDirs.assimp}",
+		"%{IncludeDirs.entt}",
 		"%{IncludeDirs.freetype}",
 		"%{IncludeDirs.glm}",
 		"%{IncludeDirs.glfw}",

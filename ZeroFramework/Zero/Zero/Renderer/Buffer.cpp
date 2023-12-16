@@ -8,14 +8,6 @@
 
 namespace zr
 {
-	VertexBuffer::VertexBuffer()
-	{
-	}
-
-	VertexBuffer::~VertexBuffer()
-	{
-	}
-
 	Ref<VertexBuffer> VertexBuffer::Create(void* vertices, unsigned size, DrawMode drawMode)
 	{
 		switch (Renderer::GetAPI()) {

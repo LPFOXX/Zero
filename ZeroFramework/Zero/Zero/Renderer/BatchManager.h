@@ -30,7 +30,7 @@ namespace zr
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices)
 		{
 			// search for a batch with enough storage room
-			auto& it = std::find_if(mColoredVertexBatches.begin(), mColoredVertexBatches.end(), [&vertices](const ColoredVertexBatch& batch) {
+			auto it = std::find_if(mColoredVertexBatches.begin(), mColoredVertexBatches.end(), [&vertices](const ColoredVertexBatch& batch) {
 				return batch.hasEnoughRoomFor(vertices);
 			});
 
@@ -49,7 +49,7 @@ namespace zr
 
 		void addVertices(const std::vector<BatchVertexTypes::ColoredVertex>& vertices, const std::vector<unsigned>& verticesIndices, RendererAPI::DrawPrimitive primitiveType)
 		{
-			auto& it = std::find_if(mShapesVertexBatch.begin(), mShapesVertexBatch.end(), [&vertices, &primitiveType](const ShapeVertexBatch& batch) {
+			auto it = std::find_if(mShapesVertexBatch.begin(), mShapesVertexBatch.end(), [&vertices, &primitiveType](const ShapeVertexBatch& batch) {
 				return batch.hasEnoughRoom(vertices, primitiveType);
 			});
 
@@ -77,7 +77,7 @@ namespace zr
 			}
 			else {
 				// search for a batch with enough storage room
-				auto& it = std::find_if(mExtendedVertexBatches.begin(), mExtendedVertexBatches.end(), [&textureId, &vertices, &color](const ExtendedVertexBatch& batch) {
+				auto it = std::find_if(mExtendedVertexBatches.begin(), mExtendedVertexBatches.end(), [&textureId, &vertices, &color](const ExtendedVertexBatch& batch) {
 					return batch.hasEnoughRoomFor(textureId, vertices, color);
 				});
 

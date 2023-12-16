@@ -242,7 +242,7 @@ namespace zr
 	void WindowsWindow::setIcon(const std::string& filePath) const
 	{
 		Image image;
-		image.loadFromFile(filePath, true, true);
+		image.loadFromFile(filePath, false, true);
 		setIcon(image);
 	}
 

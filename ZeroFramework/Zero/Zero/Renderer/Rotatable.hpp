@@ -24,6 +24,12 @@ namespace zr
 			mNeedsRotationUpdate = true;
 		}
 
+		void rotate(float offsetAngle)
+		{
+			mRotationAngle += offsetAngle;
+			mNeedsRotationUpdate = true;
+		}
+
 		inline float getRotationAngle() const
 		{
 			return mRotationAngle;

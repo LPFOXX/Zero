@@ -128,15 +128,17 @@ namespace zr
 			calculateOffsetsAndStride();
 		}
 
-		inline void addElement(BufferElement& element)
+		inline void addElement(const BufferElement&& element)
 		{
 			mElements.push_back(element);
 			calculateOffsetsAndStride();
 		}
+
 		inline unsigned getStride() const
 		{
 			return mStride;
 		}
+
 		inline const std::vector<BufferElement>& getElements() const
 		{
 			return mElements;
@@ -184,8 +186,8 @@ namespace zr
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer();
-		virtual ~VertexBuffer();
+		VertexBuffer() = default;
+		virtual ~VertexBuffer() = default;
 
 		static Ref<VertexBuffer> Create(void* data, unsigned size, DrawMode drawMode);
 

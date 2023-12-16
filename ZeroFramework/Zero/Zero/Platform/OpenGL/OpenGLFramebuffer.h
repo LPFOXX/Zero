@@ -54,7 +54,7 @@ namespace zr
 	public:
 		static void BindDefault();
 		static unsigned GetMaxSamples();
-		static std::pair<unsigned, unsigned> OpenGLFramebuffer::GetMaxViewportSize();
+		static std::pair<unsigned, unsigned> GetMaxViewportSize();
 
 	private:
 		class MultisampledFramebuffer

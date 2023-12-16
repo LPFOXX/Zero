@@ -1,5 +1,7 @@
 #include "../zr_pch.h"
 
+#include "Core/Log.h"
+
 namespace zr
 {
 	template<typename EventDataType>

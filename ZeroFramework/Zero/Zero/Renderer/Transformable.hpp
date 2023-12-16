@@ -24,6 +24,24 @@ namespace zr
 			return mTransform;
 		}
 
+		glm::mat4& getTransformMatrix()
+		{
+			transform();
+			return mTransform;
+		}
+
+		operator const glm::mat4& () const
+		{
+			transform();
+			return mTransform;
+		}
+
+		operator glm::mat4& ()
+		{
+			transform();
+			return mTransform;
+		}
+
 	protected:
 		virtual void transform() const = 0;
 

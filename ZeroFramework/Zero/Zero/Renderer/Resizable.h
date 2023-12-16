@@ -5,12 +5,12 @@ namespace zr
 	class Resizable
 	{
 	public:
-		Resizable::Resizable() :
+		Resizable() :
 			mSize(0.f, 0.f)
 		{
 		}
 
-		Resizable::~Resizable()
+		~Resizable()
 		{
 		}
 
@@ -20,7 +20,7 @@ namespace zr
 		* @param size The size to change the sprite rect into.
 		*
 		*/
-		void Resizable::setSize(const glm::vec2& size)
+		inline void setSize(const glm::vec2& size)
 		{
 			setSize(size.x, size.y);
 		}
@@ -32,7 +32,7 @@ namespace zr
 		* @param height The vertical size to change the sprite rect into.
 		*
 		*/
-		void Resizable::setSize(float width, float height)
+		void setSize(float width, float height)
 		{
 			mSize.x = width;
 			mSize.y = height;
@@ -46,7 +46,7 @@ namespace zr
 		* @return The size of the rect containing the sprite.
 		*
 		*/
-		inline const glm::vec2& Resizable::getSize() const
+		inline const glm::vec2& getSize() const
 		{
 			return mSize;
 		}

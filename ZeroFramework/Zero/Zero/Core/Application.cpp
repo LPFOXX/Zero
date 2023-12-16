@@ -102,7 +102,7 @@ namespace zr
 				mWindow->onUpdate();
 			}*/
 
-			Time& elapsedTime = clock.restart();
+			Time elapsedTime = clock.restart();
 
 			if (!mIsMinimized) {
 				ZR_PROFILER_SCOPE("LayerStack onUpdates");

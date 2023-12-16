@@ -203,7 +203,7 @@ namespace zr
 
 			const NodeAnimation* getNodeAnimation(const std::string& nodeName) const
 			{
-				auto& it = mNodeAnimations.find(nodeName);
+				auto it = mNodeAnimations.find(nodeName);
 				if (it != mNodeAnimations.end()) {
 					return &it->second;
 				}
@@ -325,7 +325,7 @@ namespace zr
 
 			const Animation* getAnimation(const std::string& animationName) const
 			{
-				auto& it = std::find_if(mAnimations.cbegin(), mAnimations.cend(), [&animationName](const Animation& animation) {
+				auto it = std::find_if(mAnimations.cbegin(), mAnimations.cend(), [&animationName](const Animation& animation) {
 					return animation.getName() == animationName;
 				});
 
@@ -338,7 +338,7 @@ namespace zr
 
 			int getAnimationIndex(const std::string& animationName) const
 			{
-				auto& it = std::find_if(mAnimations.begin(), mAnimations.end(), [&animationName](const Animation& animation) {
+				auto it = std::find_if(mAnimations.begin(), mAnimations.end(), [&animationName](const Animation& animation) {
 					return animation.getName() == animationName;
 				});
 

@@ -43,7 +43,7 @@ namespace zr
 		mVertices.clear();
 		mIndices.clear();
 
-		auto& vertices = Line::ComputeEdgesVertices(mA, mB, mThickness);
+		auto vertices = Line::ComputeEdgesVertices(mA, mB, mThickness);
 
 		mVertices.insert(mVertices.end(), vertices.begin(), vertices.end());
 		mIndices.insert(mIndices.end(), { 0, 1, 2, 2, 3, 0 });

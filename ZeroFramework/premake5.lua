@@ -1,7 +1,7 @@
 project "ASSIMP"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
     
     defines {
@@ -290,7 +290,7 @@ project "GLFW"
 project "ImGui"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
 
     defines {
@@ -314,14 +314,14 @@ project "ImGui"
 
     filter "system:windows"
         systemversion "latest"
-        cppdialect "C++11"
+        cppdialect "C++20"
         staticruntime "On"
     filter {}
 
     filter "system:linux"
         pic "On"
         systemversion "latest"
-        cppdialect "C++11"
+        cppdialect "C++20"
         staticruntime "On"
     filter {}
 
@@ -340,7 +340,7 @@ project "ImGui"
 project "Lua"
     kind "StaticLib"
     language "C"
-    --cppdialect "C++11"
+    --cppdialect "C++20"
     staticruntime "on"
 
     targetdir ("out/" .. outputdir .. "/%{prj.name}")
@@ -374,7 +374,7 @@ project "Lua"
 project "RTTR"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
 
     targetdir ("out/" .. outputdir .. "/%{prj.name}")
@@ -411,7 +411,7 @@ project "RTTR"
 project "SFML"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
 
     targetdir ("out/" .. outputdir .. "/%{prj.name}")
@@ -459,7 +459,7 @@ project "SFML"
 project "SPDLOG"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
 
     defines {
@@ -498,7 +498,7 @@ project "SPDLOG"
 project "ZeroFramework"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++11"
+    cppdialect "C++20"
     staticruntime "on"
     
     defines {

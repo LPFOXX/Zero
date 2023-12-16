@@ -26,6 +26,7 @@ namespace zr
 		mMaxZoomLevel(.25f),
 		mMinZoomLevel(std::numeric_limits<float>::max())
 	{
+		mInputMapper = CreateRef<InputMapper16>();
 		mCamera = CreateRef<OrthographicCamera>(-mAspectRatio * mZoomLevel, mAspectRatio * mZoomLevel, -mZoomLevel, mZoomLevel);
 	}
 
@@ -43,6 +44,7 @@ namespace zr
 		mMaxZoomLevel(.25f),
 		mMinZoomLevel(std::numeric_limits<float>::max())
 	{
+		mInputMapper = CreateRef<InputMapper16>();
 	}
 
 	OrthographicCameraController::~OrthographicCameraController()
@@ -81,6 +83,20 @@ namespace zr
 			mCamera->setRotationAngle(mCameraRotation);
 		}
 
+		if (mInputMapper->isInputPressed(zr::CameraController::Actions::ZoomIn)) {
+			float zoomLevel = mZoomLevel - mZoomRate * elapsedTime.asSeconds();
+			zoomLevel = zr::clamp(mMaxZoomLevel, mMinZoomLevel, zoomLevel);
+			readjustCameraTranslationSpeed(zoomLevel);
+			updateProjectionMatrix();
+		}
+		else if (mInputMapper->isInputPressed(zr::CameraController::Actions::ZoomOut))
+		{
+			float zoomLevel = mZoomLevel + mZoomRate * elapsedTime.asSeconds();
+			zoomLevel = zr::clamp(mMaxZoomLevel, mMinZoomLevel, zoomLevel);
+			readjustCameraTranslationSpeed(zoomLevel);
+			updateProjectionMatrix();
+		}
+
 		mCamera->setPosition(mCameraPosition);
 	}
 
@@ -89,7 +105,6 @@ namespace zr
 		ZR_PROFILER_FUNCTION();
 
 		EventDispatcher eventDispatcher(e);
-		eventDispatcher.dispatch<MouseScrollEvent>(std::bind(&OrthographicCameraController::onMouseScrolled, this, std::placeholders::_1));
 		eventDispatcher.dispatch<RenderWindowResizeEvent>(std::bind(&OrthographicCameraController::onRenderWindowResized, this, std::placeholders::_1));
 	}
 
@@ -120,17 +135,6 @@ namespace zr
 	float OrthographicCameraController::getZoomLevel() const
 	{
 		return mZoomLevel;
-	}
-
-	bool OrthographicCameraController::onMouseScrolled(MouseScrollEvent& e)
-	{
-		ZR_PROFILER_FUNCTION();
-
-		float zoomLevel = mZoomLevel - e.getYOffset() * mZoomRate;
-		zoomLevel = zr::clamp(mMaxZoomLevel, mMinZoomLevel, zoomLevel);
-		readjustCameraTranslationSpeed(zoomLevel);
-		updateProjectionMatrix();
-		return false;
 	}
 
 	bool OrthographicCameraController::onRenderWindowResized(RenderWindowResizeEvent& e)

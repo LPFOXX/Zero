@@ -120,7 +120,7 @@ namespace zr
 
 	std::string Model3D::getShaderLayoutLocations() const
 	{
-		auto& it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
+		auto it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
 			return a->getVertexArrayMaxLayoutIndex() < b->getVertexArrayMaxLayoutIndex();
 		});
 
@@ -497,7 +497,7 @@ namespace zr
 		float deltaTime = scaleKeys[next].Time - scaleKeys[index].Time;
 		float factor = (animationTime - scaleKeys[index].Time) / deltaTime;
 		factor = clamp(0.f, 1.f, factor);
-		glm::vec3& delta = scaleKeys[next].Scale - scaleKeys[index].Scale;
+		glm::vec3 delta = scaleKeys[next].Scale - scaleKeys[index].Scale;
 		scale = scaleKeys[index].Scale + factor * delta;
 	}
 
@@ -557,13 +557,13 @@ namespace zr
 		float deltaTime = translationKeys[next].Time - translationKeys[index].Time;
 		float factor = (animationTime - translationKeys[index].Time) / deltaTime;
 		factor = clamp(0.f, 1.f, factor);
-		glm::vec3& delta = translationKeys[next].Position - translationKeys[index].Position;
+		glm::vec3 delta = translationKeys[next].Position - translationKeys[index].Position;
 		translation = translationKeys[index].Position + factor * delta;
 	}
 
 	unsigned Model3D::getMaxAttributeLength() const
 	{
-		auto& it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
+		auto it = std::max_element(mMeshes.begin(), mMeshes.end(), [](const Ref<Mesh>& a, const Ref<Mesh>& b) {
 			return a->getAttributeLength() < b->getAttributeLength();
 		});
 		return (*it)->getAttributeLength();

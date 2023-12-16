@@ -31,7 +31,7 @@ namespace zr
 		Timer(const char* identifier, Function&& func);
 		~Timer();
 
-		Time Timer::restart();
+		Time restart();
 
 	private:
 		Time mStartTime;

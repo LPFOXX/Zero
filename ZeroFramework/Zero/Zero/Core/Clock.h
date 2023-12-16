@@ -4,19 +4,19 @@
 
 namespace zr
 {
-	class Time
+	class Time final
 	{
 	public:
-		using seconds =			std::chrono::duration<float, std::ratio<1>>;
-		using milliseconds =	std::chrono::duration<float, std::ratio<1, 1000>>;
-		using microseconds =	std::chrono::duration<float, std::ratio<1, 1000000>>;
-		using nanoseconds =		std::chrono::duration<float, std::ratio<1, 1000000000>>;
-		using minutes =			std::chrono::duration<float, std::ratio<60>>;
-		using hours =			std::chrono::duration<float, std::ratio<3600>>;
+		using seconds = std::chrono::duration<float, std::ratio<1>>;
+		using milliseconds = std::chrono::duration<float, std::ratio<1, 1000>>;
+		using microseconds = std::chrono::duration<float, std::ratio<1, 1000000>>;
+		using nanoseconds = std::chrono::duration<float, std::ratio<1, 1000000000>>;
+		using minutes = std::chrono::duration<float, std::ratio<60>>;
+		using hours = std::chrono::duration<float, std::ratio<3600>>;
 
 	public:
-		Time();
-		virtual ~Time();
+		Time() = default;
+		~Time() = default;
 
 		static Time Zero()
 		{
@@ -53,9 +53,9 @@ namespace zr
 			return Time((long long)microseconds);
 		}
 
-		operator float()
+		inline operator float()
 		{
-			return (float) mTimeInMicroseconds;
+			return (float)mTimeInMicroseconds;
 		}
 
 		const Time& operator+=(const Time& rhs)
@@ -70,7 +70,7 @@ namespace zr
 			return *this;
 		}
 
-		Time operator-(const Time& rhs) const 
+		Time operator-(const Time& rhs) const
 		{
 			Time time;
 			time.mTimeInMicroseconds = mTimeInMicroseconds - rhs.mTimeInMicroseconds;
@@ -140,11 +140,11 @@ namespace zr
 		long long mTimeInMicroseconds;
 	};
 
-	class Clock
+	class Clock final
 	{
 	public:
 		Clock();
-		virtual ~Clock();
+		~Clock() = default;
 
 		inline Time getElapsedTime() const
 		{
@@ -153,7 +153,7 @@ namespace zr
 
 		Time restart()
 		{
-			Time& now = Time::Now();
+			Time now = Time::Now();
 			Time elapsedTime = now - mLastRestartPoint;
 			mLastRestartPoint = now;
 			return elapsedTime;

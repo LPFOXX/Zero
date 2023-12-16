@@ -33,7 +33,7 @@ namespace zr
 		static std::array<glm::vec3, 4> ComputeEdgesVertices(const glm::vec2& A, const glm::vec2& B, float thickness)
 		{
 			std::array<glm::vec3, 4> returnValue;
-			glm::vec2& diff = B - A;
+			glm::vec2 diff = B - A;
 
 			if (thickness == 0.f) {
 				returnValue[0] = { A, 0.f };
@@ -232,7 +232,7 @@ namespace zr
 			if (glm::epsilonEqual(m1, m2, glm::epsilon<float>())) {
 				// Lines are parallel
 				const glm::vec2& newA = glm::length(B - C) >= glm::length(B - A) ? C : A;
-				auto& vertices = Line::ComputeEdgesVertices(newA, B, thickness);
+				auto vertices = Line::ComputeEdgesVertices(newA, B, thickness);
 
 				returnValue.V0 = vertices[0];
 				returnValue.V1 = vertices[1];
@@ -243,12 +243,12 @@ namespace zr
 				return returnValue;
 			}
 
-			auto& r1Vertices = Line::ComputeEdgesVertices(A, B, thickness);
-			auto& r2Vertices = Line::ComputeEdgesVertices(B, C, thickness);
+			auto r1Vertices = Line::ComputeEdgesVertices(A, B, thickness);
+			auto r2Vertices = Line::ComputeEdgesVertices(B, C, thickness);
 
-			auto& r1 = A - B;
-			auto& r2 = C - B;
-			auto& diff = -r1;
+			auto r1 = A - B;
+			auto r2 = C - B;
+			auto diff = -r1;
 
 			glm::vec2 r1Top[2] = { {0.f, 0.f}, {0.f, 0.f} };
 			glm::vec2 r1Bottom[2] = { {0.f, 0.f}, {0.f, 0.f} };

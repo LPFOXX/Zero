@@ -225,31 +225,31 @@ namespace zr
 
 			if (searchForTextures) {
 				// 1. ambient maps
-				std::vector<std::string>& ambientMap = processMaterial(scene, material, Texture2D::Type::Ambient);
+				std::vector<std::string> ambientMap = processMaterial(scene, material, Texture2D::Type::Ambient);
 				if (!ambientMap.empty()) {
 					textures[Texture2D::Type::Ambient] = ambientMap;
 				}
 
 				// 2. diffuse maps 
-				std::vector<std::string>& diffuseMap = processMaterial(scene, material, Texture2D::Type::Diffuse);
+				std::vector<std::string> diffuseMap = processMaterial(scene, material, Texture2D::Type::Diffuse);
 				if (!diffuseMap.empty()) {
 					textures[Texture2D::Type::Diffuse] = diffuseMap;
 				}
 
 				// 3. specular maps
-				std::vector<std::string>& specularMap = processMaterial(scene, material, Texture2D::Type::Specular);
+				std::vector<std::string> specularMap = processMaterial(scene, material, Texture2D::Type::Specular);
 				if (!specularMap.empty()) {
 					textures[Texture2D::Type::Specular] = specularMap;
 				}
 
 				// 4. normal maps
-				std::vector<std::string>& normalMap = processMaterial(scene, material, Texture2D::Type::Normal);
+				std::vector<std::string> normalMap = processMaterial(scene, material, Texture2D::Type::Normal);
 				if (!normalMap.empty()) {
 					textures[Texture2D::Type::Normal] = normalMap;
 				}
 
 				// 5. height maps
-				std::vector<std::string>& heightMap = processMaterial(scene, material, Texture2D::Type::Height);
+				std::vector<std::string> heightMap = processMaterial(scene, material, Texture2D::Type::Height);
 				if (!heightMap.empty()) {
 					textures[Texture2D::Type::Height] = heightMap;
 				}

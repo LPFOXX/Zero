@@ -32,7 +32,6 @@ namespace zr
 		float getZoomLevel() const;
 
 	private:
-		bool onMouseScrolled(MouseScrollEvent& e);
 		bool onRenderWindowResized(RenderWindowResizeEvent& e);
 		bool onRenderWindowFramebufferResized(RenderWindowFramebufferResizeEvent& e);
 		void readjustCameraTranslationSpeed(float zoomLevel);

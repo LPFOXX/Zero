@@ -76,7 +76,10 @@ namespace zr
 			MouseButtonRelease,
 
 			KeyPressed,
-			KeyReleased
+			KeyReleased,
+
+			MouseMoved,
+			MouseScrolled
 		};
 
 		struct InputKey
@@ -137,7 +140,7 @@ namespace zr
 
 		bool isInputPressed(const KeyType& key)
 		{
-			auto& it = mKeyMap.find(key);
+			const auto it = mKeyMap.find(key);
 			if (it != mKeyMap.end()) {
 				if (it->second.mInputType == InputType::KeyPressed) {
 					return Input::IsKeyPressed(it->second.mKeyOrButtonCode);

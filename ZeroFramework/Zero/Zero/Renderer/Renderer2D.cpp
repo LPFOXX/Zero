@@ -97,6 +97,7 @@ namespace zr
 
 		if (sData->Framebuffer != nullptr) {
 			sData->Framebuffer->blit();
+			Framebuffer::BindDefault();
 		}
 	}
 

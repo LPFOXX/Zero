@@ -132,7 +132,7 @@ namespace zr
 		for (auto& vertexBuffer : mVertexBuffers) {
 			const auto& layout = vertexBuffer->getLayout().getElements();
 			for (auto& layoutElement : layout) {
-				std::string& layoutIdentifier = layoutElement.Name + (layoutElement.VectorSize >= 2 ? "[" + std::to_string(layoutElement.VectorSize) + "]" : "");
+				std::string layoutIdentifier = layoutElement.Name + (layoutElement.VectorSize >= 2 ? "[" + std::to_string(layoutElement.VectorSize) + "]" : "");
 				ss << "layout (location = " << location << ") in " << ShaderDataTypeGLType(layoutElement.Type) << " " << layoutIdentifier << ";\n";
 				if (layoutElement.VectorSize >= 2) {
 					location += layoutElement.VectorSize;
